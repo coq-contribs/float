@@ -1,8 +1,8 @@
 Name: Float
 Title: Library for floating point numbers
-Author: Laurent Thery
+Author: Laurent Théry
 Author: Sylvie Boldo
-Institution: Inria Sophia-Antipolis
+Institution: INRIA Sophia-Antipolis
 Institution: ENS Lyon
 Date: 2001
 Description: A library for floating point numbers.
