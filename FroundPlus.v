@@ -470,16 +470,6 @@ apply (LeR0Fnum radix); auto.
 rewrite <- (Zpower_nat_1 radix); rewrite pGivesBound; auto with zarith.
 apply Zle_lt_trans with (Zabs (Fnum (Fnormalize radix b precision r'))).
 repeat rewrite Zabs_eq; auto with zarith.
-(* 2 subgoals now solved by auto (omega) in 8.0
-Pattern 2 (Fnum (Fnormalize radix b precision r'));
- Replace (Fnum (Fnormalize radix b precision r'))
-      with (Zminus (Fnum (Fnormalize radix b precision r')) ZERO);
- Auto with zarith.
-Cut (Zle ZERO (Fnum (Fnormalize radix b precision r'))); Unfold Zminus;
- Auto with zarith.
-Apply (LeR0Fnum radix); Auto.
-Apply (LeR0Fnum radix); Auto.
-*)
 case Fb1; auto.
 rewrite FPredSimpl4; auto with arith.
 rewrite <- H'10.
