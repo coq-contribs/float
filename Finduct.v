@@ -103,7 +103,7 @@ Theorem FinductPosAux :
  x = (Fweight q - Fweight p)%Z -> Fcanonic radix b q -> (p <= q)%R -> P q.
 intros P p H' H'0 H'1 H'2 x H'3; pattern x in |- *.
 apply Z_lt_induction; auto.
-intros x0 H'4 q H'5 H'6 H'7.
+intros x0 H'4 _ q H'5 H'6 H'7.
 Casec H'7; intros H'7.
 cut (p <= FPred b radix precision q)%R; [ intros Rl1 | idtac ].
 cut (P (FPred b radix precision q)); [ intros P1 | idtac ].
@@ -158,7 +158,7 @@ Theorem FinductNegAux :
  Fcanonic radix b q -> (0 <= q)%R -> (q <= p)%R -> P q.
 intros P p H' H'0 H'1 H'2 x H'3; pattern x in |- *.
 apply Z_lt_induction; auto.
-intros x0 H'4 q H'5 H'6 H'7 H'8.
+intros x0 H'4 _ q H'5 H'6 H'7 H'8.
 Casec H'8; intros H'8.
 cut (FSucc b radix precision q <= p)%R; [ intros Rle1 | idtac ].
 cut (P (FSucc b radix precision q)); [ intros P1 | idtac ].
