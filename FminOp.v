@@ -349,7 +349,7 @@ rewrite Z2pos_correct; auto; rewrite inj_abs; auto with zarith.
 apply PosNormMin; auto with zarith.
 unfold nNormMin in |- *; auto with zarith.
 case o1; simpl in |- *; auto; intros; red in |- *; intros; discriminate.
-left; unfold FtoRradix, FtoR in |- *; simpl in |- *; ring.
+left; unfold FtoRradix, FtoR in |- *; simpl in |- *.
 generalize (H2 H4); intros tmp; injection tmp.
 intros H'1 H'2 H'3; rewrite H'2; simpl in |- *; auto.
 ring.
@@ -431,7 +431,6 @@ rewrite <- H; ring.
 replace (e - e)%Z with 0%Z; simpl in |- *; auto with zarith.
 replace (e + n - e)%Z with (Z_of_nat n); simpl in |- *; auto with zarith.
 apply sym_equal; apply absolu_INR.
-ring.
 apply sym_equal; apply Zmin_le2; auto with zarith.
 auto with arith.
 intros H1; case H1; auto with arith; intros H2 ((H3, H4), H5).

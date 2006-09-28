@@ -23,6 +23,7 @@
   ******************************************************************************)
 Require Import Float.
 Require Import Fcomp.
+
 Section operations.
 Variable radix : Z.
  
@@ -134,7 +135,7 @@ repeat rewrite <- INR_IZR_INZ; apply Rle_INR; auto.
 cut (Zabs_nat (Fnum p) <> 0); auto with zarith.
 Contradict H'.
 unfold FtoRradix, FtoR in |- *; simpl in |- *.
-replace (Fnum p) with 0%Z; try ring.
+replace (Fnum p) with 0%Z; simpl; try ring.
 generalize H'; case (Fnum p); simpl in |- *; auto with zarith arith;
  intros p0 H'3; Contradict H'3; auto with zarith arith.
 Qed.

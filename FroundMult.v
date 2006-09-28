@@ -209,7 +209,7 @@ rewrite powerRZ_add with (n := Z_of_nat precision); auto with real zarith.
 pattern (Fnum p * Fnum q)%Z at 1 in |- *; rewrite H'3.
 rewrite plus_IZR; rewrite Rmult_IZR.
 repeat rewrite Zpower_nat_powerRZ; auto with real zarith.
-rewrite Z4; ring.
+rewrite Z4; simpl; ring.
 cut (ex (fun m : Z => fmax = Float m (Fexp (Fmult p q)) :>R));
  [ intros Z5 | idtac ].
 2: unfold FtoRradix in |- *;
@@ -508,7 +508,7 @@ case (Zle_lt_or_eq 0 (Zabs n2)); auto with zarith; intros Z1.
 apply Rlt_trans with (Zpos (vNum b) * Zabs n2)%R; auto with real zarith.
 rewrite <- Z1; auto with real zarith.
 replace (Zabs n1 * 0%Z)%R with (0 * Zpos (vNum b))%R;
- [ auto with real zarith | ring ].
+ [ auto with real zarith | simpl; ring ].
 exists (n1 * n2)%Z; exists 0%Z; repeat (split; auto with zarith).
 rewrite Rmult_IZR; rewrite powerRZ_O; ring.
 apply lt_IZR.
@@ -630,10 +630,10 @@ intros r (s, (H5, (H6, (H7, (H8, H9))))); exists (Fopp r); exists (Fopp s);
  repeat (split; simpl in |- *; auto with float real zarith).
 repeat rewrite (Fopp_correct radix); auto with zarith; fold FtoRradix in |- *;
  rewrite H7; repeat rewrite (Fopp_correct radix); auto with zarith; 
- ring.
+ fold FtoRradix; ring.
 repeat rewrite (Fopp_correct radix); auto with zarith; fold FtoRradix in |- *;
  rewrite H8; repeat rewrite (Fopp_correct radix); auto with zarith; 
- ring.
+ fold FtoRradix; ring.
 case (Rle_or_lt 0 q); intros Rl2.
 case (multExactExp_pos P H (Fopp p) q (Fopp pq)); auto with float real.
 rewrite (Fopp_correct radix); auto with real.
@@ -644,10 +644,10 @@ intros r (s, (H5, (H6, (H7, (H8, H9))))); exists (Fopp r); exists (Fopp s);
  repeat (split; simpl in |- *; auto with float real zarith).
 repeat rewrite (Fopp_correct radix); auto with zarith; fold FtoRradix in |- *;
  rewrite H7; repeat rewrite (Fopp_correct radix); auto with zarith; 
- ring.
+ fold FtoRradix; ring.
 repeat rewrite (Fopp_correct radix); auto with zarith; fold FtoRradix in |- *;
  rewrite H8; repeat rewrite (Fopp_correct radix); auto with zarith; 
- ring.
+ fold FtoRradix; ring.
 case (multExactExp_pos P H (Fopp p) (Fopp q) pq); auto with float real.
 rewrite (Fopp_correct radix); auto with real.
 rewrite (Fopp_correct radix); auto with real.
@@ -657,6 +657,6 @@ replace (FtoRradix (Fopp p) * FtoRradix (Fopp q))%R with
 intros r (s, (H5, (H6, (H7, (H8, (H9, (H10, H11))))))); exists r; exists s;
  repeat (split; simpl in |- *; auto with float real zarith).
 fold FtoRradix in |- *; rewrite H8; repeat rewrite (Fopp_correct radix);
- auto with zarith; ring.
+ auto with zarith; fold FtoRradix; ring.
 Qed.
 End FRoundP.

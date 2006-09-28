@@ -288,15 +288,9 @@ intros p q x H H0 H1.
 apply Rle_trans with (Fulp b radix precision p * / 2%nat)%R.
 rewrite H1.
 replace (Rabs (x - p)) with (2%nat * Rabs (x - p) * / 2%nat)%R;
- [ idtac | ring ].
+ [ idtac | simpl; field; discrR ].
 apply Rmult_le_compat_r; auto with real.
 apply ClosestUlp; auto.
-replace (/ 2%nat * (Rabs (x - p) * 2%nat))%R with
- (Rabs (x - p) * (2%nat * / 2%nat))%R.
-replace (2%nat * / 2%nat)%R with 1%R.
-ring.
-apply sym_eq; apply Rinv_r; auto with real.
-simpl in |- *; ring.
 apply Rmult_le_compat_r.
 apply Rlt_le.
 apply Rinv_0_lt_compat; auto with real.

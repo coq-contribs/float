@@ -569,9 +569,9 @@ apply div2IsBetweenPos; auto with float.
 rewrite (Fopp_correct radix); auto.
 replace 0%R with (-0)%R; try apply Rlt_le; auto with real.
 replace (/ 2%nat * Fopp p)%R with (- (/ 2%nat * p))%R; auto with float.
-rewrite (Fopp_correct radix); auto; ring; ring.
+rewrite (Fopp_correct radix); fold FtoRradix; ring.
 replace (/ 2%nat * Fopp p)%R with (- (/ 2%nat * p))%R; auto with float.
-rewrite (Fopp_correct radix); auto; ring; ring.
+rewrite (Fopp_correct radix); fold FtoRradix; ring.
 intros x y H'3; rewrite <- (Ropp_involutive x);
  rewrite <- (Ropp_involutive y); rewrite H'3; auto.
 Qed.
@@ -597,10 +597,9 @@ apply oppBounded; auto.
 unfold FtoRradix in |- *; rewrite Fopp_correct.
 rewrite <- (Ropp_involutive r).
 replace (radix * - FtoR radix q')%R with (- (radix * q'))%R;
- [ apply Ropp_le_contravar | ring ]; auto.
+ [ apply Ropp_le_contravar | fold FtoRradix; ring ]; auto.
 rewrite <- (Faux.Rabsolu_left1 r); auto.
 apply Rlt_le; auto.
-ring.
 apply RleRoundedLessR0 with (P := P) (r := r); auto.
 apply Rlt_le; auto.
 Qed.
@@ -662,7 +661,7 @@ intros H'2 H'3; Elimc H'3; intros H'3 H'4; Elimc H'4; intros H'4 H'5;
 apply Rle_trans with r; auto with real.
 apply isMin_inv1 with (1 := H'6).
 rewrite Rmult_comm; pattern r at 1 in |- *; replace r with (r * 1%nat)%R;
- [ apply Rmult_le_compat_l | ring ]; auto with real arith.
+ [ apply Rmult_le_compat_l | simpl; ring ]; auto with real arith.
 case (MinEx b radix precision) with (r := r); auto with arith;
  intros min Hmin.
 cut (Fbounded b (Float (Fnum min) (Zsucc (Fexp min)))); [ intros F2 | idtac ].
@@ -799,7 +798,8 @@ cut (Fbounded b max);
 elim Fb0; intros H H0; repeat (split; simpl in |- *); auto.
 apply Zle_trans with (Fexp max); auto with zarith.
 apply Rle_trans with r; auto with real.
-pattern r at 2 in |- *; replace r with (- (- r * 1%nat))%R; [ idtac | ring ].
+pattern r at 2 in |- *; replace r with (- (- r * 1%nat))%R;
+  [ idtac | simpl; ring ].
 replace (radix * r)%R with (- (- r * radix))%R; [ idtac | ring ].
 apply Ropp_le_contravar; apply Rmult_le_compat_l; auto with real arith.
 replace 0%R with (-0)%R; auto with real arith.

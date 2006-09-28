@@ -15,7 +15,7 @@
 
 
 Require Import ZArith.
-Require Import ZArithRing.
+Require Import ArithRing.
 Require Import Faux.
 Require Import sTactic.
 Require Import Digit.
@@ -165,10 +165,10 @@ apply
 intros r2; CaseEq ((1 ?= q)%positive Datatypes.Eq); simpl in |- *; auto.
 intros H3; rewrite <- (Pcompare_Eq_eq _ _ H3); simpl in |- *;
  unfold nat_of_P in |- *; simpl in |- *; repeat rewrite ZL6;
- apply f_equal with (f := S); ring.
+ apply f_equal with (f := S); unfold nat_of_P; ring.
 intros H3; unfold nat_of_P in |- *; simpl in |- *; repeat rewrite ZL6;
  repeat rewrite (fun x y => plus_comm x (S y)); simpl in |- *;
- apply f_equal with (f := S); ring.
+ apply f_equal with (f := S); unfold nat_of_P; ring.
 unfold Pminus in |- *.
 intros H3; case (Pminus_mask_Gt _ _ H3); intros h (H4, (H5, H6)); rewrite H4;
  apply

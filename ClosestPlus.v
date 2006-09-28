@@ -619,9 +619,10 @@ rewrite (Rplus_comm (Rabs (p - (x + y))) (Rabs (x + y)));
   (Rplus_comm (Rabs p * (radix * / (2%nat * pPred (vNum b)))) (Rabs (x + y)))
   ; apply Rplus_le_compat_l.
 replace (Rabs p * (radix * / (2%nat * pPred (vNum b))))%R with
- (Rabs p * / 2%nat * (radix * / pPred (vNum b)))%R;
- [ apply plusErrorBound1withZero | ring; ring ]; auto.
+ (Rabs p * / 2%nat * (radix * / pPred (vNum b)))%R.
+apply plusErrorBound1withZero; auto.
 rewrite (Rinv_mult_distr 2%nat (pPred (vNum b))); auto with real zarith.
+ring.
 apply NEq_IZRO; auto with real zarith.
 generalize pPredMoreThanOne; auto with zarith.
 Qed.

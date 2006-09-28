@@ -94,7 +94,8 @@ case (ZdividesP v (Zpower_nat radix (S (S (n + p))))); auto.
 intros H'0 H'1 H'2; Contradict H'2; auto with zarith.
 case (ZdividesP v (Zpower_nat radix (S (S (n + p))))); auto.
 intros H'0 H'1 H'2; case H'1.
-case H'0; intros z1 Hz1; exists (radix * z1)%Z; rewrite Hz1; ring.
+case H'0; intros z1 Hz1; exists (radix * z1)%Z; rewrite Hz1;
+ unfold Zpower_nat; simpl; ring.
 Qed.
  
 Theorem maxDivSimplInv :

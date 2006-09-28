@@ -53,22 +53,22 @@ case (Rle_or_lt p q); intros Rltp.
 apply RmaxAbs; auto.
 apply (RoundedModeMultLess b radix) with (P := P) (r := (p + q)%R); auto.
 replace (radix * FtoR radix p)%R with (p + p)%R;
- [ auto with real | simpl in |- *; ring ].
+ [ auto with real | simpl; fold FtoRradix; ring ].
 unfold FtoRradix in |- *;
  apply (RoundedModeMult b radix) with (P := P) (r := (p + q)%R); 
  auto.
 replace (radix * FtoR radix q)%R with (q + q)%R;
- [ auto with real | simpl in |- *; ring ].
+ [ auto with real | simpl in |- *; fold FtoRradix; ring ].
 rewrite RmaxSym.
 apply RmaxAbs; auto.
 apply (RoundedModeMultLess b radix) with (P := P) (r := (p + q)%R); auto.
 replace (radix * FtoR radix q)%R with (q + q)%R;
- [ auto with real | simpl in |- *; ring ].
+ [ auto with real | simpl in |- *; fold FtoRradix; ring ].
 unfold FtoRradix in |- *;
  apply (RoundedModeMult b radix) with (P := P) (r := (p + q)%R); 
  auto.
 replace (radix * FtoR radix p)%R with (p + p)%R;
- [ auto with real zarith | simpl in |- *; ring ].
+ [ auto with real zarith | simpl in |- *; fold FtoRradix; ring ].
 apply Rle_ge; auto with real zarith.
 Qed.
  
@@ -88,7 +88,7 @@ unfold FtoRradix in |- *; apply plusErrorBound1 with (precision := precision);
  auto with arith.
 replace (Rabs (FtoR radix r) * / radix * (radix * / pPred (vNum b)))%R with
  (radix * / pPred (vNum b) * (Rabs r * / radix))%R; 
- [ idtac | ring ].
+ [ idtac | fold FtoRradix; ring ].
 apply Rmult_le_compat_l; auto.
 replace 0%R with (radix * 0)%R; [ apply Rmult_le_compat_l | ring ].
 cut (0 <= radix)%Z; auto with real zarith.
@@ -164,8 +164,7 @@ rewrite <- H0; auto with real.
 unfold FtoRradix in |- *; apply ClosestIdem with (b := b); auto.
 apply (ClosestCompatible b radix (p + q)%R (FtoR radix p) pq pq); auto.
 replace (FtoR 2%nat p) with (FtoRradix p); auto.
-rewrite <- H0; replace (FtoRradix q) with 0%R; try ring.
-generalize H'; unfold Rabs in |- *; case (Rcase_abs q); auto.
+fold FtoRradix; rewrite <- H0; replace (FtoRradix q) with 0%R; try ring.
 generalize H'; unfold Rabs in |- *; case (Rcase_abs q); auto.
 intros H'4 H'5; Contradict H'5; rewrite <- H0; auto with real.
 apply Rlt_not_le; auto with real.

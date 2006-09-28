@@ -145,7 +145,7 @@ apply Rplus_le_reg_l with (r := r).
 replace (r + (FtoR radix min + (max - r)))%R with (min + max)%R.
 replace (r + r)%R with (2%nat * r)%R; auto.
 simpl in |- *; ring.
-simpl in |- *; ring.
+fold FtoRradix; ring.
 apply Rplus_le_reg_l with (r := r).
 repeat rewrite Rplus_minus; auto.
 case H'0; auto.
