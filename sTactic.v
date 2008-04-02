@@ -42,9 +42,9 @@ Qed.
 *)
 
 Ltac Contradict name :=
-  (apply (fun a : Prop => Contradict1 a _ name); clear name; intros name) ||
-    (apply (fun a : Prop => Contradict2 a _ name); clear name);
-   try apply Contradict3.
+  (simple apply (fun a => Contradict1 a _ name); clear name; intros name) ||
+  (simple apply (fun a => Contradict2 a _ name); clear name);
+  try simple apply Contradict3.
 
 (* Same as Case but keeps an equality *)
 
