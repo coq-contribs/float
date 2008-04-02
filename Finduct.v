@@ -1,19 +1,3 @@
-(* This program is free software; you can redistribute it and/or      *)
-(* modify it under the terms of the GNU Lesser General Public License *)
-(* as published by the Free Software Foundation; either version 2.1   *)
-(* of the License, or (at your option) any later version.             *)
-(*                                                                    *)
-(* This program is distributed in the hope that it will be useful,    *)
-(* but WITHOUT ANY WARRANTY; without even the implied warranty of     *)
-(* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the      *)
-(* GNU General Public License for more details.                       *)
-(*                                                                    *)
-(* You should have received a copy of the GNU Lesser General Public   *)
-(* License along with this program; if not, write to the Free         *)
-(* Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA *)
-(* 02110-1301 USA                                                     *)
-
-
 (****************************************************************************
                                                                              
           IEEE754  :  Finduct                                                     
@@ -22,13 +6,7 @@
                                                                              
   *****************************************************************************
   Define an induction principle on float*)
-Require Import List.
-Require Import Float.
-Require Import Fnorm.
-Require Import Fop.
-Require Import Fcomp.
-Require Import FSucc.
-Require Import FPred.
+Require Export FPred.
 Section finduct.
 Variable b : Fbound.
 Variable radix : Z.
@@ -50,10 +28,8 @@ Theorem FweightLt :
  Fcanonic radix b p ->
  Fcanonic radix b q -> (0 <= p)%R -> (p < q)%R -> (Fweight p < Fweight q)%Z.
 intros p q H' H'0 H'1 H'2.
-cut (Fbounded b p); [ intros Fb1 | apply FcanonicBound with (2 := H'); auto ];
- auto.
-cut (Fbounded b q);
- [ intros Fb2 | apply FcanonicBound with (2 := H'0); auto ]; 
+cut (Fbounded b p); [ intros Fb1 | apply FcanonicBound with (1 := H') ]; auto.
+cut (Fbounded b q); [ intros Fb2 | apply FcanonicBound with (1 := H'0) ];
  auto.
 case (FcanonicLtPos _ radixMoreThanOne b precision) with (p := p) (q := q);
  auto with arith; intros Zl1.
@@ -118,8 +94,8 @@ Theorem FinductPosAux :
  forall q : float,
  x = (Fweight q - Fweight p)%Z -> Fcanonic radix b q -> (p <= q)%R -> P q.
 intros P p H' H'0 H'1 H'2 x H'3; pattern x in |- *.
-apply Zlt_0_ind; auto.
-intros x0 H'4 _ q H'5 H'6 H'7.
+apply Z_lt_induction; auto.
+intros x0 H'4 q H'5 H'6 H'7.
 Casec H'7; intros H'7.
 cut (p <= FPred b radix precision q)%R; [ intros Rl1 | idtac ].
 cut (P (FPred b radix precision q)); [ intros P1 | idtac ].
@@ -173,8 +149,8 @@ Theorem FinductNegAux :
  x = (Fweight p - Fweight q)%Z ->
  Fcanonic radix b q -> (0 <= q)%R -> (q <= p)%R -> P q.
 intros P p H' H'0 H'1 H'2 x H'3; pattern x in |- *.
-apply Zlt_0_ind; auto.
-intros x0 H'4 _ q H'5 H'6 H'7 H'8.
+apply Z_lt_induction; auto.
+intros x0 H'4 q H'5 H'6 H'7 H'8.
 Casec H'8; intros H'8.
 cut (FSucc b radix precision q <= p)%R; [ intros Rle1 | idtac ].
 cut (P (FSucc b radix precision q)); [ intros P1 | idtac ].
@@ -242,7 +218,8 @@ apply Zle_trans with (Fexp p); auto with float zarith.
 apply Rle_trans with (FtoRradix p); auto; apply Rlt_le; auto.
 unfold FtoR in |- *; simpl in |- *.
 rewrite powerRZ_Zs; auto with real zarith; auto.
-rewrite <- Rmult_assoc; rewrite (fun (x : R) (y : Z) => Rmult_comm x y);
+rewrite <- Rmult_assoc;
+ rewrite (fun (x : R) (y : Z) => Rmult_comm x y); 
  rewrite Rmult_assoc; auto.
 simpl in |- *; intros; apply Zle_antisym; auto with zarith.
 simpl in |- *; auto.
@@ -257,17 +234,17 @@ apply ZltNormMinVnum; auto with zarith.
 unfold nNormMin in |- *; auto with zarith.
 apply Zle_trans with (Fexp p); auto with float zarith.
 case H'; auto with float.
-intros H'5; rewrite H'5; auto with zarith.
 rewrite <- (PosNormMin radix b precision); auto with zarith.
 apply Rle_trans with (1 := H'1); auto with real.
 apply Rlt_trans with (1 := H'3).
 unfold FtoR in |- *; simpl in |- *.
 rewrite powerRZ_Zs; auto with real zarith; auto.
-rewrite <- Rmult_assoc; rewrite (fun (x : R) (y : Z) => Rmult_comm x y);
+rewrite <- Rmult_assoc;
+ rewrite (fun (x : R) (y : Z) => Rmult_comm x y); 
  rewrite Rmult_assoc; auto.
 apply Rmult_lt_compat_l; auto with real arith.
 case H'.
-intros H'5 H'6; rewrite H'5.
+intros H'5 H'6; elim H'6; intros H'7 H'8; rewrite H'7; clear H'6.
 change (p < firstNormalPos radix b precision)%R in |- *.
 apply (FsubnormalLtFirstNormalPos radix); auto with arith.
 simpl in |- *; intros; apply Zle_antisym; auto with zarith.

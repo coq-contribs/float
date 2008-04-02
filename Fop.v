@@ -1,19 +1,3 @@
-(* This program is free software; you can redistribute it and/or      *)
-(* modify it under the terms of the GNU Lesser General Public License *)
-(* as published by the Free Software Foundation; either version 2.1   *)
-(* of the License, or (at your option) any later version.             *)
-(*                                                                    *)
-(* This program is distributed in the hope that it will be useful,    *)
-(* but WITHOUT ANY WARRANTY; without even the implied warranty of     *)
-(* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the      *)
-(* GNU General Public License for more details.                       *)
-(*                                                                    *)
-(* You should have received a copy of the GNU Lesser General Public   *)
-(* License along with this program; if not, write to the Free         *)
-(* Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA *)
-(* 02110-1301 USA                                                     *)
-
-
 (****************************************************************************
                                                                              
           IEEE754  :  Fop                                                     
@@ -21,9 +5,7 @@
           Laurent Thery                                                      
                                                                              
   ******************************************************************************)
-Require Import Float.
-Require Import Fcomp.
-
+Require Export Fcomp.
 Section operations.
 Variable radix : Z.
  
@@ -42,7 +24,7 @@ rewrite plus_IZR.
 rewrite Rmult_comm; rewrite Rmult_plus_distr_l; auto.
 repeat rewrite Rmult_IZR.
 repeat rewrite (Rmult_comm (Fnum x)); repeat rewrite (Rmult_comm (Fnum y)).
-repeat rewrite Zpower_nat_powerRZ; auto.
+repeat rewrite Zpower_nat_Z_powerRZ; auto.
 repeat rewrite <- Rmult_assoc.
 repeat rewrite <- powerRZ_add; auto with real zarith arith.
 repeat rewrite inj_abs; auto with real zarith.
@@ -135,7 +117,7 @@ repeat rewrite <- INR_IZR_INZ; apply Rle_INR; auto.
 cut (Zabs_nat (Fnum p) <> 0); auto with zarith.
 Contradict H'.
 unfold FtoRradix, FtoR in |- *; simpl in |- *.
-replace (Fnum p) with 0%Z; simpl; try ring.
+replace (Fnum p) with 0%Z; try (simpl;ring).
 generalize H'; case (Fnum p); simpl in |- *; auto with zarith arith;
  intros p0 H'3; Contradict H'3; auto with zarith arith.
 Qed.
@@ -201,7 +183,8 @@ repeat rewrite Zmult_assoc_reverse; auto.
 Qed.
  
 Theorem oneZplus :
- forall x y : Z, Float 1%nat (x + y) = Fmult (Float 1%nat x) (Float 1%nat y).
+ forall x y : Z,
+ Float 1%nat (x + y) = Fmult (Float 1%nat x) (Float 1%nat y).
 intros x y; unfold Fmult in |- *; auto.
 Qed.
 End operations.

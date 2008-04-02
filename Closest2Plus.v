@@ -1,19 +1,3 @@
-(* This program is free software; you can redistribute it and/or      *)
-(* modify it under the terms of the GNU Lesser General Public License *)
-(* as published by the Free Software Foundation; either version 2.1   *)
-(* of the License, or (at your option) any later version.             *)
-(*                                                                    *)
-(* This program is distributed in the hope that it will be useful,    *)
-(* but WITHOUT ANY WARRANTY; without even the implied warranty of     *)
-(* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the      *)
-(* GNU General Public License for more details.                       *)
-(*                                                                    *)
-(* You should have received a copy of the GNU Lesser General Public   *)
-(* License along with this program; if not, write to the Free         *)
-(* Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA *)
-(* 02110-1301 USA                                                     *)
-
-
 (****************************************************************************
                                                                              
           IEEE754  :  Closest2Plus                                                     
@@ -53,7 +37,7 @@ case (Rle_or_lt p q); intros Rltp.
 apply RmaxAbs; auto.
 apply (RoundedModeMultLess b radix) with (P := P) (r := (p + q)%R); auto.
 replace (radix * FtoR radix p)%R with (p + p)%R;
- [ auto with real | simpl; fold FtoRradix; ring ].
+ [ auto with real | simpl in |- *; fold FtoRradix; ring ].
 unfold FtoRradix in |- *;
  apply (RoundedModeMult b radix) with (P := P) (r := (p + q)%R); 
  auto.
@@ -168,7 +152,8 @@ fold FtoRradix; rewrite <- H0; replace (FtoRradix q) with 0%R; try ring.
 generalize H'; unfold Rabs in |- *; case (Rcase_abs q); auto.
 intros H'4 H'5; Contradict H'5; rewrite <- H0; auto with real.
 apply Rlt_not_le; auto with real.
-rewrite H0; intros; apply Rle_antisym; auto with real.
+intros H'4 H'5; apply Rle_antisym; auto with real.
+rewrite H0; auto.
 apply
  RoundedModeBounded
   with (radix := radix) (P := Closest b radix) (r := (p + q)%R); 
@@ -222,8 +207,8 @@ apply plusClosestLowerBoundAux1 with (q := Fopp p); auto.
 unfold FtoRradix in |- *; repeat rewrite Fopp_correct; rewrite Rabs_Ropp;
  rewrite <- Faux.Rabsolu_left1; auto with real.
 apply
- (ClosestCompatible b radix (- (p + q))%R (Fopp q + Fopp p)%R 
-    (Fopp pq) (Fopp pq)); auto.
+ (ClosestCompatible b radix (- (p + q))%R (Fopp q + Fopp p)%R (
+    Fopp pq) (Fopp pq)); auto.
 apply ClosestOpp; auto.
 unfold FtoRradix in |- *; repeat rewrite Fopp_correct; ring.
 apply oppBounded; auto.

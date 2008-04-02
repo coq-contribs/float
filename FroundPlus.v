@@ -1,19 +1,3 @@
-(* This program is free software; you can redistribute it and/or      *)
-(* modify it under the terms of the GNU Lesser General Public License *)
-(* as published by the Free Software Foundation; either version 2.1   *)
-(* of the License, or (at your option) any later version.             *)
-(*                                                                    *)
-(* This program is distributed in the hope that it will be useful,    *)
-(* but WITHOUT ANY WARRANTY; without even the implied warranty of     *)
-(* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the      *)
-(* GNU General Public License for more details.                       *)
-(*                                                                    *)
-(* You should have received a copy of the GNU Lesser General Public   *)
-(* License along with this program; if not, write to the Free         *)
-(* Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA *)
-(* 02110-1301 USA                                                     *)
-
-
 (****************************************************************************
                                                                              
           IEEE754  :  FroundPlus                                                     
@@ -21,14 +5,16 @@
           Laurent Thery                                                      
                                                                              
   ******************************************************************************)
+Require Export Finduct.
 Require Export FroundProp.
-Require Import Finduct.
+ 
 Section FRoundP.
 Variable b : Fbound.
 Variable radix : Z.
 Variable precision : nat.
  
-Coercion Local FtoRradix := FtoR radix.
+Let FtoRradix := FtoR radix.
+Coercion FtoRradix : float >-> R.
 Hypothesis radixMoreThanOne : (1 < radix)%Z.
  
 Let radixMoreThanZERO := Zlt_1_O _ (Zlt_le_weak _ _ radixMoreThanOne).
@@ -111,6 +97,7 @@ apply LeFnumZERO; simpl in |- *; auto; replace 0%Z with (Z_of_nat 0);
  auto with zarith.
 unfold pPred in |- *; apply Zle_Zpred; auto with zarith.
 rewrite INR_IZR_INZ; apply Rle_IZR; simpl in |- *; auto with zarith.
+cut (1 < radix)%Z; auto with zarith;intros.
 unfold FtoRradix, FtoR in |- *; simpl in |- *.
 rewrite powerRZ_Zs; auto with real zarith; ring.
 Qed.
@@ -250,7 +237,8 @@ apply Zle_trans with (Fexp p); auto with float zarith.
 apply Rle_trans with (FtoRradix p); auto; apply Rlt_le; auto.
 unfold FtoR in |- *; simpl in |- *.
 rewrite powerRZ_Zs; auto with real zarith; auto.
-rewrite <- Rmult_assoc; rewrite (fun (x : R) (y : Z) => Rmult_comm x y);
+rewrite <- Rmult_assoc;
+ rewrite (fun (x : R) (y : Z) => Rmult_comm x y); 
  rewrite Rmult_assoc; auto.
 simpl in |- *; intros; apply Zle_antisym; auto with zarith.
 simpl in |- *; auto.
@@ -270,13 +258,14 @@ apply Rle_trans with (1 := H'1); auto with real.
 apply Rlt_trans with (1 := H'3).
 unfold FtoR in |- *; simpl in |- *.
 rewrite powerRZ_Zs; auto with real arith; auto.
-rewrite <- Rmult_assoc; rewrite (fun (x : R) (y : Z) => Rmult_comm x y);
+rewrite <- Rmult_assoc;
+ rewrite (fun (x : R) (y : Z) => Rmult_comm x y); 
  rewrite Rmult_assoc; auto.
 apply Rmult_lt_compat_l; auto with real arith.
 replace (Fexp p) with (- dExp b)%Z.
 change (p < firstNormalPos radix b precision)%R in |- *.
 apply (FsubnormalLtFirstNormalPos radix); auto with arith.
-case H'; intros Z1 Z2; auto.
+case H'; intros Z1 (Z2, Z3); auto.
 auto with real zarith.
 simpl in |- *; auto.
 intros H; apply Zle_antisym; auto with zarith.
@@ -346,6 +335,7 @@ apply Rmult_le_compat_r; auto with real arith.
 unfold FtoRradix in Rle2; rewrite (FnormalizeCorrect radix) in Rle2;
  auto with arith.
 rewrite INR_IZR_INZ; cut (2 <= radix)%Z; auto with real zarith.
+cut (1 < radix)%Z; auto with zarith.
 intros H'10.
 case
  (FcanonicLtPos _ radixMoreThanOne b precision)
@@ -389,7 +379,7 @@ replace (FPred b radix precision q0) with (Float (Zpred (Fnum q0)) (Fexp q0));
 unfold Fminus, Fopp, Fplus in |- *; simpl in |- *.
 repeat rewrite Zmin_n_n; repeat rewrite <- Zminus_diag_reverse; simpl in |- *;
  auto.
-rewrite H'10.
+rewrite H.
 repeat rewrite Zmin_n_n; repeat rewrite <- Zminus_diag_reverse; simpl in |- *;
  auto.
 rewrite Zpower_nat_O; repeat rewrite Zmult_1_r.
@@ -406,8 +396,9 @@ rewrite <- (Zabs_eq (Fnum (Fnormalize radix b precision r')));
 apply pNormal_absolu_min with (b := b); auto with arith.
 cut (Fcanonic radix b (Fnormalize radix b precision r'));
  [ intros Ca1; case Ca1; auto | auto with float arith ].
-intros H'12; case Zeq1; rewrite <- H'10.
+intros H'12; case Zeq1; rewrite <- H.
 case H'12; auto.
+intros Hbis H0; case H0; auto.
 apply (LeR0Fnum radix); auto.
 rewrite FPredSimpl4; auto.
 Contradict H'16; rewrite H'16.
@@ -416,7 +407,7 @@ unfold pPred in |- *; rewrite Zopp_Zpred_Zs; apply Zlt_le_succ.
 apply Zlt_Zabs_inv1.
 cut (Fbounded b (Fnormalize radix b precision r'));
  [ auto with float | idtac ].
-apply (FcanonicBound radix) with (b := b); auto with float arith.
+apply (FcanonicBound radix b); auto with float arith.
 intros H'10.
 case (Z_eq_dec (Fnum q0) (nNormMin radix precision)); intros Zeq2.
 exists
@@ -460,8 +451,8 @@ rewrite Zeq2; rewrite powerRZ_Zs; auto with real zarith.
 rewrite <- Rmult_assoc.
 replace (nNormMin radix precision * radix)%R with (powerRZ radix precision).
 unfold pPred, nNormMin, Zpred in |- *; rewrite pGivesBound.
-rewrite plus_IZR; repeat rewrite Zpower_nat_powerRZ; simpl in |- *; try ring.
-rewrite <- Zpower_nat_powerRZ; auto with zarith; rewrite <- Rmult_IZR;
+rewrite plus_IZR; repeat rewrite Zpower_nat_Z_powerRZ; simpl in |- *; try ring.
+rewrite <- Zpower_nat_Z_powerRZ; auto with zarith; rewrite <- Rmult_IZR;
  rewrite Zmult_comm; rewrite <- (PosNormMin radix b precision);
  auto with real zarith.
 auto.
@@ -471,7 +462,7 @@ red in |- *; intros H'12;
 apply Zlt_not_le.
 rewrite <- H'12; rewrite <- H'10; unfold Zsucc in |- *;
  auto with float zarith.
-apply (FcanonicBound radix) with (b := b); auto with arith.
+apply (FcanonicBound radix b); auto with arith.
 apply FnormalizeCanonic; auto with arith.
 exists
  (Float (Fnum (Fnormalize radix b precision r') - radix)
@@ -518,7 +509,7 @@ apply (vNumbMoreThanOne radix) with (precision := precision);
  auto with zarith.
 apply (LeR0Fnum radix); auto.
 apply Rlt_le; auto.
-apply (FcanonicBound radix) with (b := b); auto with arith.
+apply (FcanonicBound radix b); auto with arith.
 apply FnormalizeCanonic; auto with arith.
 Qed.
  
@@ -542,8 +533,8 @@ exists (Fminus radix r p); split; auto.
 rewrite <- Fopp_Fminus.
 apply oppBounded.
 apply Sterbenz; auto.
-apply (FcanonicBound radix) with (b := b); auto with arith.
-apply (FcanonicBound radix) with (b := b); auto with arith.
+apply (FcanonicBound radix b); auto with arith.
+apply (FcanonicBound radix b); auto with arith.
 apply Rmult_le_reg_l with (r := INR 2); auto with real.
 rewrite <- Rmult_assoc; rewrite Rinv_r; auto with real arith;
  rewrite Rmult_1_l; auto.
@@ -557,8 +548,8 @@ exists (Fminus radix r p); split; auto.
 rewrite <- Fopp_Fminus.
 apply oppBounded.
 apply Sterbenz; auto.
-apply (FcanonicBound radix) with (b := b); auto with arith.
-apply (FcanonicBound radix) with (b := b); auto with arith.
+apply (FcanonicBound radix b); auto with arith.
+apply (FcanonicBound radix b); auto with arith.
 apply Rmult_le_reg_l with (r := INR 2); auto with real.
 rewrite <- Rmult_assoc; rewrite Rinv_r; auto with real arith;
  rewrite Rmult_1_l; auto.
@@ -568,7 +559,7 @@ apply Rle_trans with (2 := H'6); apply Rlt_le; auto.
 rewrite (Fminus_correct radix); auto with arith.
 apply ExactMinusIntervalAux with (P := P) (q := q); auto.
 exists r; split; auto.
-apply (FcanonicBound radix) with (b := b); auto with arith.
+apply (FcanonicBound radix b); auto with arith.
 rewrite <- H'0; ring.
 Qed.
  
@@ -651,4 +642,5 @@ apply sym_equal; apply LSB_comp; auto.
 repeat rewrite Fplus_correct; auto with arith.
 unfold FtoRradix in E; unfold FtoRradix in E0; rewrite E; rewrite E0; auto.
 Qed.
+ 
 End FRoundP.

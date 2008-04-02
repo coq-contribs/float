@@ -1,19 +1,3 @@
-(* This program is free software; you can redistribute it and/or      *)
-(* modify it under the terms of the GNU Lesser General Public License *)
-(* as published by the Free Software Foundation; either version 2.1   *)
-(* of the License, or (at your option) any later version.             *)
-(*                                                                    *)
-(* This program is distributed in the hope that it will be useful,    *)
-(* but WITHOUT ANY WARRANTY; without even the implied warranty of     *)
-(* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the      *)
-(* GNU General Public License for more details.                       *)
-(*                                                                    *)
-(* You should have received a copy of the GNU Lesser General Public   *)
-(* License along with this program; if not, write to the Free         *)
-(* Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA *)
-(* 02110-1301 USA                                                     *)
-
-
 (****************************************************************************
                                                                              
           IEEE754  :  Fmin                                                     
@@ -21,21 +5,16 @@
           Laurent Thery                                                      
                                                                              
   ******************************************************************************)
-Require Export List.
-Require Import Float.
-Require Import Fnorm.
-Require Import Fop.
-Require Import Fcomp.
-Require Import FSucc.
-Require Import FPred.
-Require Import Zenum.
-Require Import List. (* Pour surcharger le In defini dans Reals *)
+Require Export Zenum.
+Require Export FPred.
+ 
 Section FMinMax.
 Variable b : Fbound.
 Variable radix : Z.
 Variable precision : nat.
  
-Coercion Local FtoRradix := FtoR radix.
+Let FtoRradix := FtoR radix.
+Coercion FtoRradix : float >-> R.
 Hypothesis radixMoreThanOne : (1 < radix)%Z.
  
 Let radixMoreThanZERO := Zlt_1_O _ (Zlt_le_weak _ _ radixMoreThanOne).
@@ -49,10 +28,9 @@ Definition boundNat (n : nat) := Float 1%nat (digit radix n).
 Theorem boundNatCorrect : forall n : nat, (n < boundNat n)%R.
 intros n; unfold FtoRradix, FtoR, boundNat in |- *; simpl in |- *.
 rewrite Rmult_1_l.
-rewrite <- Zpower_nat_powerRZ; auto with real zarith.
+rewrite <- Zpower_nat_Z_powerRZ; auto with real zarith.
 rewrite INR_IZR_INZ; auto with real zarith.
-pattern (Z_of_nat n) at 1 in |- *; rewrite <- (Zabs_eq (Z_of_nat n));
- auto with real zarith.
+apply Rle_lt_trans with (Zabs n); [rewrite (Zabs_eq (Z_of_nat n))|idtac];auto with real zarith.
 Qed.
  
 Theorem boundBoundNat : forall n : nat, Fbounded b (boundNat n).
@@ -60,6 +38,7 @@ intros n; repeat split; unfold boundNat in |- *; simpl in |- *;
  auto with zarith.
 apply vNumbMoreThanOne with (radix := radix) (precision := precision);
  auto with zarith.
+apply Zle_trans with 0%Z;[case (dExp b)|idtac]; auto with zarith.
 Qed.
 (* A function that returns a bounded greater than a given r *)
  
@@ -103,7 +82,8 @@ Qed.
  
 Definition mBFloat (p : R) :=
   map (fun p : Z * Z => Float (fst p) (snd p))
-    (mProd Z Z (Z * Z) (mZlist (- pPred (vNum b)) (pPred (vNum b)))
+    (mProd Z Z (Z * Z)
+       (mZlist (- pPred (vNum b)) (pPred (vNum b)))
        (mZlist (- dExp b) (Fexp (boundR p)))).
  
 Theorem mBFadic_correct1 :
@@ -137,8 +117,10 @@ generalize H'; simpl in |- *; auto with zarith.
 simpl in |- *; auto.
 intros p0; case p0; simpl in |- *; auto with zarith.
 intros H'0 H'1 H'2 H'3; unfold mBFloat in |- *.
-replace q with ((fun p : Z * Z => Float (fst p) (snd p)) (Fnum q, Fexp q)).
-apply in_map with (f := fun p : Z * Z => Float (fst p) (snd p)); auto.
+replace q with
+ ((fun p : Z * Z => Float (fst p) (snd p)) (Fnum q, Fexp q)).
+apply in_map with (f := fun p : Z * Z => Float (fst p) (snd p));
+ auto.
 apply mProd_correct; auto.
 apply mZlist_correct; auto with float.
 apply Zle_Zabs_inv1; auto with float.
@@ -153,8 +135,10 @@ Qed.
 Theorem mBFadic_correct2 : forall r : R, In (boundR r) (mBFloat r).
 intros r; unfold mBFloat in |- *.
 replace (boundR r) with
- ((fun p : Z * Z => Float (fst p) (snd p)) (Fnum (boundR r), Fexp (boundR r))).
-apply in_map with (f := fun p : Z * Z => Float (fst p) (snd p)); auto.
+ ((fun p : Z * Z => Float (fst p) (snd p))
+    (Fnum (boundR r), Fexp (boundR r))).
+apply in_map with (f := fun p : Z * Z => Float (fst p) (snd p));
+ auto.
 apply mProd_correct; auto.
 apply mZlist_correct; auto.
 unfold boundR, boundNat in |- *; simpl in |- *; auto with zarith.
@@ -168,6 +152,8 @@ unfold boundR, boundNat in |- *; simpl in |- *; auto with zarith.
 apply vNumbMoreThanOne with (3 := pGivesBound); auto.
 apply mZlist_correct; auto.
 unfold boundR, boundNat in |- *; simpl in |- *; auto with zarith.
+apply Zle_trans with 0%Z; auto with zarith arith.
+case (dExp b); auto with zarith.
 case (boundR r); simpl in |- *; auto with zarith.
 case (boundR r); simpl in |- *; auto with zarith.
 Qed.
@@ -177,7 +163,8 @@ intros r; unfold mBFloat in |- *.
 replace (Fopp (boundR r)) with
  ((fun p : Z * Z => Float (fst p) (snd p))
     (Fnum (Fopp (boundR r)), Fexp (Fopp (boundR r)))).
-apply in_map with (f := fun p : Z * Z => Float (fst p) (snd p)); auto.
+apply in_map with (f := fun p : Z * Z => Float (fst p) (snd p));
+ auto.
 apply mProd_correct; auto.
 apply mZlist_correct; auto.
 unfold boundR, boundNat in |- *; simpl in |- *; auto with zarith.
@@ -190,6 +177,8 @@ unfold pPred in |- *; apply Zle_Zpred; simpl in |- *.
 red in |- *; simpl in |- *; auto.
 apply mZlist_correct; auto.
 unfold boundR, boundNat in |- *; simpl in |- *; auto with zarith.
+apply Zle_trans with 0%Z; auto with zarith.
+case (dExp b); auto with zarith.
 case (boundR r); simpl in |- *; auto with zarith.
 case (boundR r); simpl in |- *; auto with zarith.
 Qed.
@@ -200,7 +189,8 @@ intros p; unfold mBFloat in |- *.
 replace (Float 0%nat (- dExp b)) with
  ((fun p : Z * Z => Float (fst p) (snd p))
     (Fnum (Float 0%nat (- dExp b)), Fexp (Float 0%nat (- dExp b)))).
-apply in_map with (f := fun p : Z * Z => Float (fst p) (snd p)); auto.
+apply in_map with (f := fun p : Z * Z => Float (fst p) (snd p));
+ auto.
 apply mProd_correct; auto.
 apply mZlist_correct; auto.
 simpl in |- *; auto with zarith.
@@ -213,6 +203,8 @@ red in |- *; simpl in |- *; auto with zarith.
 apply mZlist_correct; auto.
 simpl in |- *; auto with zarith.
 unfold boundR, boundNat in |- *; simpl in |- *; auto with zarith.
+apply Zle_trans with 0%Z; auto with zarith.
+case (dExp b); auto with zarith.
 simpl in |- *; auto with zarith.
 Qed.
  
@@ -220,25 +212,31 @@ Theorem mBPadic_Fbounded :
  forall (p : float) (r : R), In p (mBFloat r) -> Fbounded b p.
 intros p r H'; red in |- *; repeat (split; auto).
 apply Zpred_Zle_Zabs_intro.
-apply mZlist_correct_rev1 with (q := Zpred (Zpos (vNum b))); auto with real.
+apply mZlist_correct_rev1 with (q := Zpred (Zpos (vNum b)));
+ auto with real.
 apply
  mProd_correct_rev1
   with
     (l2 := mZlist (- dExp b) (Fexp (boundR r)))
     (C := (Z * Z)%type)
     (b := Fexp p); auto.
-apply in_map_inv with (f := fun p : Z * Z => Float (fst p) (snd p)); auto.
+apply
+ in_map_inv with (f := fun p : Z * Z => Float (fst p) (snd p));
+ auto.
 intros a1 b1; case a1; case b1; simpl in |- *.
 intros z z0 z1 z2 H'0; inversion H'0; auto.
 generalize H'; case p; auto.
-apply mZlist_correct_rev2 with (p := (- Zpred (Zpos (vNum b)))%Z); auto.
+apply mZlist_correct_rev2 with (p := (- Zpred (Zpos (vNum b)))%Z);
+ auto.
 apply
  mProd_correct_rev1
   with
     (l2 := mZlist (- dExp b) (Fexp (boundR r)))
     (C := (Z * Z)%type)
     (b := Fexp p); auto.
-apply in_map_inv with (f := fun p : Z * Z => Float (fst p) (snd p)); auto.
+apply
+ in_map_inv with (f := fun p : Z * Z => Float (fst p) (snd p));
+ auto.
 intros a1 b1; case a1; case b1; simpl in |- *.
 intros z z0 z1 z2 H'0; inversion H'0; auto.
 generalize H'; case p; auto.
@@ -249,7 +247,9 @@ apply
     (l1 := mZlist (- pPred (vNum b)) (pPred (vNum b)))
     (C := (Z * Z)%type)
     (a := Fnum p); auto.
-apply in_map_inv with (f := fun p : Z * Z => Float (fst p) (snd p)); auto.
+apply
+ in_map_inv with (f := fun p : Z * Z => Float (fst p) (snd p));
+ auto.
 intros a1 b1; case a1; case b1; simpl in |- *.
 intros z z0 z1 z2 H'0; inversion H'0; auto.
 generalize H'; case p; auto.
@@ -473,8 +473,8 @@ case (MinExList r (mBFloat r)).
 intros H'0; absurd (Fopp (boundR r) <= r)%R; auto.
 apply Rlt_not_le.
 apply H'0.
-(* A minimum always exists *)
 apply mBFadic_correct3; auto.
+(* A minimum always exists *)
 apply Rlt_le.
 apply boundRCorrect2; auto.
 intros H'0; elim H'0; intros min E; elim E; intros H'1 H'2; elim H'2;
@@ -513,8 +513,8 @@ intros x H'.
 case (Req_dec x r); intros H'1.
 exists x.
 rewrite <- H'1.
-(* A maximum always exists *)
 red in |- *; split; [ case H' | split ]; auto with real.
+(* A maximum always exists *)
 exists (FNSucc b radix precision x).
 apply MinMax; auto.
 Qed.
@@ -528,8 +528,8 @@ split; auto.
 split; auto.
 intros f H'2 H'3.
 case (Rle_or_lt f p); auto; intros H'5.
-(* If we are between a bound and its successor, it is our minimum *)
 Contradict H'3.
+(* If we are between a bound and its successor, it is our minimum *)
 apply Rlt_not_le.
 apply Rlt_le_trans with (1 := H'1); auto with real.
 replace (FtoRradix f) with (FtoRradix (Fnormalize radix b precision f)).
@@ -543,14 +543,15 @@ unfold FtoRradix in |- *; rewrite FnormalizeCorrect; auto with real.
 Qed.
  
 Theorem FminRep :
- forall p q : float, isMin p q -> exists m : Z, q = Float m (Fexp p) :>R.
+ forall p q : float,
+ isMin p q -> exists m : Z, q = Float m (Fexp p) :>R.
 intros p q H'.
 replace (FtoRradix q) with (FtoRradix (Fnormalize radix b precision q)).
 2: unfold FtoRradix in |- *; apply FnormalizeCorrect; auto.
 case (Zle_or_lt (Fexp (Fnormalize radix b precision q)) (Fexp p)); intros H'1.
 exists (Fnum p).
-(* A min of a float is always represnetable with the same exposant *)
 unfold FtoRradix in |- *; apply FSuccZleEq with (3 := pGivesBound); auto.
+(* A min of a float is always represnetable with the same exposant *)
 replace (Float (Fnum p) (Fexp p)) with p; [ idtac | case p ]; auto.
 replace (FtoR radix (Fnormalize radix b precision q)) with (FtoR radix q);
  [ idtac | rewrite FnormalizeCorrect ]; auto.
@@ -604,8 +605,8 @@ rewrite <- (Ropp_involutive r).
 rewrite <- (Fopp_Fopp p).
 apply MinOppMax.
 apply MinBinade; auto with real float.
-(* Same for max *)
 unfold FtoRradix in |- *; rewrite Fopp_correct; auto with real.
+(* Same for max *)
 rewrite <- (Fopp_Fopp (FNSucc b radix precision (Fopp p))).
 rewrite <- FNPredFopFNSucc; auto.
 unfold FtoRradix in |- *; rewrite Fopp_correct; auto with real arith.
@@ -619,8 +620,8 @@ rewrite <- (Fopp_Fopp (FNPred b radix precision p)).
 rewrite <- (Ropp_involutive r).
 apply MaxOppMin.
 rewrite FNPredFopFNSucc; auto.
-(* Taking the pred of a max we get a min *)
 rewrite Fopp_Fopp; auto.
+(* Taking the pred of a max we get a min *)
 apply MinMax; auto.
 apply MaxOppMin; auto.
 Contradict H'0.
@@ -629,19 +630,21 @@ rewrite <- (Ropp_involutive r); rewrite H'0; auto; unfold FtoRradix in |- *;
 Qed.
  
 Theorem FmaxRep :
- forall p q : float, isMax p q -> exists m : Z, q = Float m (Fexp p) :>R.
+ forall p q : float,
+ isMax p q -> exists m : Z, q = Float m (Fexp p) :>R.
 intros p q H'; case (FminRep (Fopp p) (Fopp q)).
 unfold FtoRradix in |- *; rewrite Fopp_correct.
 apply MaxOppMin; auto.
 intros x H'0.
 exists (- x)%Z.
-(* The max of a float can be represented with the same exposant *)
 rewrite <- (Ropp_involutive (FtoRradix q)).
+(* The max of a float can be represented with the same exposant *)
 unfold FtoRradix in |- *; rewrite <- Fopp_correct.
 unfold FtoRradix in H'0; rewrite H'0.
 unfold FtoR in |- *; simpl in |- *; auto with real.
 rewrite Ropp_Ropp_IZR; rewrite Ropp_mult_distr_l_reverse; auto.
 Qed.
+ 
 End FMinMax.
 Hint Resolve ProjectMax MonotoneMax MinOppMax MaxOppMin MinMax MinBinade
   MaxBinade MaxMin: float.

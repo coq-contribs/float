@@ -1,23 +1,10 @@
-(* This program is free software; you can redistribute it and/or      *)
-(* modify it under the terms of the GNU Lesser General Public License *)
-(* as published by the Free Software Foundation; either version 2.1   *)
-(* of the License, or (at your option) any later version.             *)
-(*                                                                    *)
-(* This program is distributed in the hope that it will be useful,    *)
-(* but WITHOUT ANY WARRANTY; without even the implied warranty of     *)
-(* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the      *)
-(* GNU General Public License for more details.                       *)
-(*                                                                    *)
-(* You should have received a copy of the GNU Lesser General Public   *)
-(* License along with this program; if not, write to the Free         *)
-(* Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA *)
-(* 02110-1301 USA                                                     *)
-
-
-Require Import Arith.
-Require Export Float.
-Require Export Fop.
-Require Export Fnorm.
+(****************************************************************************
+                                                                             
+          IEEE754  :  MSBProp                                                     
+                                                                             
+          Laurent Thery, Sylvie Boldo                                                      
+                                                                             
+  ******************************************************************************)
 Require Export MSB.
 Section MSBProp.
 Variable b : Fbound.
@@ -57,7 +44,8 @@ Theorem boundNormalMult :
  (Rabs y * Float 1%nat (Fexp x) < radix * (Rabs x * Float 1%nat (Fexp y)))%R.
 intros x y H H0.
 apply
- Rlt_le_trans with (Float (Zpos (vNum b)) (Fexp y) * Float 1%nat (Fexp x))%R.
+ Rlt_le_trans
+  with (Float (Zpos (vNum b)) (Fexp y) * Float 1%nat (Fexp x))%R.
 apply Rmult_lt_compat_r.
 unfold FtoRradix in |- *; unfold FtoR in |- *; simpl in |- *.
 replace (1 * powerRZ radix (Fexp x))%R with (powerRZ radix (Fexp x));

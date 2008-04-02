@@ -1,19 +1,3 @@
-(* This program is free software; you can redistribute it and/or      *)
-(* modify it under the terms of the GNU Lesser General Public License *)
-(* as published by the Free Software Foundation; either version 2.1   *)
-(* of the License, or (at your option) any later version.             *)
-(*                                                                    *)
-(* This program is distributed in the hope that it will be useful,    *)
-(* but WITHOUT ANY WARRANTY; without even the implied warranty of     *)
-(* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the      *)
-(* GNU General Public License for more details.                       *)
-(*                                                                    *)
-(* You should have received a copy of the GNU Lesser General Public   *)
-(* License along with this program; if not, write to the Free         *)
-(* Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA *)
-(* 02110-1301 USA                                                     *)
-
-
 (****************************************************************************
                                                                              
           IEEE754  :  Fbound                                                   
@@ -21,8 +5,6 @@
           Laurent Thery                                                      
                                                                              
   ******************************************************************************)
-Require Export Float.
-Require Export Fcomp.
 Require Export Fop.
 Section Fbounded_Def.
 Variable radix : Z.
@@ -32,8 +14,10 @@ Let radixMoreThanZERO := Zlt_1_O _ (Zlt_le_weak _ _ radixMoreThanOne).
 Hint Resolve radixMoreThanZERO: zarith.
  
 Coercion Local FtoRradix := FtoR radix.
+
+Coercion Z_of_N: N >-> Z.
  
-Record Fbound : Set := Bound {vNum : positive; dExp : nat}.
+Record Fbound : Set := Bound {vNum : positive; dExp : N}.
  
 Definition Fbounded (b : Fbound) (d : float) :=
   (Zabs (Fnum d) < Zpos (vNum b))%Z /\ (- dExp b <= Fexp d)%Z.
@@ -52,7 +36,8 @@ Hint Resolve FboundedNum FboundedExp: float.
  
 Theorem isBounded :
  forall (b : Fbound) (p : float), {Fbounded b p} + {~ Fbounded b p}.
-intros b p; case (Z_le_gt_dec (Zpos (vNum b)) (Zabs (Fnum p))); intros H'.
+intros b p; case (Z_le_gt_dec (Zpos (vNum b)) (Zabs (Fnum p)));
+ intros H'.
 right; red in |- *; intros H'3; Contradict H'; auto with float zarith.
 case (Z_le_gt_dec (- dExp b) (Fexp p)); intros H'1.
 left; repeat split; auto with zarith.
@@ -66,7 +51,7 @@ Qed.
 Theorem FboundedFzero : forall b : Fbound, Fbounded b (Fzero (- dExp b)).
 intros b; repeat (split; simpl in |- *).
 replace 0%Z with (- 0%nat)%Z; [ idtac | simpl in |- *; auto ].
-apply Zle_Zopp; apply Znat.inj_le; auto with arith.
+apply Zeq_le; auto with arith.
 Qed.
 Hint Unfold Fbounded.
  
@@ -83,7 +68,7 @@ apply Zle_trans with (Fexp p); auto with float.
 pattern (Fexp p) at 1 in |- *;
  (replace (Fexp p) with (Fexp p + 0%nat)%Z; [ idtac | simpl in |- *; ring ]).
 apply Zplus_le_compat_l.
-apply Znat.inj_le; auto with arith.
+apply inj_le; auto with arith.
 Qed.
  
 Theorem FvalScale :
@@ -275,7 +260,8 @@ Theorem LessExpBound :
  (Fexp q <= Fexp p)%Z ->
  (0 <= p)%R ->
  (p <= q)%R ->
- exists m : Z, Float m (Fexp q) = p :>R /\ Fbounded b (Float m (Fexp q)).
+ exists m : Z,
+   Float m (Fexp q) = p :>R /\ Fbounded b (Float m (Fexp q)).
 intros b p q H' H'0 H'1 H'2 H'3;
  exists (Fnum p * Zpower_nat radix (Zabs_nat (Fexp p - Fexp q)))%Z.
 cut
@@ -307,7 +293,8 @@ Qed.
  
 Theorem maxMax :
  forall (b : Fbound) (p : float) (z : Z),
- Fbounded b p -> (Fexp p <= z)%Z -> (Fabs p < Float (Zpos (vNum b)) z)%R.
+ Fbounded b p ->
+ (Fexp p <= z)%Z -> (Fabs p < Float (Zpos (vNum b)) z)%R.
 intros b p z H' H'0; unfold FtoRradix in |- *;
  rewrite <-
   (FshiftCorrect _ radixMoreThanOne (Zabs_nat (z - Fexp p))
@@ -324,7 +311,8 @@ change
    (Zpos (vNum b) * Zpower_nat radix (Zabs_nat (z - Fexp p)))%Z *
    powerRZ radix (Fexp p))%R in |- *.
 apply Rmult_lt_compat_r; auto with real zarith.
-apply Rlt_le_trans with (IZR (Zpos (vNum b))); auto with real float zarith.
+apply Rlt_le_trans with (IZR (Zpos (vNum b)));
+ auto with real float zarith.
 pattern (Zpos (vNum b)) at 1 in |- *;
  replace (Zpos (vNum b)) with (Zpos (vNum b) * 1)%Z;
  auto with real float zarith; ring.

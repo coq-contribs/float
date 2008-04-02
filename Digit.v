@@ -1,19 +1,3 @@
-(* This program is free software; you can redistribute it and/or      *)
-(* modify it under the terms of the GNU Lesser General Public License *)
-(* as published by the Free Software Foundation; either version 2.1   *)
-(* of the License, or (at your option) any later version.             *)
-(*                                                                    *)
-(* This program is distributed in the hope that it will be useful,    *)
-(* but WITHOUT ANY WARRANTY; without even the implied warranty of     *)
-(* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the      *)
-(* GNU General Public License for more details.                       *)
-(*                                                                    *)
-(* You should have received a copy of the GNU Lesser General Public   *)
-(* License along with this program; if not, write to the Free         *)
-(* Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA *)
-(* 02110-1301 USA                                                     *)
-
-
 (****************************************************************************
                                                                              
           IEEE754  :  Digit                                                  
@@ -22,14 +6,9 @@
                                                                              
   *****************************************************************************
   Gives the number of digits necessary to write a number in a given base *)
-Require Import Arith.
-Require Import ZArith.
-Require Import ZArithRing.
-Require Import Omega.
-Require Import Zpower.
-Require Import Zcomplements.
-Require Import Faux.
-Require Import sTactic.
+Require Export ZArithRing.
+Require Export Omega.
+Require Export Faux.
 Section Pdigit.
 (* n is the base *)
 Variable n : Z.
@@ -223,7 +202,7 @@ Qed.
 Theorem pos_length_pow :
  forall p : positive, (Zpos p < Zpower_nat n (S (pos_length p)))%Z.
 intros p; elim p; simpl in |- *; auto.
-intros p0 H; rewrite BinInt.Zpos_xI.
+intros p0 H; rewrite Zpos_xI.
 apply Zlt_le_trans with (Z_of_nat 2 * Zpower_nat n (S (pos_length p0)))%Z.
 replace (Z_of_nat 2) with (1 + 1)%Z; [ idtac | simpl in |- *; auto ].
 replace 2%Z with (1 + 1)%Z; [ auto with zarith | simpl in |- *; auto ].
@@ -233,7 +212,7 @@ rewrite Zpower_nat_1; auto with zarith.
 cut (Z_of_nat 2 <= n)%Z; [ auto with zarith | idtac ].
 replace (Z_of_nat 2) with (Zsucc 1);
  [ auto with zarith | simpl in |- *; auto ].
-intros p0 H; rewrite BinInt.Zpos_xO.
+intros p0 H; rewrite Zpos_xO.
 apply Zlt_le_trans with (Z_of_nat 2 * Zpower_nat n (S (pos_length p0)))%Z.
 replace (Z_of_nat 2) with (1 + 1)%Z; [ idtac | simpl in |- *; auto ].
 replace 2%Z with (1 + 1)%Z; [ auto with zarith | simpl in |- *; auto ].

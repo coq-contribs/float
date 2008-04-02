@@ -1,19 +1,3 @@
-(* This program is free software; you can redistribute it and/or      *)
-(* modify it under the terms of the GNU Lesser General Public License *)
-(* as published by the Free Software Foundation; either version 2.1   *)
-(* of the License, or (at your option) any later version.             *)
-(*                                                                    *)
-(* This program is distributed in the hope that it will be useful,    *)
-(* but WITHOUT ANY WARRANTY; without even the implied warranty of     *)
-(* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the      *)
-(* GNU General Public License for more details.                       *)
-(*                                                                    *)
-(* You should have received a copy of the GNU Lesser General Public   *)
-(* License along with this program; if not, write to the Free         *)
-(* Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA *)
-(* 02110-1301 USA                                                     *)
-
-
 (****************************************************************************
                                                                              
           IEEE754  :  FPred                                                     
@@ -21,12 +5,7 @@
           Laurent Thery                                                      
                                                                              
   ******************************************************************************)
-Require Import List.
-Require Import Float.
-Require Import Fnorm.
-Require Import Fop.
-Require Import Fcomp.
-Require Import FSucc.
+Require Export FSucc.
 Section pred.
 Variable b : Fbound.
 Variable radix : Z.
@@ -143,7 +122,8 @@ rewrite H'2; rewrite H'3; rewrite FPredSimpl3; unfold Fopp in |- *;
 rewrite <- Zopp_Zpred_Zs; rewrite Zopp_involutive; auto.
 case x; simpl in |- *; auto.
 rewrite FPredSimpl2; auto; rewrite FSuccSimpl2; unfold Fopp in |- *;
- simpl in |- *; try rewrite Zopp_involutive; auto.
+ simpl in |- *; try rewrite Zopp_involutive; 
+ auto.
 rewrite H'2; auto.
 rewrite FPredSimpl4; auto; rewrite FSuccSimpl4; auto.
 unfold Fopp in |- *; simpl in |- *; rewrite <- Zopp_Zpred_Zs;
@@ -284,7 +264,7 @@ Theorem FPredSuc :
  forall x : float,
  Fcanonic radix b x -> FPred (FSucc b radix precision x) = x.
 intros x H; unfold FPred, FSucc in |- *.
-cut (Fbounded b x); [ intros Fb0 | apply FcanonicBound with (2 := H); auto ].
+cut (Fbounded b x); [ intros Fb0 | apply FcanonicBound with (1 := H) ].
 generalize (Z_eq_bool_correct (Fnum x) (pPred (vNum b)));
  case (Z_eq_bool (Fnum x) (pPred (vNum b))); simpl in |- *.
 generalize (Z_eq_bool_correct (nNormMin radix precision) (- pPred (vNum b)));
@@ -368,7 +348,7 @@ Theorem FSucPred :
  forall x : float,
  Fcanonic radix b x -> FSucc b radix precision (FPred x) = x.
 intros x H; unfold FPred, FSucc in |- *.
-cut (Fbounded b x); [ intros Fb0 | apply FcanonicBound with (2 := H); auto ].
+cut (Fbounded b x); [ intros Fb0 | apply FcanonicBound with (1 := H) ].
 generalize (Z_eq_bool_correct (Fnum x) (- pPred (vNum b)));
  case (Z_eq_bool (Fnum x) (- pPred (vNum b))); simpl in |- *.
 generalize (Z_eq_bool_correct (- nNormMin radix precision) (pPred (vNum b)));
@@ -455,7 +435,7 @@ Qed.
 Theorem FNPredSuc :
  forall x : float,
  Fbounded b x -> FNPred (FNSucc b radix precision x) = x :>R.
-intros x H'; unfold FNPred in |- *; rewrite FcanonicFormalizeEq; auto.
+intros x H'; unfold FNPred in |- *; rewrite FcanonicFnormalizeEq; auto.
 unfold FNSucc in |- *; rewrite FPredSuc; auto.
 unfold FtoRradix in |- *; apply FnormalizeCorrect; auto.
 apply FnormalizeCanonic; auto.
@@ -478,7 +458,7 @@ Qed.
 Theorem FNSucPred :
  forall x : float,
  Fbounded b x -> FNSucc b radix precision (FNPred x) = x :>R.
-intros x H'; unfold FNSucc in |- *; rewrite FcanonicFormalizeEq; auto.
+intros x H'; unfold FNSucc in |- *; rewrite FcanonicFnormalizeEq; auto.
 unfold FNPred in |- *; rewrite FSucPred; auto.
 unfold FtoRradix in |- *; apply FnormalizeCorrect; auto.
 apply FnormalizeCanonic; auto.
@@ -497,6 +477,8 @@ apply FcanonicBound with (radix := radix); auto.
 apply FNSucPred; auto.
 apply FcanonicBound with (radix := radix); auto.
 Qed.
+
+
 End pred.
 Hint Resolve FBoundedPred FPredCanonic FPredLt R0RltRleSucc FPredProp
   FNPredCanonic FNPredLt FNPredProp: float.

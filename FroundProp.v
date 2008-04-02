@@ -1,24 +1,8 @@
-(* This program is free software; you can redistribute it and/or      *)
-(* modify it under the terms of the GNU Lesser General Public License *)
-(* as published by the Free Software Foundation; either version 2.1   *)
-(* of the License, or (at your option) any later version.             *)
-(*                                                                    *)
-(* This program is distributed in the hope that it will be useful,    *)
-(* but WITHOUT ANY WARRANTY; without even the implied warranty of     *)
-(* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the      *)
-(* GNU General Public License for more details.                       *)
-(*                                                                    *)
-(* You should have received a copy of the GNU Lesser General Public   *)
-(* License along with this program; if not, write to the Free         *)
-(* Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA *)
-(* 02110-1301 USA                                                     *)
-
-
 (****************************************************************************
                                                                              
           IEEE754  :  FroundProp                                                     
                                                                              
-          Laurent Thery                                                      
+          Laurent Thery, Sylvie Boldo                                                      
                                                                              
   ******************************************************************************)
 Require Export Fround.
@@ -73,6 +57,72 @@ intros x; unfold is_Fzero, Fulp, Fnormalize in |- *; case (Z_zerop (Fnum x));
 intros H' H'0; Contradict H'; auto.
 Qed.
  
+Theorem FulpLe2 :
+ forall p : float,
+ Fbounded b p ->
+ Fnormal radix b (Fnormalize radix b precision p) ->
+ (Fulp p <= Rabs p * powerRZ radix (Zsucc (- precision)))%R.
+intros p H1 H2; unfold Fulp in |- *.
+replace (FtoRradix p) with (FtoRradix (Fnormalize radix b precision p));
+ [ idtac | unfold FtoRradix in |- *; apply FnormalizeCorrect; auto ].
+apply Rmult_le_reg_l with (powerRZ radix (Zpred precision)).
+apply powerRZ_lt; auto with real arith.
+replace
+ (powerRZ radix (Zpred precision) *
+  (Rabs (Fnormalize radix b precision p) *
+   powerRZ radix (Zsucc (- precision))))%R with
+ (Rabs (Fnormalize radix b precision p)).
+unfold FtoRradix in |- *; rewrite <- Fabs_correct; auto with arith real.
+unfold Fabs, FtoR in |- *; simpl in |- *.
+apply Rmult_le_compat_r; [ apply powerRZ_le | rewrite <- inj_pred ];
+ auto with real arith zarith.
+rewrite <- Zpower_nat_Z_powerRZ.
+replace (Zpower_nat radix (pred precision)) with (nNormMin radix precision);
+ auto; apply Rle_IZR.
+apply pNormal_absolu_min with b; auto with arith zarith real.
+apply
+ trans_eq
+  with
+    (Rabs (Fnormalize radix b precision p) *
+     (powerRZ radix (Zpred precision) * powerRZ radix (Zsucc (- precision))))%R;
+ [ idtac | ring ].
+rewrite <- powerRZ_add; auto with zarith real.
+replace (Zpred precision + Zsucc (- precision))%Z with 0%Z;
+ [ simpl in |- *; ring | unfold Zsucc, Zpred in |- *; ring ];
+ auto with real zarith.
+Qed.
+ 
+Theorem FulpGe :
+ forall p : float,
+ Fbounded b p -> (Rabs p <= (powerRZ radix precision - 1) * Fulp p)%R.
+intros p H.
+replace (FtoRradix p) with (FtoRradix (Fnormalize radix b precision p));
+ [ idtac | unfold FtoRradix in |- *; apply FnormalizeCorrect; auto ].
+unfold FtoRradix in |- *; rewrite <- Fabs_correct; auto with arith real.
+unfold FtoR in |- *; simpl in |- *; unfold Fulp in |- *.
+apply Rmult_le_compat_r; [ apply powerRZ_le | idtac ];
+ auto with real arith zarith.
+apply Rle_trans with (IZR (Zpred (Zpos (vNum b))));
+ [ apply Rle_IZR; auto with float zarith | idtac ].
+unfold Zpred in |- *; right; rewrite pGivesBound; replace 1%R with (IZR 1);
+ auto with real.
+rewrite <- Zpower_nat_Z_powerRZ; rewrite Z_R_minus;auto.
+Qed.
+ 
+Theorem LeFulpPos :
+ forall x y : float,
+ Fbounded b x ->
+ Fbounded b y -> (0 <= x)%R -> (x <= y)%R -> (Fulp x <= Fulp y)%R.
+intros x y Hx Hy H1 H2; unfold Fulp in |- *.
+apply Rle_powerRZ; auto with real zarith.
+apply Fcanonic_Rle_Zle with radix b precision; auto with zarith arith.
+apply FnormalizeCanonic; auto with zarith arith.
+apply FnormalizeCanonic; auto with zarith arith.
+repeat rewrite FnormalizeCorrect; auto with zarith arith real.
+repeat rewrite Rabs_right; auto with zarith arith real.
+apply Rge_trans with (FtoRradix x); auto with real.
+Qed.
+ 
 Theorem FulpSucCan :
  forall p : float,
  Fcanonic radix b p -> (FSucc b radix precision p - p <= Fulp p)%R.
@@ -82,7 +132,7 @@ replace (Fulp p) with (powerRZ radix (Fexp p)).
     apply sym_equal; apply FcanonicUnique with (3 := pGivesBound);
     auto with arith; apply FnormalizeCanonic || apply FnormalizeCorrect;
     auto with float zarith.
-2: apply FcanonicBound with (2 := H'); auto with float zarith.
+2: apply FcanonicBound with (1 := H'); auto with float zarith.
 unfold FtoRradix in |- *; rewrite <- Fminus_correct; auto with zarith.
 case (Z_eq_dec (Fnum p) (- nNormMin radix precision)); intros H1'.
 case (Z_eq_dec (Fexp p) (- dExp b)); intros H2'.
@@ -129,7 +179,7 @@ replace 1%R with (INR 1); auto with real arith.
 unfold Zpred in |- *; auto with zarith.
 rewrite FPredDiff1; auto with arith.
 unfold FtoR in |- *; simpl in |- *; rewrite Rmult_1_l; auto with real.
-apply FcanonicBound with (2 := H'); auto.
+apply FcanonicBound with (1 := H').
 Qed.
  
 Theorem FulpPred :
@@ -142,6 +192,68 @@ unfold FNPred in |- *; apply FulpPredCan; auto with float arith.
 unfold FtoRradix in |- *; apply FnormalizeCorrect; auto.
 apply FulpComp; auto with float arith.
 unfold FtoRradix in |- *; apply FnormalizeCorrect; auto.
+Qed.
+ 
+Theorem FSuccDiffPos :
+ forall x : float,
+ (0 <= x)%R ->
+ Fminus radix (FSucc b radix precision x) x = Float 1%nat (Fexp x) :>R.
+intros x H.
+unfold FtoRradix in |- *; apply FSuccDiff1; auto with arith.
+Contradict H; unfold FtoRradix, FtoR in |- *; simpl in |- *; rewrite H.
+apply Rlt_not_le.
+replace 0%R with (0 * powerRZ radix (Fexp x))%R; [ idtac | ring ].
+apply Rlt_monotony_exp; auto with real arith.
+generalize (nNormPos _ radixMoreThanOne precision);
+ replace 0%R with (IZR (- 0%nat)); auto with real zarith arith.
+Qed.
+ 
+Theorem FulpFPredGePos :
+ forall f : float,
+ Fbounded b f ->
+ Fcanonic radix b f ->
+ (0 < f)%R -> (Fulp (FPred b radix precision f) <= Fulp f)%R.
+intros f Hf1 Hf2 H.
+apply LeFulpPos; auto with zarith float; unfold FtoRradix in |- *.
+apply R0RltRlePred; auto with arith.
+apply Rlt_le; apply FPredLt; auto with arith.
+Qed.
+ 
+Theorem CanonicFulp :
+ forall p : float, Fcanonic radix b p -> Fulp p = Float 1%nat (Fexp p).
+intros p H; unfold Fulp in |- *.
+rewrite FcanonicFnormalizeEq; auto with arith.
+unfold FtoRradix, FtoR in |- *; simpl in |- *; ring.
+Qed.
+ 
+Theorem FSuccUlpPos :
+ forall x : float,
+ Fcanonic radix b x ->
+ (0 <= x)%R -> Fminus radix (FSucc b radix precision x) x = Fulp x :>R.
+intros x H H0; rewrite CanonicFulp; auto.
+apply FSuccDiffPos; auto.
+Qed.
+ 
+Theorem FNSuccUlpPos :
+ forall x : float,
+ Fcanonic radix b x ->
+ (0 <= x)%R -> Fminus radix (FNSucc b radix precision x) x = Fulp x :>R.
+intros x H H0.
+unfold FNSucc in |- *.
+rewrite FcanonicFnormalizeEq; auto with arith.
+apply FSuccUlpPos; auto.
+Qed.
+ 
+Theorem FulpFabs : forall f : float, Fulp f = Fulp (Fabs f) :>R.
+intros f; unfold Fulp in |- *; case (Rle_or_lt 0 f); intros H'.
+replace (Fabs f) with f; auto; unfold Fabs in |- *; apply floatEq;
+ simpl in |- *; auto with zarith real.
+apply sym_eq; apply Zabs_eq; apply LeR0Fnum with radix; auto with zarith real.
+replace (Fabs f) with (Fopp f);
+ [ rewrite Fnormalize_Fopp | apply floatEq; simpl in |- * ]; 
+ auto.
+apply sym_eq; apply Zabs_eq_opp; apply R0LeFnum with radix;
+ auto with zarith real.
 Qed.
  
 Theorem RoundedModeUlp :
@@ -168,7 +280,7 @@ apply Rgt_not_le; red in |- *; unfold FtoRradix in |- *;
  auto with real float arith.
 case H'5; auto.
 intros H'4 H'7; elim H'7; intros H'8 H'9; apply H'9; clear H'7; auto.
-apply (FcanonicBound radix) with (b := b); auto with float arith.
+apply (FcanonicBound radix b); auto with float arith.
 apply Rle_ge; apply Rplus_le_reg_l with (r := FtoR radix q).
 repeat rewrite Rplus_minus; auto.
 rewrite Rplus_0_r; apply isMin_inv1 with (1 := H'5); auto.
@@ -185,7 +297,7 @@ apply Rgt_not_le; red in |- *; unfold FtoRradix in |- *;
  auto with real float arith.
 case H'5; auto.
 intros H'4 H'7; elim H'7; intros H'8 H'9; apply H'9; clear H'7; auto.
-apply (FcanonicBound radix) with (b := b); auto with float arith.
+apply (FcanonicBound radix b); auto with float arith.
 intros H1; apply Rplus_lt_compat_l; auto with real; apply Ropp_lt_contravar;
  unfold Rminus in |- *; auto with real.
 apply Rplus_le_reg_l with (r := FtoR radix q).
@@ -530,8 +642,7 @@ apply Rplus_le_reg_l with (r := (- (/ 2%nat * p))%R).
 replace (- (/ 2%nat * p) + FtoR radix p)%R with (/ 2%nat * p)%R.
 replace (- (/ 2%nat * p) + (FtoR radix max + / 2%nat * p))%R with
  (FtoR radix max); [ apply isMax_inv1 with (1 := H'1) | ring ].
-pattern (FtoR radix p) at 1 in |- *;
- replace (FtoR radix p) with (2%nat * (/ 2%nat * p))%R.
+replace (FtoR radix p) with (2%nat * (/ 2%nat * p))%R.
 simpl in |- *; ring.
 rewrite <- Rmult_assoc; rewrite Rinv_r; auto with real.
 apply Rplus_le_reg_l with (r := (- min)%R).
@@ -569,9 +680,9 @@ apply div2IsBetweenPos; auto with float.
 rewrite (Fopp_correct radix); auto.
 replace 0%R with (-0)%R; try apply Rlt_le; auto with real.
 replace (/ 2%nat * Fopp p)%R with (- (/ 2%nat * p))%R; auto with float.
-rewrite (Fopp_correct radix); fold FtoRradix; ring.
+rewrite (Fopp_correct radix); auto; fold FtoRradix; ring.
 replace (/ 2%nat * Fopp p)%R with (- (/ 2%nat * p))%R; auto with float.
-rewrite (Fopp_correct radix); fold FtoRradix; ring.
+rewrite (Fopp_correct radix); auto; fold FtoRradix;ring.
 intros x y H'3; rewrite <- (Ropp_involutive x);
  rewrite <- (Ropp_involutive y); rewrite H'3; auto.
 Qed.
@@ -597,7 +708,7 @@ apply oppBounded; auto.
 unfold FtoRradix in |- *; rewrite Fopp_correct.
 rewrite <- (Ropp_involutive r).
 replace (radix * - FtoR radix q')%R with (- (radix * q'))%R;
- [ apply Ropp_le_contravar | fold FtoRradix; ring ]; auto.
+ [ apply Ropp_le_contravar | fold FtoRradix;ring ]; auto.
 rewrite <- (Faux.Rabsolu_left1 r); auto.
 apply Rlt_le; auto.
 apply RleRoundedLessR0 with (P := P) (r := r); auto.
@@ -798,8 +909,7 @@ cut (Fbounded b max);
 elim Fb0; intros H H0; repeat (split; simpl in |- *); auto.
 apply Zle_trans with (Fexp max); auto with zarith.
 apply Rle_trans with r; auto with real.
-pattern r at 2 in |- *; replace r with (- (- r * 1%nat))%R;
-  [ idtac | simpl; ring ].
+pattern r at 2 in |- *; replace r with (- (- r * 1%nat))%R; [ idtac | simpl; ring ].
 replace (radix * r)%R with (- (- r * radix))%R; [ idtac | ring ].
 apply Ropp_le_contravar; apply Rmult_le_compat_l; auto with real arith.
 replace 0%R with (-0)%R; auto with real arith.
@@ -1138,8 +1248,7 @@ unfold MSB, Fdigit in |- *; simpl in |- *.
 case (Zpred (digit radix (Fnum p) + Fexp p)); simpl in |- *; auto with zarith.
 intros p0; case p0; simpl in |- *; auto.
 intros p1; elim p1; simpl in |- *; auto.
-unfold Pminus in |- *; simpl in |- *; intros p2 H; injection H; intros H1;
- rewrite H1; auto.
+intros p2 H; injection H; intros H1; rewrite <- H1; auto.
 intros p0; case p0; simpl in |- *; auto.
 intros p1; case p1; simpl in |- *; auto.
 intros p2; elim p2; simpl in |- *; auto.
@@ -1242,5 +1351,6 @@ pattern (FtoRradix p) at 1 in |- *; replace (FtoRradix p) with (p + 0)%R;
  [ idtac | ring ].
 apply Rplus_lt_compat_l; auto.
 Qed.
+ 
 End FRoundP.
 Hint Resolve FulpSucCan FulpSuc FulpPredCan FulpPred: float.

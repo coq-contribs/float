@@ -1,19 +1,11 @@
-(* This program is free software; you can redistribute it and/or      *)
-(* modify it under the terms of the GNU Lesser General Public License *)
-(* as published by the Free Software Foundation; either version 2.1   *)
-(* of the License, or (at your option) any later version.             *)
-(*                                                                    *)
-(* This program is distributed in the hope that it will be useful,    *)
-(* but WITHOUT ANY WARRANTY; without even the implied warranty of     *)
-(* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the      *)
-(* GNU General Public License for more details.                       *)
-(*                                                                    *)
-(* You should have received a copy of the GNU Lesser General Public   *)
-(* License along with this program; if not, write to the Free         *)
-(* Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA *)
-(* 02110-1301 USA                                                     *)
-
-
+(****************************************************************************
+                                                                             
+          IEEE754  :  Closest                                                   
+                                                                             
+          Laurent Thery                                                      
+                                                                             
+  *****************************************************************************
+  Properties about the closest rounding mode *)
 Require Export Fround.
 Section Fclosest.
 Variable b : Fbound.
@@ -145,7 +137,7 @@ apply Rplus_le_reg_l with (r := r).
 replace (r + (FtoR radix min + (max - r)))%R with (min + max)%R.
 replace (r + r)%R with (2%nat * r)%R; auto.
 simpl in |- *; ring.
-fold FtoRradix; ring.
+simpl in |- *; fold FtoRradix; ring.
 apply Rplus_le_reg_l with (r := r).
 repeat rewrite Rplus_minus; auto.
 case H'0; auto.
@@ -506,7 +498,7 @@ apply MinEq with (1 := isM0); auto.
 apply MaxEq with (1 := isM0); auto.
 left.
 apply FNevenEq with (f1 := FNSucc b radix precision min); auto.
-apply FcanonicBound with (radix := radix); auto.
+apply FcanonicBound with (radix := radix).
 apply FNSuccCanonic; auto with arith.
 case H'; auto.
 case H'0; auto.

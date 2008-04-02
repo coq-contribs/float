@@ -1,25 +1,13 @@
-(* This program is free software; you can redistribute it and/or      *)
-(* modify it under the terms of the GNU Lesser General Public License *)
-(* as published by the Free Software Foundation; either version 2.1   *)
-(* of the License, or (at your option) any later version.             *)
-(*                                                                    *)
-(* This program is distributed in the hope that it will be useful,    *)
-(* but WITHOUT ANY WARRANTY; without even the implied warranty of     *)
-(* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the      *)
-(* GNU General Public License for more details.                       *)
-(*                                                                    *)
-(* You should have received a copy of the GNU Lesser General Public   *)
-(* License along with this program; if not, write to the Free         *)
-(* Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA *)
-(* 02110-1301 USA                                                     *)
-
-
-Require Import Float.
-Require Import Fcomp.
-Require Import Fprop.
-Require Import Fop.
-Require Import Fnorm.
-Require Import Zdivides.
+(****************************************************************************
+                                                                             
+          IEEE754  :  MSB                                                     
+                                                                             
+          Laurent Thery                                                      
+                                                                             
+  ******************************************************************************)
+Require Export Fprop.
+Require Export Zdivides.
+Require Export Fnorm.
 Section mf.
 Variable radix : Z.
 Hypothesis radixMoreThanOne : (1 < radix)%Z.
@@ -66,7 +54,8 @@ intros n H'; case (ZdividesP v (Zpower_nat radix (S n))); simpl in |- *;
 Qed.
  
 Theorem maxDivSimplAux :
- forall (v : Z) (p q : nat), p = maxDiv v (S (q + p)) -> p = maxDiv v (S p).
+ forall (v : Z) (p q : nat),
+ p = maxDiv v (S (q + p)) -> p = maxDiv v (S p).
 intros v p q; elim q.
 simpl in |- *; case (ZdividesP v (Zpower_nat radix (S p))); auto.
 intros n H' H'0.
@@ -78,14 +67,16 @@ intros H' H'0; Contradict H'0; auto with zarith.
 Qed.
  
 Theorem maxDivSimpl :
- forall (v : Z) (p q : nat), p < q -> p = maxDiv v q -> p = maxDiv v (S p).
+ forall (v : Z) (p q : nat),
+ p < q -> p = maxDiv v q -> p = maxDiv v (S p).
 intros v p q H' H'0.
 apply maxDivSimplAux with (q := q - S p); auto.
 replace (S (q - S p + p)) with q; auto with zarith.
 Qed.
  
 Theorem maxDivSimplInvAux :
- forall (v : Z) (p q : nat), p = maxDiv v (S p) -> p = maxDiv v (S (q + p)).
+ forall (v : Z) (p q : nat),
+ p = maxDiv v (S p) -> p = maxDiv v (S (q + p)).
 intros v p q H'; elim q.
 simpl in |- *; auto.
 intros n; simpl in |- *.
@@ -94,12 +85,13 @@ case (ZdividesP v (Zpower_nat radix (S (S (n + p))))); auto.
 intros H'0 H'1 H'2; Contradict H'2; auto with zarith.
 case (ZdividesP v (Zpower_nat radix (S (S (n + p))))); auto.
 intros H'0 H'1 H'2; case H'1.
-case H'0; intros z1 Hz1; exists (radix * z1)%Z; rewrite Hz1;
- unfold Zpower_nat; simpl; ring.
+case H'0; intros z1 Hz1; exists (radix * z1)%Z;rewrite Hz1.
+unfold Zpower_nat; simpl; ring.
 Qed.
  
 Theorem maxDivSimplInv :
- forall (v : Z) (p q : nat), p < q -> p = maxDiv v (S p) -> p = maxDiv v q.
+ forall (v : Z) (p q : nat),
+ p < q -> p = maxDiv v (S p) -> p = maxDiv v q.
 intros v p q H' H'0.
 replace q with (S (q - S p + p)); auto with zarith.
 apply maxDivSimplInvAux; auto.
@@ -193,7 +185,7 @@ Theorem LSB_shift :
 intros x n H'; unfold LSB, Fdigit in |- *; simpl in |- *.
 rewrite digitAdd; auto with arith.
 rewrite maxDivPlus; auto.
-rewrite Znat.inj_plus; ring.
+rewrite inj_plus; ring.
 Qed.
  
 Theorem LSB_comp :
@@ -207,7 +199,8 @@ apply sym_equal; apply LSB_shift; auto.
 apply (NisFzeroComp radix) with (x := x); auto.
 Qed.
  
-Theorem maxDiv_opp : forall (v : Z) (p : nat), maxDiv v p = maxDiv (- v) p.
+Theorem maxDiv_opp :
+ forall (v : Z) (p : nat), maxDiv v p = maxDiv (- v) p.
 intros v p; elim p; simpl in |- *; auto.
 intros n H; case (ZdividesP v (Zpower_nat radix (S n)));
  case (ZdividesP (- v) (Zpower_nat radix (S n))); auto.
@@ -224,7 +217,8 @@ rewrite Fdigit_opp; auto.
 rewrite maxDiv_opp; auto.
 Qed.
  
-Theorem maxDiv_abs : forall (v : Z) (p : nat), maxDiv v p = maxDiv (Zabs v) p.
+Theorem maxDiv_abs :
+ forall (v : Z) (p : nat), maxDiv v p = maxDiv (Zabs v) p.
 intros v p; elim p; simpl in |- *; auto.
 intros n H; case (ZdividesP v (Zpower_nat radix (S n)));
  case (ZdividesP (Zabs v) (Zpower_nat radix (S n))); 
@@ -236,8 +230,8 @@ rewrite Zabs_Zmult; rewrite (fun x => Zabs_eq (Zpower_nat radix x));
 intros Z1 Z2; case Z2.
 case Z1; intros z1 Hz1.
 case (Zle_or_lt v 0); intros Z4.
-exists (- z1)%Z; rewrite <- (Zopp_involutive v); rewrite <- (Zabs_eq_opp v);
- auto; rewrite Hz1; ring.
+exists (- z1)%Z; rewrite <- (Zopp_involutive v);
+ rewrite <- (Zabs_eq_opp v); auto; rewrite Hz1; ring.
 exists z1; rewrite <- (Zabs_eq v); auto with zarith; rewrite Hz1; ring.
 Qed.
  
@@ -253,7 +247,7 @@ Theorem MSB_shift :
  forall (x : float) (n : nat), ~ is_Fzero x -> MSB x = MSB (Fshift radix n x).
 intros; unfold MSB, Fshift, Fdigit in |- *; simpl in |- *.
 rewrite digitAdd; auto with zarith.
-rewrite Znat.inj_plus; unfold Zpred in |- *; ring.
+rewrite inj_plus; unfold Zpred in |- *; ring.
 Qed.
  
 Theorem MSB_comp :
@@ -298,7 +292,8 @@ Qed.
  
 Theorem Fexp_le_MSB : forall x : float, ~ is_Fzero x -> (Fexp x <= MSB x)%Z.
 intros x H'; unfold MSB in |- *.
-cut (Fdigit radix x <> 0%Z :>Z); unfold Zpred in |- *; auto with zarith.
+cut (Fdigit radix x <> 0%Z :>Z); unfold Zpred in |- *;
+ auto with zarith.
 unfold Fdigit in |- *.
 red in |- *; intros H'0; absurd (digit radix (Fnum x) = 0); auto with zarith.
 apply not_eq_sym; apply lt_O_neq; apply digitNotZero; auto.
@@ -314,7 +309,7 @@ rewrite Rmult_1_l.
 repeat rewrite (fun r : R => Rmult_comm r (powerRZ radix (Fexp x))).
 apply Rmult_le_compat_l; auto with real zarith.
 rewrite <- inj_pred; auto with real zarith.
-rewrite <- Zpower_nat_powerRZ; auto.
+rewrite <- Zpower_nat_Z_powerRZ; auto.
 apply Rle_IZR; auto.
 unfold Fdigit in |- *; auto with arith.
 apply digitLess; auto.
@@ -332,7 +327,7 @@ rewrite powerRZ_add; auto with real zarith.
 rewrite Rmult_1_l.
 repeat rewrite (fun r : R => Rmult_comm r (powerRZ radix (Fexp x))).
 apply Rmult_lt_compat_l; auto with real zarith.
-rewrite <- Zpower_nat_powerRZ; auto with arith.
+rewrite <- Zpower_nat_Z_powerRZ; auto with arith.
 apply Rlt_IZR.
 unfold Fdigit in |- *; auto with arith.
 unfold Fabs in |- *; simpl in |- *.
@@ -355,7 +350,7 @@ intros x y H' H'0; unfold MSB in |- *.
 rewrite <- H'0.
 cut (Fdigit radix x <= Fdigit radix y)%Z;
  [ unfold Zpred in |- *; auto with zarith | idtac ].
-unfold Fdigit in |- *; apply Znat.inj_le.
+unfold Fdigit in |- *; apply inj_le.
 apply digit_monotone; auto.
 apply le_IZR.
 apply Rmult_le_reg_l with (r := powerRZ radix (Fexp x));
@@ -407,8 +402,8 @@ cut
  (digit radix (Fnum x) + Zpred (digit radix (Fnum y)) <=
   digit radix (Fnum x * Fnum y))%Z;
  [ unfold Zpred in |- *; auto with zarith | idtac ].
-rewrite <- inj_pred; auto with float zarith; try rewrite <- Znat.inj_plus.
-apply Znat.inj_le.
+rewrite <- inj_pred; auto with float zarith; try rewrite <- inj_plus.
+apply inj_le.
 rewrite <- digitAdd; auto with zarith.
 apply digit_monotone; auto with zarith.
 repeat rewrite Zabs_Zmult.
@@ -443,8 +438,8 @@ cut
  (digit radix (Fnum x * Fnum y) <=
   digit radix (Fnum x) + digit radix (Fnum y))%Z;
  [ unfold Zpred in |- *; auto with zarith | idtac ].
-rewrite <- Znat.inj_plus.
-apply Znat.inj_le; auto.
+rewrite <- inj_plus.
+apply inj_le; auto.
 rewrite <- digitAdd; auto with arith.
 apply digit_monotone; auto with arith.
 repeat rewrite Zabs_Zmult.
@@ -499,7 +494,8 @@ Qed.
  
 Theorem LSB_rep :
  forall x y : float,
- ~ is_Fzero y -> (LSB x <= LSB y)%Z -> exists z : Z, y = Float z (Fexp x) :>R.
+ ~ is_Fzero y ->
+ (LSB x <= LSB y)%Z -> exists z : Z, y = Float z (Fexp x) :>R.
 intros x y H' H'0.
 case (Zle_or_lt (Fexp x) (Fexp y)); intros Zl1.
 exists (Fnum y * Zpower_nat radix (Zabs_nat (Fexp y - Fexp x)))%Z.
@@ -529,8 +525,8 @@ unfold FtoR in |- *; simpl in |- *; auto.
 replace (Fexp x - (Fexp x - Fexp y))%Z with (Fexp y); [ idtac | ring ].
 replace
  (Zquotient (Fnum y) (Zpower_nat radix (Zabs_nat (Fexp x - Fexp y))) *
-  Zpower_nat radix (Zabs_nat (Fexp x - Fexp y)))%Z with 
- (Fnum y); auto.
+  Zpower_nat radix (Zabs_nat (Fexp x - Fexp y)))%Z with (
+ Fnum y); auto.
 apply ZdividesZquotient; auto with zarith.
 apply
  ZdividesTrans
@@ -546,7 +542,8 @@ apply Fexp_le_LSB.
 rewrite Zplus_comm; auto.
 Qed.
  
-Theorem LSB_rep_min : forall p : float, exists z : Z, p = Float z (LSB p) :>R.
+Theorem LSB_rep_min :
+ forall p : float, exists z : Z, p = Float z (LSB p) :>R.
 intros p;
  exists (Zquotient (Fnum p) (Zpower_nat radix (Zabs_nat (LSB p - Fexp p)))).
 unfold FtoRradix, FtoR, LSB in |- *; simpl in |- *.
@@ -555,7 +552,7 @@ rewrite <- Rmult_assoc.
 replace (maxDiv (Fnum p) (Fdigit radix p) + Fexp p - Fexp p)%Z with
  (Z_of_nat (maxDiv (Fnum p) (Fdigit radix p))); auto.
 rewrite absolu_INR.
-rewrite <- Zpower_nat_powerRZ; auto with zarith.
+rewrite <- Zpower_nat_Z_powerRZ; auto with zarith.
 rewrite <- Rmult_IZR.
 rewrite <- ZdividesZquotient; auto with zarith.
 apply maxDivCorrect.

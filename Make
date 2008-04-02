@@ -15,7 +15,6 @@ Fcomp.v
 Finduct.v
 Float.v
 Fmin.v
-FminOp.v
 Fnorm.v
 Fodd.v
 Fop.v
@@ -31,5 +30,5 @@ Paux.v
 Power.v
 Zdivides.v
 Zenum.v
-ex.v
 sTactic.v
+Rpow.v

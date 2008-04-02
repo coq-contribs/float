@@ -1,18 +1,10 @@
-(* This program is free software; you can redistribute it and/or      *)
-(* modify it under the terms of the GNU Lesser General Public License *)
-(* as published by the Free Software Foundation; either version 2.1   *)
-(* of the License, or (at your option) any later version.             *)
-(*                                                                    *)
-(* This program is distributed in the hope that it will be useful,    *)
-(* but WITHOUT ANY WARRANTY; without even the implied warranty of     *)
-(* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the      *)
-(* GNU General Public License for more details.                       *)
-(*                                                                    *)
-(* You should have received a copy of the GNU Lesser General Public   *)
-(* License along with this program; if not, write to the Free         *)
-(* Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA *)
-(* 02110-1301 USA                                                     *)
-
+(****************************************************************************
+                                                                             
+          IEEE754  :  ClosestPlus                                                   
+                                                                             
+          Laurent Thery, Sylvie Boldo                                                      
+                                                                             
+  ******************************************************************************)
 
 Require Export FroundPlus.
 Require Export ClosestProp.
@@ -114,12 +106,12 @@ Qed.
  
 Theorem errorBoundedPlus :
  forall p q pq : float,
- Fbounded b p ->
- Fbounded b q ->
- Closest b radix (p + q) pq ->
+ (Fbounded b p) ->
+ (Fbounded b q) ->
+ (Closest b radix (p + q) pq) ->
  exists error : float,
    error = (p + q - pq)%R :>R /\
-   Fbounded b error /\ Fexp error = Zmin (Fexp p) (Fexp q).
+   (Fbounded b error) /\ (Fexp error) = (Zmin (Fexp p) (Fexp q)).
 intros p q pq H' H'0 H'1.
 case (errorBoundedPlusAbs p q pq); auto.
 intros x H'2; elim H'2; intros H'3 H'4; elim H'4; intros H'5 H'6;
@@ -222,7 +214,7 @@ Theorem plusExact2Aux :
  (Fexp r < Zpred (Fexp p))%Z -> r = (p + q)%R :>R.
 intros p q r H' H'0 H'1 H'2 H'3.
 apply plusExact1; auto.
-apply FcanonicBound with (2 := H'0); auto.
+apply FcanonicBound with (1 := H'0); auto.
 case (Zle_or_lt (Fexp p) (Fexp q)); intros Zl1.
 rewrite Zmin_le1; auto with zarith.
 apply Zle_trans with (Zpred (Fexp p)); auto with zarith.
@@ -238,8 +230,8 @@ apply Rle_not_lt; auto.
 unfold FtoRradix in |- *;
  apply
   (ClosestMonotone b radix
-     (Float (nNormMin radix precision) (Zpred (Fexp p))) 
-     (p + q)%R); auto; auto.
+     (Float (nNormMin radix precision) (Zpred (Fexp p))) (
+     p + q)%R); auto; auto.
 cut (Float (nNormMin radix precision) (Fexp p) <= p)%R;
  [ intros Eq1 | idtac ].
 case (Rle_or_lt 0 q); intros Rl1.
@@ -314,7 +306,7 @@ apply (LeFnumZERO radix); simpl in |- *; auto with arith.
 apply Zlt_le_weak; apply nNormPos; auto with zarith.
 absurd (- dExp b <= Fexp q)%Z; auto with float.
 apply Zlt_not_le.
-case H'0; intros Z1 Z2; rewrite <- Z1; auto with zarith.
+case H'0; intros Z1 (Z2, Z3); rewrite <- Z2; auto with zarith.
 Qed.
  
 Theorem plusExact2 :
@@ -448,7 +440,7 @@ unfold pPred in |- *; apply Rlt_IZR; apply Zlt_succ_pred; simpl in |- *.
 apply vNumbMoreThanOne with (radix := radix) (precision := precision);
  auto with real arith.
 Qed.
-
+ 
 Theorem plusErrorBound1bis :
  forall p q r : float,
  Fbounded b p ->
@@ -485,7 +477,7 @@ cut (Fcanonic radix b (Fnormalize radix b precision r));
 2: apply ClosestRoundedModeP with (precision := precision); auto.
 2: replace (Fexp (Fnormalize radix b precision r)) with (- dExp b)%Z.
 2: unfold Zmin in |- *; case (Fexp p ?= Fexp q)%Z; intuition.
-2: case Fs; intros H1 H2; auto.
+2: case Fs; intros H1 (H2, H3); auto.
 apply Rle_trans with (/ 2%nat * Fulp b radix precision r)%R.
 replace (Rabs (FtoRradix r - (FtoRradix p + FtoRradix q))) with
  (/ 2%nat * (2%nat * Rabs (FtoRradix r - (FtoRradix p + FtoRradix q))))%R;
@@ -513,7 +505,7 @@ rewrite INR_IZR_INZ; apply Rlt_IZR; simpl in |- *; apply Zlt_1_O;
 unfold FtoRradix in |- *;
  rewrite <- (FnormalizeCorrect _ radixMoreThanOne b precision r).
 rewrite <- (Fabs_correct radix); auto with arith.
-apply FnormalBoundAbs2; auto with arith.
+apply FnormalBoundAbs2 with precision; auto with arith.
 unfold Fulp, FtoRradix, FtoR in |- *; simpl in |- *.
 apply
  trans_eq
@@ -619,8 +611,8 @@ rewrite (Rplus_comm (Rabs (p - (x + y))) (Rabs (x + y)));
   (Rplus_comm (Rabs p * (radix * / (2%nat * pPred (vNum b)))) (Rabs (x + y)))
   ; apply Rplus_le_compat_l.
 replace (Rabs p * (radix * / (2%nat * pPred (vNum b))))%R with
- (Rabs p * / 2%nat * (radix * / pPred (vNum b)))%R.
-apply plusErrorBound1withZero; auto.
+ (Rabs p * / 2%nat * (radix * / pPred (vNum b)))%R;
+ [ apply plusErrorBound1withZero | idtac ]; auto.
 rewrite (Rinv_mult_distr 2%nat (pPred (vNum b))); auto with real zarith.
 ring.
 apply NEq_IZRO; auto with real zarith.

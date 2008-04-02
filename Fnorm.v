@@ -1,19 +1,3 @@
-(* This program is free software; you can redistribute it and/or      *)
-(* modify it under the terms of the GNU Lesser General Public License *)
-(* as published by the Free Software Foundation; either version 2.1   *)
-(* of the License, or (at your option) any later version.             *)
-(*                                                                    *)
-(* This program is distributed in the hope that it will be useful,    *)
-(* but WITHOUT ANY WARRANTY; without even the implied warranty of     *)
-(* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the      *)
-(* GNU General Public License for more details.                       *)
-(*                                                                    *)
-(* You should have received a copy of the GNU Lesser General Public   *)
-(* License along with this program; if not, write to the Free         *)
-(* Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA *)
-(* 02110-1301 USA                                                     *)
-
-
 (****************************************************************************
                                                                              
           IEEE754  :  Fnorm                                                     
@@ -22,6 +6,7 @@
                                                                              
   ******************************************************************************)
 Require Export Fbound.
+ 
 Section Fnormalized_Def.
 Variable radix : Z.
 Hypothesis radixMoreThanOne : (1 < radix)%Z.
@@ -29,7 +14,8 @@ Hypothesis radixMoreThanOne : (1 < radix)%Z.
 Let radixMoreThanZERO := Zlt_1_O _ (Zlt_le_weak _ _ radixMoreThanOne).
 Hint Resolve radixMoreThanZERO: zarith.
  
-Coercion Local FtoRradix := FtoR radix.
+Let FtoRradix := FtoR radix.
+Coercion FtoRradix : float >-> R.
 Variable b : Fbound.
  
 Definition Fnormal (p : float) :=
@@ -40,7 +26,8 @@ intros p H; case H; auto.
 Qed.
  
 Theorem FnormalBound :
- forall p : float, Fnormal p -> (Zpos (vNum b) <= Zabs (radix * Fnum p))%Z.
+ forall p : float,
+ Fnormal p -> (Zpos (vNum b) <= Zabs (radix * Fnum p))%Z.
 intros p H; case H; auto.
 Qed.
 Hint Resolve FnormalBounded FnormalBound: float.
@@ -79,7 +66,7 @@ rewrite <-
  (FshiftCorrect _ radixMoreThanOne (Zabs_nat (z - Fexp p))
     (Float (pPred (vNum b)) z)).
 unfold FtoR, Fabs in |- *; simpl in |- *; auto with zarith.
-rewrite Rmult_IZR; rewrite Zpower_nat_powerRZ; auto with zarith.
+rewrite Rmult_IZR; rewrite Zpower_nat_Z_powerRZ; auto with zarith.
 repeat rewrite inj_abs; auto with zarith.
 replace (z - (z - Fexp p))%Z with (Fexp p); [ idtac | ring ].
 rewrite Rmult_assoc; rewrite <- powerRZ_add; auto with real zarith.
@@ -111,40 +98,41 @@ rewrite <- (Zabs_eq radix); auto with float zarith; rewrite <- Zabs_Zmult;
 Qed.
  
 Definition Fsubnormal (p : float) :=
+  Fbounded b p /\
   Fexp p = (- dExp b)%Z /\ (Zabs (radix * Fnum p) < Zpos (vNum b))%Z.
  
 Theorem FsubnormalFbounded : forall p : float, Fsubnormal p -> Fbounded b p.
 intros p H; case H; auto.
-intros H1 H2; repeat split; try rewrite H1; auto with zarith.
-rewrite <- (Zmult_1_l (Zabs (Fnum p))).
-apply Zle_lt_trans with (2 := H2).
-rewrite Zabs_Zmult.
-rewrite (Zabs_eq radix); auto with zarith.
 Qed.
  
 Theorem FsubnormalFexp :
  forall p : float, Fsubnormal p -> Fexp p = (- dExp b)%Z.
 intros p H; case H; auto.
+intros H1 H2; case H2; auto.
 Qed.
  
 Theorem FsubnormalBound :
- forall p : float, Fsubnormal p -> (Zabs (radix * Fnum p) < Zpos (vNum b))%Z.
+ forall p : float,
+ Fsubnormal p -> (Zabs (radix * Fnum p) < Zpos (vNum b))%Z.
 intros p H; case H; auto.
+intros H1 H2; case H2; auto.
 Qed.
 Hint Resolve FsubnormalFbounded FsubnormalBound FsubnormalFexp: float.
  
 Theorem FsubnormFopp : forall p : float, Fsubnormal p -> Fsubnormal (Fopp p).
 intros p H'; repeat split; simpl in |- *; auto with zarith float.
+rewrite Zabs_Zopp; auto with float.
 rewrite <- Zopp_mult_distr_r; rewrite Zabs_Zopp; auto with float.
 Qed.
  
 Theorem FsubnormFabs : forall p : float, Fsubnormal p -> Fsubnormal (Fabs p).
-intros p; case p; intros a e H; split; simpl in |- *; auto with float.
-case H; intros H1 H2; auto.
-rewrite Zabs_Zmult.
-rewrite (fun x => Zabs_eq (Zabs x)); auto with float zarith.
+intros p; case p; intros a e H; split; auto with float.
+simpl in |- *; split; auto with float.
+case H; intros H1 (H2, H3); auto.
+rewrite <- (Zabs_eq radix); auto with zarith.
 rewrite <- Zabs_Zmult.
-case H; auto.
+rewrite (fun x => Zabs_eq (Zabs x)); auto with float zarith.
+case H; intros H1 (H2, H3); auto.
 Qed.
  
 Theorem FsubnormalUnique :
@@ -161,7 +149,9 @@ intros p q H' H'0 H'1.
 apply Rlt_Fexp_eq_Zlt with (radix := radix); auto with zarith.
 apply trans_equal with (- dExp b)%Z.
 case H'; auto.
+intros H1 H2; case H2; auto.
 apply sym_equal; case H'0; auto.
+intros H1 H2; case H2; auto.
 Qed.
  
 Theorem LtFsubnormal :
@@ -174,8 +164,9 @@ unfold FtoRradix in Test; rewrite sameExpEq with (2 := Test); auto.
 auto with zarith.
 apply trans_equal with (- dExp b)%Z.
 case H'; auto.
+intros H1 H2; case H2; auto.
 apply sym_equal; case H'0.
-intros H1 H2; auto.
+intros H1 H2; case H2; auto.
 apply Zle_not_lt.
 apply Zlt_le_weak.
 apply FsubnormalLt; auto.
@@ -209,7 +200,8 @@ Qed.
  
 Theorem NormalNotSubNormal : forall p : float, ~ (Fnormal p /\ Fsubnormal p).
 intros p; red in |- *; intros H; elim H; intros H0 H1; clear H.
-absurd (Zabs (radix * Fnum p) < Zpos (vNum b))%Z; auto with float zarith.
+absurd (Zabs (radix * Fnum p) < Zpos (vNum b))%Z;
+ auto with float zarith.
 Qed.
  
 Theorem MaxFloat :
@@ -267,7 +259,8 @@ rewrite Zabs_eq; auto with zarith.
 rewrite Zabs_eq; auto with zarith.
 Qed.
  
-Theorem digitVNumiSPrecision : digit radix (Zpos (vNum b)) = S precision.
+Theorem digitVNumiSPrecision :
+ digit radix (Zpos (vNum b)) = S precision.
 apply digitInv; auto.
 rewrite pGivesBound.
 rewrite Zabs_eq; auto with zarith.
@@ -276,7 +269,8 @@ rewrite pGivesBound; auto with zarith.
 Qed.
  
 Theorem vNumPrecision :
- forall n : Z, digit radix n <= precision -> (Zabs n < Zpos (vNum b))%Z.
+ forall n : Z,
+ digit radix n <= precision -> (Zabs n < Zpos (vNum b))%Z.
 intros n H'.
 rewrite <- (Zabs_eq (Zpos (vNum b))); auto with zarith.
 apply digit_anti_monotone_lt with (n := radix); auto.
@@ -469,8 +463,7 @@ Qed.
  
 Theorem pNormal_absolu_min :
  forall p : float, Fnormal p -> (nNormMin <= Zabs (Fnum p))%Z.
-intros p H; apply Zmult_le_reg_r with (p := radix).
-apply Zlt_gt; auto with zarith.
+intros p H; apply Zmult_le_reg_r with (p := radix); auto with zarith.
 unfold nNormMin in |- *.
 pattern radix at 2 in |- *; rewrite <- (Zpower_nat_1 radix).
 rewrite <- Zpower_nat_is_exp; auto with zarith.
@@ -487,7 +480,8 @@ Theorem maxMaxBis :
  forall (p : float) (z : Z),
  Fbounded b p -> (Fexp p < z)%Z -> (Fabs p < Float nNormMin z)%R.
 intros p z H' H'0;
- apply Rlt_le_trans with (FtoR radix (Float (Zpos (vNum b)) (Zpred z))).
+ apply
+  Rlt_le_trans with (FtoR radix (Float (Zpos (vNum b)) (Zpred z))).
 unfold FtoRradix in |- *; apply maxMax; auto with zarith;
  unfold Zpred in |- *; auto with zarith.
 unfold FtoRradix, FtoR, nNormMin in |- *; simpl in |- *.
@@ -625,10 +619,6 @@ Theorem Fnormalize_Fopp :
 intros p; case p; unfold Fnormalize in |- *; simpl in |- *.
 intros Fnum1 Fexp1; case (Z_zerop Fnum1); intros H'.
 rewrite H'; simpl in |- *; auto.
-(*
-Case (Z_zerop ZERO); Intros H'0; Simpl; Auto.
-Case H'0; Auto.
-*)
 case (Z_zerop (- Fnum1)); intros H'0; simpl in |- *; auto.
 case H'; replace Fnum1 with (- - Fnum1)%Z; auto with zarith.
 unfold Fopp, Fshift, Fdigit in |- *; simpl in |- *.
@@ -659,7 +649,7 @@ apply Zle_trans with (m := (Fexp1 - Zabs_nat (dExp b + Fexp1))%Z).
 rewrite inj_abs; auto with zarith.
 unfold Zminus in |- *; apply Zplus_le_compat_l; auto.
 apply Zle_Zopp; auto.
-apply Znat.inj_le; auto with arith.
+apply inj_le; auto with arith.
 Qed.
  
 Theorem FnormalizeCanonic :
@@ -702,7 +692,7 @@ apply Zle_Zmult_comp_r.
 apply Zle_ZERO_Zabs.
 rewrite (fun x => Zabs_eq (Zpower_nat radix x)); auto with zarith.
 unfold Fdigit in |- *; apply digitLess; auto.
-intros H'0; right; split; auto.
+intros H'0; right; split; auto; split.
 rewrite MinR; clear MinR; auto.
 cut (- dExp b <= Fexp p)%Z; [ idtac | auto with float ].
 case p; simpl in |- *.
@@ -854,7 +844,7 @@ apply FcanonicLtPos; try apply FcanonicFopp; auto; unfold FtoRradix in |- *;
  auto with real.
 Qed.
  
-Theorem FcanonicFormalizeEq :
+Theorem FcanonicFnormalizeEq :
  forall p : float, Fcanonic p -> Fnormalize p = p.
 intros p H'.
 apply FcanonicUnique; auto.
@@ -895,16 +885,18 @@ Qed.
  
 Theorem FnormalBoundAbs2 :
  forall p : float,
- Fnormal p -> (Zpos (vNum b) * Float 1%nat (Zpred (Fexp p)) <= Fabs p)%R.
+ Fnormal p ->
+ (Zpos (vNum b) * Float 1%nat (Zpred (Fexp p)) <= Fabs p)%R.
 intros p H'; unfold FtoRradix, FtoR in |- *; simpl in |- *.
 replace (1 * powerRZ radix (Zpred (Fexp p)))%R with
  (powerRZ radix (Zpred (Fexp p))); [ idtac | ring ].
 pattern (Fexp p) at 2 in |- *; replace (Fexp p) with (Zsucc (Zpred (Fexp p)));
- [ rewrite powerRZ_Zs | unfold Zsucc, Zpred in |- *; ring ].
-2: apply NEq_IZRO; apply Zlt_not_eq_rev; exact radixMoreThanZERO.
+ [ rewrite powerRZ_Zs; auto with real zarith
+ | unfold Zsucc, Zpred in |- *; ring ].
 repeat rewrite <- Rmult_assoc.
 apply Rmult_le_compat_r; auto with real arith.
-repeat rewrite INR_IZR_INZ; rewrite (fun x => inject_nat_convert (Zpos x) x);
+repeat rewrite INR_IZR_INZ;
+ rewrite (fun x => inject_nat_convert (Zpos x) x); 
  auto.
 rewrite <- Rmult_IZR; apply Rle_IZR.
 rewrite <- (Zabs_eq radix); auto with zarith.
@@ -944,7 +936,8 @@ unfold Zpred in |- *; ring.
 Qed.
  
 Theorem FcanonicPpred :
- forall x : Z, (- dExp b <= x)%Z -> Fcanonic (Float (pPred (vNum b)) x).
+ forall x : Z,
+ (- dExp b <= x)%Z -> Fcanonic (Float (pPred (vNum b)) x).
 intros x H; left; apply FnormalPpred; auto.
 Qed.
  
@@ -990,6 +983,7 @@ apply Rle_trans with (2 := H'1).
 apply (LeFnumZERO radix); simpl in |- *; auto with zarith.
 apply Zlt_le_weak; apply nNormPos.
 Qed.
+ 
 End Fnormalized_Def.
 Hint Resolve FnormalBounded FnormalPrecision: float.
 Hint Resolve FnormalNotZero nNrMMimLevNum firstNormalPosNormal FsubnormFopp
