@@ -1,19 +1,3 @@
-(* This program is free software; you can redistribute it and/or      *)
-(* modify it under the terms of the GNU Lesser General Public License *)
-(* as published by the Free Software Foundation; either version 2.1   *)
-(* of the License, or (at your option) any later version.             *)
-(*                                                                    *)
-(* This program is distributed in the hope that it will be useful,    *)
-(* but WITHOUT ANY WARRANTY; without even the implied warranty of     *)
-(* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the      *)
-(* GNU General Public License for more details.                       *)
-(*                                                                    *)
-(* You should have received a copy of the GNU Lesser General Public   *)
-(* License along with this program; if not, write to the Free         *)
-(* Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA *)
-(* 02110-1301 USA                                                     *)
-
-
 (****************************************************************************
                                                                              
           IEEE754  :  Float                                                     
@@ -26,15 +10,8 @@
    Inspired by the Diadic of Patrick Loiseleur
   *******************************************************)
 Require Export Omega.
-Require Export Zcomplements.
-Require Export Zpower.
-Require Export Arith.
 Require Export Compare.
-Require Export Reals.
-Require Export Power.
-Require Export Faux.
-Require Export Digit.
-Require Export sTactic.
+Require Export Rpow.
 Section definitions.
 Variable radix : Z.
 Hypothesis radixMoreThanOne : (1 < radix)%Z.
@@ -233,7 +210,7 @@ Qed.
 Theorem FshiftCorrect : forall (n : nat) (x : float), Fshift n x = x :>R.
 intros n x; unfold FtoR1, FtoR in |- *; simpl in |- *.
 rewrite Rmult_IZR.
-rewrite Zpower_nat_powerRZ; auto.
+rewrite Zpower_nat_Z_powerRZ; auto.
 repeat rewrite Rmult_assoc.
 rewrite <- powerRZ_add; auto with real zarith.
 rewrite Zplus_minus; auto.
@@ -276,10 +253,10 @@ intros n m p; case p; unfold Fshift in |- *; simpl in |- *.
 intros Fnum1 Fexp1; apply floatEq; simpl in |- *; auto with zarith.
 rewrite Zpower_nat_is_exp; auto with zarith.
 rewrite (Zmult_comm (Zpower_nat radix n)); auto with zarith.
-rewrite <- (BinInt.Zminus_plus_simpl_r (Fexp1 - m) n m).
+rewrite <- (Zminus_plus_simpl_r (Fexp1 - m) n m).
 replace (Fexp1 - m + m)%Z with Fexp1; auto with zarith.
 replace (Z_of_nat (n + m)) with (n + m)%Z; auto with zarith arith.
-rewrite <- Znat.inj_plus; auto.
+rewrite <- inj_plus; auto.
 Qed.
  
 Theorem ReqGivesEqwithSameExp :

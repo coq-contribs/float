@@ -1,19 +1,3 @@
-(* This program is free software; you can redistribute it and/or      *)
-(* modify it under the terms of the GNU Lesser General Public License *)
-(* as published by the Free Software Foundation; either version 2.1   *)
-(* of the License, or (at your option) any later version.             *)
-(*                                                                    *)
-(* This program is distributed in the hope that it will be useful,    *)
-(* but WITHOUT ANY WARRANTY; without even the implied warranty of     *)
-(* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the      *)
-(* GNU General Public License for more details.                       *)
-(*                                                                    *)
-(* You should have received a copy of the GNU Lesser General Public   *)
-(* License along with this program; if not, write to the Free         *)
-(* Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA *)
-(* 02110-1301 USA                                                     *)
-
-
 (****************************************************************************
                                                                              
           IEEE754  :  Zenum                                                  
@@ -22,12 +6,11 @@
                                                                              
   *****************************************************************************
   Simple functions to enumerate relative numbers *)
-Require Import List.
-Require Import Omega.
-Require Import ZArith.
-Require Import sTactic.
-Require Import Faux.
-(* Returns the list of relative numbers from z to z+n *)
+Require Export Faux.
+Require Export Omega.
+Require Export List.
+(* 
+   Returns the list of relative numbers from z to z+n *)
  
 Fixpoint mZlist_aux (p : Z) (n : nat) {struct n} : 
  list Z :=
@@ -47,7 +30,7 @@ intros n H' p q H'0 H'1; case (Zle_lt_or_eq _ _ H'0); intros H'2.
 simpl in |- *; right.
 apply H'; auto with zarith.
 rewrite Zplus_succ_comm.
-rewrite <- Znat.inj_S; auto.
+rewrite <- inj_S; auto.
 simpl in |- *; auto.
 Qed.
  
@@ -55,18 +38,18 @@ Theorem mZlist_aux_correct_rev1 :
  forall (n : nat) (p q : Z), In q (mZlist_aux p n) -> (p <= q)%Z.
 intros n; elim n; clear n; simpl in |- *; auto.
 intros p q H'; elim H'; auto with zarith.
-intros; elim H0.
-intros; elim H1; auto with zarith.
-intros; apply Zle_succ_le; auto with zarith.
+intros n H' p q H'0; elim H'0; auto with zarith.
+intros H'1; apply Zle_succ_le; auto with zarith.
 Qed.
  
 Theorem mZlist_aux_correct_rev2 :
- forall (n : nat) (p q : Z), In q (mZlist_aux p n) -> (q <= p + Z_of_nat n)%Z.
+ forall (n : nat) (p q : Z),
+ In q (mZlist_aux p n) -> (q <= p + Z_of_nat n)%Z.
 intros n; elim n; clear n; auto.
 intros p q H'; elim H'; auto with zarith.
 intros H'0; elim H'0.
 intros n H' p q H'0; elim H'0; auto with zarith.
-intros H'1; rewrite Znat.inj_S; rewrite <- Zplus_succ_comm; auto.
+intros H'1; rewrite inj_S; rewrite <- Zplus_succ_comm; auto.
 Qed.
 (* Return the list of of relative numbres from p to p+q if p=<q,
    otherwise the empty list *)

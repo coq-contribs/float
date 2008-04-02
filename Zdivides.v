@@ -1,19 +1,3 @@
-(* This program is free software; you can redistribute it and/or      *)
-(* modify it under the terms of the GNU Lesser General Public License *)
-(* as published by the Free Software Foundation; either version 2.1   *)
-(* of the License, or (at your option) any later version.             *)
-(*                                                                    *)
-(* This program is distributed in the hope that it will be useful,    *)
-(* but WITHOUT ANY WARRANTY; without even the implied warranty of     *)
-(* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the      *)
-(* GNU General Public License for more details.                       *)
-(*                                                                    *)
-(* You should have received a copy of the GNU Lesser General Public   *)
-(* License along with this program; if not, write to the Free         *)
-(* Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA *)
-(* 02110-1301 USA                                                     *)
-
-
 (****************************************************************************
                                                                              
           IEEE754  :  NDiv                                                     
@@ -22,17 +6,8 @@
                                                                              
   *****************************************************************************
   Definition of the quotient and divisibility for natural and relative numbers*)
-Require Import Omega.
-Require Import Arith.
-Require Import Compare.
-Require Import Paux.
-Require Import Zpower.
-Require Import Zcomplements.
-Require Import Reals.
-Require Import sTactic.
-Require Import Digit.
-Require Import Faux.
-Require Import Option.
+Require Export Omega.
+Require Export Paux.
  
 Definition oZ1 (x : Option positive) :=
   match x with
@@ -87,7 +62,7 @@ intros m'; generalize (Pdiv_correct m' n'); case (Pdiv m' n'); simpl in |- *;
 intros q r (H1, H2); exists (oZ1 r); repeat (split; auto with zarith).
 rewrite <- (inject_nat_convert (Zpos m') m'); auto.
 rewrite H1.
-rewrite Znat.inj_plus; rewrite Znat.inj_mult.
+rewrite inj_plus; rewrite inj_mult.
 rewrite <- (inject_nat_convert (Zpos n') n'); auto.
 repeat rewrite inj_oZ1; auto.
 rewrite inj_oZ1; rewrite Zabs_eq; auto with zarith.
@@ -101,7 +76,7 @@ intros q r (H1, H2); exists (- oZ1 r)%Z; repeat (split; auto with zarith).
 replace (Zneg m') with (- Zpos m')%Z; [ idtac | simpl in |- *; auto ].
 rewrite <- (inject_nat_convert (Zpos m') m'); auto.
 rewrite H1.
-rewrite Znat.inj_plus; rewrite Znat.inj_mult.
+rewrite inj_plus; rewrite inj_mult.
 rewrite <- (inject_nat_convert (Zpos n') n'); auto.
 repeat rewrite inj_oZ1; auto with zarith.
 ring.
@@ -120,7 +95,7 @@ intros q r (H1, H2); exists (oZ1 r); repeat (split; auto with zarith).
 replace (Zneg n') with (- Zpos n')%Z; [ idtac | simpl in |- *; auto ].
 rewrite <- (inject_nat_convert (Zpos m') m'); auto.
 rewrite H1.
-rewrite Znat.inj_plus; rewrite Znat.inj_mult.
+rewrite inj_plus; rewrite inj_mult.
 rewrite <- (inject_nat_convert (Zpos n') n'); auto.
 repeat rewrite inj_oZ1; auto with zarith.
 ring.
@@ -138,7 +113,7 @@ replace (Zneg m') with (- Zpos m')%Z; [ idtac | simpl in |- *; auto ].
 rewrite <- (inject_nat_convert (Zpos m') m'); auto.
 replace (Zneg n') with (- Zpos n')%Z; [ idtac | simpl in |- *; auto ].
 rewrite H1.
-rewrite Znat.inj_plus; rewrite Znat.inj_mult.
+rewrite inj_plus; rewrite inj_mult.
 rewrite <- (inject_nat_convert (Zpos n') n'); auto.
 repeat rewrite inj_oZ1; auto with zarith.
 ring.
@@ -234,7 +209,6 @@ apply Zeq_mult_simpl with (c := p); auto.
 rewrite (Zmult_comm n); rewrite E; ring.
 Qed.
  
-				
 Definition ZdividesP : forall n m : Z, {Zdivides n m} + {~ Zdivides n m}.
 intros n m; case m.
 case n.
@@ -256,7 +230,7 @@ left; apply ZdividesZquotientInv; auto.
 right; Contradict H1; apply sym_equal; apply ZdividesZquotient; auto.
 red in |- *; intros; discriminate.
 Defined.
-Eval compute in (ZdividesP 4 2).
+(* Eval Compute in (ZdividesP (POS (xO (xO xH))) (POS (xO xH))). *)
  
 Theorem Zquotient1 : forall m : Z, Zquotient m 1 = m.
 intros m.

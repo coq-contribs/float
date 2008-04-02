@@ -1,19 +1,3 @@
-(* This program is free software; you can redistribute it and/or      *)
-(* modify it under the terms of the GNU Lesser General Public License *)
-(* as published by the Free Software Foundation; either version 2.1   *)
-(* of the License, or (at your option) any later version.             *)
-(*                                                                    *)
-(* This program is distributed in the hope that it will be useful,    *)
-(* but WITHOUT ANY WARRANTY; without even the implied warranty of     *)
-(* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the      *)
-(* GNU General Public License for more details.                       *)
-(*                                                                    *)
-(* You should have received a copy of the GNU Lesser General Public   *)
-(* License along with this program; if not, write to the Free         *)
-(* Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA *)
-(* 02110-1301 USA                                                     *)
-
-
 (****************************************************************************
                                                                              
           IEEE754  :  Fcomp                                                     
@@ -21,7 +5,7 @@
           Laurent Thery                                                      
                                                                              
   ******************************************************************************)
-Require Import Float.
+Require Export Float.
 Section comparisons.
 Variable radix : Z.
 Hypothesis radixMoreThanOne : (1 < radix)%Z.
@@ -42,7 +26,7 @@ intros x y; unfold Fdiff in |- *.
 rewrite <- Z_R_minus.
 rewrite Rmult_comm; rewrite Rmult_minus_distr_l.
 repeat rewrite Rmult_IZR.
-repeat rewrite Zpower_nat_powerRZ; auto.
+repeat rewrite Zpower_nat_Z_powerRZ; auto.
 rewrite (Rmult_comm (Fnum x)); rewrite (Rmult_comm (Fnum y)).
 repeat rewrite <- Rmult_assoc.
 repeat rewrite <- powerRZ_add; auto with real zarith.
@@ -67,11 +51,11 @@ Definition Fge (x y : float) := (x >= y)%R.
  
 Definition Fgt (x y : float) := (x > y)%R.
  
-Definition Fcompare (x y : float) := (0 ?= Fdiff x y)%Z.
+Definition Fcompare (x y : float) := (Fdiff x y ?= 0)%Z.
  
 Definition Feq_bool (x y : float) :=
   match Fcompare x y with
-  | Datatypes.Eq => true
+  | Eq => true
   | _ => false
   end.
  
@@ -85,9 +69,9 @@ change ((x - y)%R = 0%R) in |- *.
 rewrite <- Fdiff_correct.
 apply Rmult_eq_0_compat_r; auto.
 cut (Fdiff x y = 0%Z); [ intros H; rewrite H | idtac ]; auto with real.
-apply sym_eq; apply Zcompare_EGAL.
-generalize H'; unfold Feq_bool, Fcompare in |- *; case (0 ?= Fdiff x y)%Z;
- auto; intros; discriminate.
+apply Zcompare_EGAL.
+generalize H'; unfold Feq_bool, Fcompare in |- *.
+case (Fdiff x y ?= 0)%Z;auto; intros; discriminate.
 Qed.
  
 Theorem Feq_bool_correct_r :
@@ -110,7 +94,7 @@ Qed.
  
 Definition Flt_bool (x y : float) :=
   match Fcompare x y with
-  | Datatypes.Gt => true
+  | Lt => true
   | _ => false
   end.
  
@@ -127,9 +111,9 @@ replace 0%R with (powerRZ radix (Zmin (Fexp x) (Fexp y)) * 0)%R;
 rewrite (Rmult_comm (Fdiff x y)).
 apply Rmult_lt_compat_l; auto with real zarith.
 replace 0%R with (IZR 0); auto with real arith.
-apply Rlt_IZR; apply Zgt_lt; red in |- *.
+apply Rlt_IZR; red in |- *.
 generalize H'; unfold Flt_bool, Fcompare in |- *.
-case (0 ?= Fdiff x y)%Z; auto; intros; try discriminate.
+case (Fdiff x y ?= 0)%Z; auto; intros; try discriminate.
 Qed.
  
 Theorem Flt_bool_correct_r :
@@ -142,7 +126,7 @@ intros H'0.
 cut (Fdiff x y < 0)%R; auto with arith.
 intros H'1.
 cut (Fdiff x y < 0)%Z; auto with zarith.
-intros H'2; generalize (Zcompare.Zlt_compare _ _ H'2);
+intros H'2; generalize (Zlt_compare _ _ H'2);
  unfold Flt_bool, Fcompare, Zcompare in |- *; case (Fdiff x y);
  auto with arith; intros; contradiction.
 apply lt_IZR; auto with arith.
@@ -164,8 +148,8 @@ Qed.
  
 Definition Fle_bool (x y : float) :=
   match Fcompare x y with
-  | Datatypes.Gt => true
-  | Datatypes.Eq => true
+  | Lt => true
+  | Eq => true
   | _ => false
   end.
  

@@ -1,19 +1,3 @@
-(* This program is free software; you can redistribute it and/or      *)
-(* modify it under the terms of the GNU Lesser General Public License *)
-(* as published by the Free Software Foundation; either version 2.1   *)
-(* of the License, or (at your option) any later version.             *)
-(*                                                                    *)
-(* This program is distributed in the hope that it will be useful,    *)
-(* but WITHOUT ANY WARRANTY; without even the implied warranty of     *)
-(* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the      *)
-(* GNU General Public License for more details.                       *)
-(*                                                                    *)
-(* You should have received a copy of the GNU Lesser General Public   *)
-(* License along with this program; if not, write to the Free         *)
-(* Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA *)
-(* 02110-1301 USA                                                     *)
-
-
 (****************************************************************************
                                                                              
           IEEE754  :  Fodd                                                     
@@ -21,15 +5,7 @@
           Laurent Thery                                                      
                                                                              
   ******************************************************************************)
-Require Import ZArith.
-Require Import List.
-Require Import Float.
-Require Import Fnorm.
-Require Import Fop.
-Require Import Fcomp.
-Require Import FSucc.
-Require Import FPred.
-Require Import Fmin.
+Require Export Fmin.
 Section FOdd.
 Variable b : Fbound.
 Variable radix : Z.
@@ -92,12 +68,16 @@ Hint Resolve OddOpp EvenOpp: zarith.
 Theorem OddEvenDec : forall n : Z, {Odd n} + {Even n}.
 intros z; case z; simpl in |- *; auto with zarith.
 intros p; case p; simpl in |- *; auto with zarith.
-intros p1; left; exists (Zpos p1); rewrite Zplus_comm; simpl in |- *; auto.
-intros p1; right; exists (Zpos p1); simpl in |- *; auto.
-change (forall p : positive, {Odd (- Zpos p)} + {Even (- Zpos p)}) in |- *.
-intros p; case p; auto with zarith.
-intros p1; left; apply OddOpp; exists (Zpos p1); rewrite Zplus_comm;
+intros p1; left; exists (Zpos p1); rewrite Zplus_comm;
  simpl in |- *; auto.
+intros p1; right; exists (Zpos p1); simpl in |- *; auto.
+change
+  (forall p : positive,
+   {Odd (- Zpos p)} + {Even (- Zpos p)}) 
+ in |- *.
+intros p; case p; auto with zarith.
+intros p1; left; apply OddOpp; exists (Zpos p1);
+ rewrite Zplus_comm; simpl in |- *; auto.
 intros p1; right; apply EvenOpp; exists (Zpos p1); simpl in |- *; auto.
 Qed.
  
@@ -145,7 +125,8 @@ exists (z2 + z1)%Z; try rewrite Hz1; try rewrite Hz2; ring.
 Qed.
 Hint Resolve EvenPlus1 EvenPlus2 OddPlus1 OddPlus2: zarith.
  
-Theorem EvenPlusInv1 : forall n m : Z, Even (n + m) -> Even n -> Even m.
+Theorem EvenPlusInv1 :
+ forall n m : Z, Even (n + m) -> Even n -> Even m.
 intros n m H H0; replace m with (n + m + - n)%Z; auto with zarith.
 Qed.
  
@@ -196,7 +177,8 @@ rewrite Zpower_nat_is_exp; rewrite Zpower_nat_1; simpl in |- *;
  auto with zarith.
 Qed.
  
-Theorem OddExp : forall (n : Z) (m : nat), Odd n -> Odd (Zpower_nat n m).
+Theorem OddExp :
+ forall (n : Z) (m : nat), Odd n -> Odd (Zpower_nat n m).
 intros n m; elim m; simpl in |- *.
 rewrite Zpower_nat_O; simpl in |- *; auto with zarith.
 intros n0 H H0; replace (S n0) with (1 + n0); auto with arith.
@@ -347,7 +329,7 @@ Theorem FNoddSuc :
  Fbounded b p -> FNodd p -> FNeven (FNSucc b radix precision p).
 unfold FNodd, FNeven, FNSucc in |- *.
 intros p H' H'0.
-rewrite FcanonicFormalizeEq; auto with float arith.
+rewrite FcanonicFnormalizeEq; auto with float arith.
 apply FoddSuc; auto with float arith.
 Qed.
  
@@ -356,7 +338,7 @@ Theorem FNevenSuc :
  Fbounded b p -> FNeven p -> FNodd (FNSucc b radix precision p).
 unfold FNodd, FNeven, FNSucc in |- *.
 intros p H' H'0.
-rewrite FcanonicFormalizeEq; auto with float arith.
+rewrite FcanonicFnormalizeEq; auto with float arith.
 apply FevenSuc; auto.
 Qed.
  
@@ -365,7 +347,7 @@ Theorem FNevenPred :
  Fbounded b p -> FNodd p -> FNeven (FNPred b radix precision p).
 unfold FNodd, FNeven, FNPred in |- *.
 intros p H' H'0.
-rewrite FcanonicFormalizeEq; auto with float arith.
+rewrite FcanonicFnormalizeEq; auto with float arith.
 apply FevenPred; auto.
 Qed.
  
@@ -374,7 +356,7 @@ Theorem FNoddPred :
  Fbounded b p -> FNeven p -> FNodd (FNPred b radix precision p).
 unfold FNodd, FNeven, FNPred in |- *.
 intros p H' H'0.
-rewrite FcanonicFormalizeEq; auto with float arith.
+rewrite FcanonicFnormalizeEq; auto with float arith.
 apply FoddPred; auto.
 Qed.
  

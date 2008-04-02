@@ -1,27 +1,14 @@
-(* This program is free software; you can redistribute it and/or      *)
-(* modify it under the terms of the GNU Lesser General Public License *)
-(* as published by the Free Software Foundation; either version 2.1   *)
-(* of the License, or (at your option) any later version.             *)
-(*                                                                    *)
-(* This program is distributed in the hope that it will be useful,    *)
-(* but WITHOUT ANY WARRANTY; without even the implied warranty of     *)
-(* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the      *)
-(* GNU General Public License for more details.                       *)
-(*                                                                    *)
-(* You should have received a copy of the GNU Lesser General Public   *)
-(* License along with this program; if not, write to the Free         *)
-(* Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA *)
-(* 02110-1301 USA                                                     *)
-
-
-Require Import ZArith.
-Require Import ArithRing.
-Require Import Faux.
-Require Import sTactic.
-Require Import Digit.
-Require Import Option.
-Require Import Inverse_Image.
-Require Import Wf_nat.
+(****************************************************************************
+                                                                             
+          IEEE754  :  Paux                                                     
+                                                                             
+          Laurent Thery                                                      
+                                                                             
+  ******************************************************************************)
+Require Export Digit.
+Require Export Option.
+Require Export Inverse_Image.
+Require Export Wf_nat.
  
 Fixpoint exp (n m : nat) {struct m} : nat :=
   match m with
@@ -40,41 +27,47 @@ Fixpoint positive_exp (p n : positive) {struct n} : positive :=
   | xO n1 =>
       match positive_exp p n1 with
       | r =>
-          (fun (x : positive) (_ : positive -> positive) (y : positive) =>
-           (x * y)%positive) r (fun x => x) r
+          (fun (x : positive) (_ : positive -> positive)
+             (y : positive) => (x * y)%positive) r (
+            fun x => x) r
       end
   | xI n1 =>
       match positive_exp p n1 with
       | r =>
-          (fun (x : positive) (_ : positive -> positive) (y : positive) =>
-           (x * y)%positive) p (fun x => x)
-            ((fun (x : positive) (_ : positive -> positive) (y : positive) =>
-              (x * y)%positive) r (fun x => x) r)
+          (fun (x : positive) (_ : positive -> positive)
+             (y : positive) => (x * y)%positive) p (
+            fun x => x)
+            ((fun (x : positive)
+                (_ : positive -> positive)
+                (y : positive) => (x * y)%positive) r (
+               fun x => x) r)
       end
   end.
  
 Theorem positive_exp_correct :
  forall p n : positive,
- nat_of_P (positive_exp p n) = exp (nat_of_P p) (nat_of_P n).
+ nat_of_P (positive_exp p n) =
+ exp (nat_of_P p) (nat_of_P n).
 intros p n; elim n; simpl in |- *; auto.
 intros p0 H.
 repeat
  rewrite
   (fun (x y : positive) (_ : positive -> positive) =>
-   nat_of_P_mult_morphism x y); simpl in |- *; auto.
+   nat_of_P_mult_morphism x y); simpl in |- *; 
+ auto.
 rewrite ZL6; rewrite expPlus; rewrite H; auto.
 intros p0 H.
 repeat
  rewrite
   (fun (x y : positive) (_ : positive -> positive) =>
-   nat_of_P_mult_morphism x y); simpl in |- *; auto.
+   nat_of_P_mult_morphism x y); simpl in |- *; 
+ auto.
 rewrite H; rewrite <- expPlus; rewrite <- ZL6; auto.
 rewrite mult_comm; simpl in |- *; auto.
 Qed.
  
-Fixpoint Pdiv (p : positive) :
- positive -> Option positive * Option positive :=
-  fun q =>
+Fixpoint Pdiv (p q : positive) {struct p} :
+ Option positive * Option positive :=
   match p with
   | xH =>
       match q with
@@ -135,151 +128,191 @@ Definition oZ h := match h with
  
 Theorem Pdiv_correct :
  forall p q,
- nat_of_P p = oZ (fst (Pdiv p q)) * nat_of_P q + oZ (snd (Pdiv p q)) /\
+ nat_of_P p =
+ oZ (fst (Pdiv p q)) * nat_of_P q + oZ (snd (Pdiv p q)) /\
  oZ (snd (Pdiv p q)) < nat_of_P q.
-intros p q; elim p; simpl in |- *; auto; try unfold Pminus in |- *.
-3: case q; simpl in |- *; try intros q1; split; auto; unfold nat_of_P in |- *;
-    simpl in |- *; auto with arith.
+intros p q; elim p; simpl in |- *; auto.
+3: case q; simpl in |- *; try intros q1; split; auto;
+    unfold nat_of_P in |- *; simpl in |- *; 
+    auto with arith.
 intros p'; simpl in |- *; case (Pdiv p' q); simpl in |- *;
  intros q1 r1 (H1, H2); split.
 unfold nat_of_P in |- *; simpl in |- *.
 rewrite ZL6; rewrite H1.
 case q1; case r1; simpl in |- *.
-intros r2 q2; CaseEq ((xI r2 ?= q)%positive Datatypes.Eq); simpl in |- *;
- auto.
+intros r2 q2; CaseEq ((xI r2 ?= q)%positive Datatypes.Eq);
+ simpl in |- *; auto.
 intros H3; rewrite <- (Pcompare_Eq_eq _ _ H3); simpl in |- *;
  unfold nat_of_P in |- *; simpl in |- *.
 apply f_equal with (f := S); repeat rewrite (fun x y => mult_comm x (S y));
- repeat rewrite ZL6; unfold nat_of_P in |- *; simpl in |- *; 
- ring.
-intros H3; unfold nat_of_P in |- *; simpl in |- *; repeat rewrite ZL6;
- unfold nat_of_P in |- *; repeat rewrite (fun x y => plus_comm x (S y));
- simpl in |- *; apply f_equal with (f := S); ring.
-unfold Pminus in |- *.
-intros H3; case (Pminus_mask_Gt _ _ H3); intros h (H4, (H5, H6)); rewrite H4.
+ repeat rewrite ZL6; unfold nat_of_P in |- *; 
+ simpl in |- *; ring.
+intros H3; unfold nat_of_P in |- *; simpl in |- *;
+ repeat rewrite ZL6; unfold nat_of_P in |- *;
+ repeat rewrite (fun x y => plus_comm x (S y)); simpl in |- *;
+ apply f_equal with (f := S); ring.
+intros H3; case (Pminus_mask_Gt _ _ H3); intros h (H4, (H5, H6));
+ unfold Pminus in |- *; rewrite H4.
 apply
- trans_equal with (nat_of_P q + nat_of_P h + Pmult_nat q2 2 * Pmult_nat q 1);
+ trans_equal
+  with
+    (nat_of_P q + nat_of_P h +
+     Pmult_nat q2 2 * Pmult_nat q 1);
  [ rewrite <- nat_of_P_plus_morphism; rewrite H5; simpl in |- *;
-    repeat rewrite ZL6; unfold nat_of_P in |- *; apply f_equal with (f := S)
+    repeat rewrite ZL6; unfold nat_of_P in |- *;
+    apply f_equal with (f := S)
  | unfold nat_of_P in |- * ]; ring.
 intros r2; CaseEq ((1 ?= q)%positive Datatypes.Eq); simpl in |- *; auto.
 intros H3; rewrite <- (Pcompare_Eq_eq _ _ H3); simpl in |- *;
- unfold nat_of_P in |- *; simpl in |- *; repeat rewrite ZL6;
- apply f_equal with (f := S); unfold nat_of_P; ring.
-intros H3; unfold nat_of_P in |- *; simpl in |- *; repeat rewrite ZL6;
- repeat rewrite (fun x y => plus_comm x (S y)); simpl in |- *;
- apply f_equal with (f := S); unfold nat_of_P; ring.
-unfold Pminus in |- *.
-intros H3; case (Pminus_mask_Gt _ _ H3); intros h (H4, (H5, H6)); rewrite H4;
+ repeat rewrite ZL6; unfold nat_of_P in |- *; simpl in |- *; 
+ apply f_equal with (f := S);ring.
+intros H3; unfold nat_of_P in |- *; simpl in |- *;
+ repeat rewrite (fun x y => plus_comm x (S y));
+ simpl in |- *; apply f_equal with (f := S); repeat rewrite ZL6; 
+   unfold nat_of_P in |- *; simpl in |- *; ring.
+intros H3; case (Pminus_mask_Gt _ _ H3); intros h (H4, (H5, H6));
+ unfold Pminus in |- *; rewrite H4;
  apply
-  trans_equal with (nat_of_P q + nat_of_P h + Pmult_nat r2 2 * Pmult_nat q 1);
+  trans_equal
+   with
+     (nat_of_P q + nat_of_P h +
+      Pmult_nat r2 2 * Pmult_nat q 1);
  [ rewrite <- nat_of_P_plus_morphism; rewrite H5; simpl in |- *;
-    repeat rewrite ZL6; unfold nat_of_P in |- *; apply f_equal with (f := S)
+    repeat rewrite ZL6; unfold nat_of_P in |- *;
+    apply f_equal with (f := S)
  | unfold nat_of_P in |- * ]; ring.
-intros r2; CaseEq ((xI r2 ?= q)%positive Datatypes.Eq); simpl in |- *; auto.
+intros r2; CaseEq ((xI r2 ?= q)%positive Datatypes.Eq); simpl in |- *;
+ auto.
 intros H3; rewrite <- (Pcompare_Eq_eq _ _ H3); simpl in |- *;
  unfold nat_of_P in |- *; simpl in |- *; repeat rewrite ZL6;
  unfold nat_of_P in |- *; apply f_equal with (f := S); 
  ring.
-intros H3; unfold nat_of_P in |- *; simpl in |- *; repeat rewrite ZL6;
- unfold nat_of_P in |- *; apply f_equal with (f := S); 
- ring.
-intros H3; case (Pminus_mask_Gt _ _ H3); intros h (H4, (H5, H6)); rewrite H4;
+intros H3; unfold nat_of_P in |- *; simpl in |- *;
+ repeat rewrite ZL6; unfold nat_of_P in |- *;
+ apply f_equal with (f := S); ring.
+intros H3; case (Pminus_mask_Gt _ _ H3); intros h (H4, (H5, H6));
+ unfold Pminus in |- *; rewrite H4;
  apply trans_equal with (nat_of_P q + nat_of_P h);
- [ rewrite <- (nat_of_P_plus_morphism q); rewrite H5; unfold nat_of_P in |- *;
-    simpl in |- *; repeat rewrite ZL6; unfold nat_of_P in |- *;
+ [ rewrite <- (nat_of_P_plus_morphism q); rewrite H5;
+    unfold nat_of_P in |- *; simpl in |- *; 
+    repeat rewrite ZL6; unfold nat_of_P in |- *;
     apply f_equal with (f := S)
  | unfold nat_of_P in |- * ]; ring.
 case q; simpl in |- *; auto.
 generalize H2; case q1; case r1; simpl in |- *; auto.
-intros r2 q2; CaseEq ((xI r2 ?= q)%positive Datatypes.Eq); simpl in |- *;
- auto.
+intros r2 q2; CaseEq ((xI r2 ?= q)%positive Datatypes.Eq);
+ simpl in |- *; auto.
 intros; apply lt_O_nat_of_P; auto.
 intros H H0; apply nat_of_P_lt_Lt_compare_morphism; auto.
 intros H3 H7; case (Pminus_mask_Gt _ _ H3); intros h (H4, (H5, H6));
- rewrite H4; apply plus_lt_reg_l with (p := nat_of_P q);
- rewrite <- (nat_of_P_plus_morphism q); rewrite H5; 
+ unfold Pminus in |- *; rewrite H4;
+ apply plus_lt_reg_l with (p := nat_of_P q);
+ rewrite <- (nat_of_P_plus_morphism q); rewrite H5;
  unfold nat_of_P in |- *; simpl in |- *; repeat rewrite ZL6;
  unfold nat_of_P in |- *;
- apply le_lt_trans with (Pmult_nat r2 1 + Pmult_nat q 1); 
+ apply le_lt_trans with (Pmult_nat r2 1 + Pmult_nat q 1);
  auto with arith.
 intros r2 HH; case q; simpl in |- *; auto.
-intros p2; case p2; unfold nat_of_P in |- *; simpl in |- *; auto with arith.
-intros p2; case p2; unfold nat_of_P in |- *; simpl in |- *; auto with arith.
-intros r2 HH; CaseEq ((xI r2 ?= q)%positive Datatypes.Eq); simpl in |- *.
+intros p2; case p2; unfold nat_of_P in |- *; simpl in |- *;
+ auto with arith.
+intros p2; case p2; unfold nat_of_P in |- *; simpl in |- *;
+ auto with arith.
+intros r2 HH; CaseEq ((xI r2 ?= q)%positive Datatypes.Eq);
+ simpl in |- *.
 intros; apply lt_O_nat_of_P; auto.
 intros H3; apply nat_of_P_lt_Lt_compare_morphism; auto.
-intros H3; case (Pminus_mask_Gt _ _ H3); intros h (H4, (H5, H6)); rewrite H4;
+intros H3; case (Pminus_mask_Gt _ _ H3); intros h (H4, (H5, H6));
+ unfold Pminus in |- *; rewrite H4;
  apply plus_lt_reg_l with (p := nat_of_P q);
- rewrite <- (nat_of_P_plus_morphism q); rewrite H5; 
+ rewrite <- (nat_of_P_plus_morphism q); rewrite H5;
  unfold nat_of_P in |- *; simpl in |- *; repeat rewrite ZL6;
  unfold nat_of_P in |- *;
- apply le_lt_trans with (Pmult_nat r2 1 + Pmult_nat q 1); 
+ apply le_lt_trans with (Pmult_nat r2 1 + Pmult_nat q 1);
  auto with arith.
 intros HH; case q; simpl in |- *; auto.
-intros p2; case p2; unfold nat_of_P in |- *; simpl in |- *; auto with arith.
-intros p2; case p2; unfold nat_of_P in |- *; simpl in |- *; auto with arith.
+intros p2; case p2; unfold nat_of_P in |- *; simpl in |- *;
+ auto with arith.
+intros p2; case p2; unfold nat_of_P in |- *; simpl in |- *;
+ auto with arith.
 intros p'; simpl in |- *; case (Pdiv p' q); simpl in |- *;
  intros q1 r1 (H1, H2); split.
 unfold nat_of_P in |- *; simpl in |- *; rewrite ZL6; rewrite H1.
 case q1; case r1; simpl in |- *; auto.
-intros r2 q2; CaseEq ((xO r2 ?= q)%positive Datatypes.Eq); simpl in |- *;
+intros r2 q2; CaseEq ((xO r2 ?= q)%positive Datatypes.Eq);
+ simpl in |- *; auto.
+intros H3; rewrite <- (Pcompare_Eq_eq _ _ H3); simpl in |- *;
+ unfold nat_of_P in |- *; simpl in |- *; repeat rewrite ZL6;
+ unfold nat_of_P in |- *; ring.
+intros H3; unfold nat_of_P in |- *; simpl in |- *;
+ repeat rewrite ZL6; unfold nat_of_P in |- *; 
+ ring.
+intros H3; case (Pminus_mask_Gt _ _ H3); intros h (H4, (H5, H6));
+ unfold Pminus in |- *; rewrite H4;
+ apply
+  trans_equal
+   with
+     (nat_of_P q + nat_of_P h +
+      Pmult_nat q2 2 * Pmult_nat q 1);
+ [ rewrite <- (nat_of_P_plus_morphism q); rewrite H5;
+    unfold nat_of_P in |- *; simpl in |- *; 
+    repeat rewrite ZL6; unfold nat_of_P in |- *
+ | unfold nat_of_P in |- * ]; ring.
+intros H3; unfold nat_of_P in |- *; simpl in |- *;
+ repeat rewrite ZL6; unfold nat_of_P in |- *; 
+ ring.
+intros r2; CaseEq ((xO r2 ?= q)%positive Datatypes.Eq); simpl in |- *;
  auto.
 intros H3; rewrite <- (Pcompare_Eq_eq _ _ H3); simpl in |- *;
  unfold nat_of_P in |- *; simpl in |- *; repeat rewrite ZL6;
  unfold nat_of_P in |- *; ring.
-intros H3; unfold nat_of_P in |- *; simpl in |- *; repeat rewrite ZL6;
- unfold nat_of_P in |- *; ring.
-intros H3; case (Pminus_mask_Gt _ _ H3); intros h (H4, (H5, H6)); rewrite H4;
- apply
-  trans_equal with (nat_of_P q + nat_of_P h + Pmult_nat q2 2 * Pmult_nat q 1);
- [ rewrite <- (nat_of_P_plus_morphism q); rewrite H5; unfold nat_of_P in |- *;
-    simpl in |- *; repeat rewrite ZL6; unfold nat_of_P in |- *
- | unfold nat_of_P in |- * ]; ring.
-intros H3; unfold nat_of_P in |- *; simpl in |- *; repeat rewrite ZL6;
- unfold nat_of_P in |- *; ring.
-intros r2; CaseEq ((xO r2 ?= q)%positive Datatypes.Eq); simpl in |- *; auto.
-intros H3; rewrite <- (Pcompare_Eq_eq _ _ H3); simpl in |- *;
- unfold nat_of_P in |- *; simpl in |- *; repeat rewrite ZL6;
- unfold nat_of_P in |- *; ring.
-intros H3; unfold nat_of_P in |- *; simpl in |- *; repeat rewrite ZL6;
- unfold nat_of_P in |- *; ring.
-intros H3; case (Pminus_mask_Gt _ _ H3); intros h (H4, (H5, H6)); rewrite H4;
+intros H3; unfold nat_of_P in |- *; simpl in |- *;
+ repeat rewrite ZL6; unfold nat_of_P in |- *; 
+ ring.
+intros H3; case (Pminus_mask_Gt _ _ H3); intros h (H4, (H5, H6));
+ unfold Pminus in |- *; rewrite H4;
  apply trans_equal with (nat_of_P q + nat_of_P h);
- [ rewrite <- (nat_of_P_plus_morphism q); rewrite H5; unfold nat_of_P in |- *;
-    simpl in |- *; repeat rewrite ZL6; unfold nat_of_P in |- *
+ [ rewrite <- (nat_of_P_plus_morphism q); rewrite H5;
+    unfold nat_of_P in |- *; simpl in |- *; 
+    repeat rewrite ZL6; unfold nat_of_P in |- *
  | unfold nat_of_P in |- * ]; ring.
 generalize H2; case q1; case r1; simpl in |- *.
-intros r2 q2; CaseEq ((xO r2 ?= q)%positive Datatypes.Eq); simpl in |- *;
- auto.
+intros r2 q2; CaseEq ((xO r2 ?= q)%positive Datatypes.Eq);
+ simpl in |- *; auto.
 intros; apply lt_O_nat_of_P; auto.
 intros H H0; apply nat_of_P_lt_Lt_compare_morphism; auto.
 intros H3 H7; case (Pminus_mask_Gt _ _ H3); intros h (H4, (H5, H6));
- rewrite H4; apply plus_lt_reg_l with (p := nat_of_P q);
- rewrite <- (nat_of_P_plus_morphism q); rewrite H5; 
- unfold nat_of_P in |- *; simpl in |- *; unfold nat_of_P in |- *;
- simpl in |- *; repeat rewrite ZL6; unfold nat_of_P in |- *;
- apply lt_trans with (Pmult_nat r2 1 + Pmult_nat q 1); 
- auto with arith.
-intros; apply lt_O_nat_of_P; auto.
-intros r2 HH; CaseEq ((xO r2 ?= q)%positive Datatypes.Eq); simpl in |- *.
-intros; apply lt_O_nat_of_P; auto.
-intros H3; apply nat_of_P_lt_Lt_compare_morphism; auto.
-intros H3; case (Pminus_mask_Gt _ _ H3); intros h (H4, (H5, H6)); rewrite H4;
+ unfold Pminus in |- *; rewrite H4;
  apply plus_lt_reg_l with (p := nat_of_P q);
- rewrite <- (nat_of_P_plus_morphism q); rewrite H5; 
+ rewrite <- (nat_of_P_plus_morphism q); rewrite H5;
+ unfold nat_of_P in |- *; simpl in |- *;
  unfold nat_of_P in |- *; simpl in |- *; repeat rewrite ZL6;
  unfold nat_of_P in |- *;
- apply lt_trans with (Pmult_nat r2 1 + Pmult_nat q 1); 
+ apply lt_trans with (Pmult_nat r2 1 + Pmult_nat q 1);
+ auto with arith.
+intros; apply lt_O_nat_of_P; auto.
+intros r2 HH; CaseEq ((xO r2 ?= q)%positive Datatypes.Eq);
+ simpl in |- *.
+intros; apply lt_O_nat_of_P; auto.
+intros H3; apply nat_of_P_lt_Lt_compare_morphism; auto.
+intros H3; case (Pminus_mask_Gt _ _ H3); intros h (H4, (H5, H6));
+ unfold Pminus in |- *; rewrite H4;
+ apply plus_lt_reg_l with (p := nat_of_P q);
+ rewrite <- (nat_of_P_plus_morphism q); rewrite H5;
+ unfold nat_of_P in |- *; simpl in |- *; repeat rewrite ZL6;
+ unfold nat_of_P in |- *;
+ apply lt_trans with (Pmult_nat r2 1 + Pmult_nat q 1);
  auto with arith.
 auto.
 Qed.
  
 Section bugFix.
-Variable PdivAux : positive -> positive -> Option positive * Option positive.
+Variable
+  PdivAux :
+    positive ->
+    positive -> Option positive * Option positive.
  
-Fixpoint PdivlessAux (bound p base length : positive) {struct length} :
- Option positive * Option positive * nat :=
+Fixpoint PdivlessAux (bound p base length : positive) {struct length}
+ : Option positive * Option positive * nat :=
   match (bound ?= p)%positive Datatypes.Eq with
   | Datatypes.Gt => (Some _ p, None _, 0)
   | _ =>
@@ -291,22 +324,24 @@ Fixpoint PdivlessAux (bound p base length : positive) {struct length} :
           | xH => (Some _ q1, None _, 0)
           | xO length' =>
               match PdivlessAux bound q1 base length' with
-              | ((s2, None), n) => (s2, None _, S n)
-              | ((s2, Some r2), n) =>
+              | (s2, None, n) => (s2, None _, S n)
+              | (s2, Some r2, n) =>
                   (s2,
                   Some _
-                    ((fun (x : positive) (_ : positive -> positive)
-                        (y : positive) => (x * y)%positive) r2 
+                    ((fun (x : positive)
+                        (_ : positive -> positive)
+                        (y : positive) => (x * y)%positive) r2
                        (fun x => x) base), S n)
               end
           | xI length' =>
               match PdivlessAux bound q1 base length' with
-              | ((s2, None), n) => (s2, None _, S n)
-              | ((s2, Some r2), n) =>
+              | (s2, None, n) => (s2, None _, S n)
+              | (s2, Some r2, n) =>
                   (s2,
                   Some _
-                    ((fun (x : positive) (_ : positive -> positive)
-                        (y : positive) => (x * y)%positive) r2 
+                    ((fun (x : positive)
+                        (_ : positive -> positive)
+                        (y : positive) => (x * y)%positive) r2
                        (fun x => x) base), S n)
               end
           end
@@ -315,24 +350,26 @@ Fixpoint PdivlessAux (bound p base length : positive) {struct length} :
           | xH => (Some _ q1, None _, 0)
           | xO length' =>
               match PdivlessAux bound q1 base length' with
-              | ((s2, None), n) => (s2, Some _ r1, S n)
-              | ((s2, Some r2), n) =>
+              | (s2, None, n) => (s2, Some _ r1, S n)
+              | (s2, Some r2, n) =>
                   (s2,
                   Some _
-                    ((fun (x : positive) (_ : positive -> positive)
-                        (y : positive) => x * y) r2 
-                       (fun x => x) base + r1)%positive, 
+                    ((fun (x : positive)
+                        (_ : positive -> positive)
+                        (y : positive) => x * y) r2 (
+                       fun x => x) base + r1)%positive, 
                   S n)
               end
           | xI length' =>
               match PdivlessAux bound q1 base length' with
-              | ((s2, None), n) => (s2, Some _ r1, S n)
-              | ((s2, Some r2), n) =>
+              | (s2, None, n) => (s2, Some _ r1, S n)
+              | (s2, Some r2, n) =>
                   (s2,
                   Some _
-                    ((fun (x : positive) (_ : positive -> positive)
-                        (y : positive) => x * y) r2 
-                       (fun x => x) base + r1)%positive, 
+                    ((fun (x : positive)
+                        (_ : positive -> positive)
+                        (y : positive) => x * y) r2 (
+                       fun x => x) base + r1)%positive, 
                   S n)
               end
           end
@@ -361,23 +398,25 @@ Theorem Pdivless2 :
      | xH => (Some _ q1, None _, 0)
      | xO length' =>
          match Pdivless bound q1 base length' with
-         | ((s2, None), n) => (s2, None _, S n)
-         | ((s2, Some r2), n) =>
+         | (s2, None, n) => (s2, None _, S n)
+         | (s2, Some r2, n) =>
              (s2,
              Some _
-               ((fun (x : positive) (_ : positive -> positive) (y : positive) =>
-                 (x * y)%positive) r2 (fun x => x) base), 
-             S n)
+               ((fun (x : positive)
+                   (_ : positive -> positive)
+                   (y : positive) => (x * y)%positive) r2 (
+                  fun x => x) base), S n)
          end
      | xI length' =>
          match Pdivless bound q1 base length' with
-         | ((s2, None), n) => (s2, None _, S n)
-         | ((s2, Some r2), n) =>
+         | (s2, None, n) => (s2, None _, S n)
+         | (s2, Some r2, n) =>
              (s2,
              Some _
-               ((fun (x : positive) (_ : positive -> positive) (y : positive) =>
-                 (x * y)%positive) r2 (fun x => x) base), 
-             S n)
+               ((fun (x : positive)
+                   (_ : positive -> positive)
+                   (y : positive) => (x * y)%positive) r2 (
+                  fun x => x) base), S n)
          end
      end
  | (Some q1, Some r1) =>
@@ -385,22 +424,26 @@ Theorem Pdivless2 :
      | xH => (Some _ q1, None _, 0)
      | xO length' =>
          match Pdivless bound q1 base length' with
-         | ((s2, None), n) => (s2, Some _ r1, S n)
-         | ((s2, Some r2), n) =>
+         | (s2, None, n) => (s2, Some _ r1, S n)
+         | (s2, Some r2, n) =>
              (s2,
              Some _
-               ((fun (x : positive) (_ : positive -> positive) (y : positive) =>
-                 x * y) r2 (fun x => x) base + r1)%positive, 
+               ((fun (x : positive)
+                   (_ : positive -> positive)
+                   (y : positive) => x * y) r2 (
+                  fun x => x) base + r1)%positive, 
              S n)
          end
      | xI length' =>
          match Pdivless bound q1 base length' with
-         | ((s2, None), n) => (s2, Some _ r1, S n)
-         | ((s2, Some r2), n) =>
+         | (s2, None, n) => (s2, Some _ r1, S n)
+         | (s2, Some r2, n) =>
              (s2,
              Some _
-               ((fun (x : positive) (_ : positive -> positive) (y : positive) =>
-                 x * y) r2 (fun x => x) base + r1)%positive, 
+               ((fun (x : positive)
+                   (_ : positive -> positive)
+                   (y : positive) => x * y) r2 (
+                  fun x => x) base + r1)%positive, 
              S n)
          end
      end
@@ -450,9 +493,12 @@ Theorem Pdivless_correct :
  (forall bound',
   nat_of_P bound = nat_of_P base * bound' ->
   nat_of_P bound <= nat_of_P p ->
-  nat_of_P bound <= nat_of_P base * oZ (fst (fst (Pdivless bound p base q)))).
+  nat_of_P bound <=
+  nat_of_P base * oZ (fst (fst (Pdivless bound p base q)))).
 intros bound p q base Hb; generalize q; pattern p in |- *;
- apply well_founded_ind with (R := fun a b => nat_of_P a < nat_of_P b); 
+ apply
+  well_founded_ind
+   with (R := fun a b => nat_of_P a < nat_of_P b); 
  auto; clear p q.
 apply wf_inverse_image with (R := lt); auto.
 exact lt_wf; auto.
@@ -471,7 +517,8 @@ intros o1; case o1; simpl in |- *.
 intros o1' o2; case o2; simpl in |- *.
 intros o2' (Ho1, Ho2).
 generalize Hq; case q; simpl in |- *; auto.
-intros p0 Hq0; (cut (nat_of_P o1' <= nat_of_P p0); [ intros Hrec | idtac ]).
+intros p0 Hq0;
+ (cut (nat_of_P o1' <= nat_of_P p0); [ intros Hrec | idtac ]).
 cut (nat_of_P o1' < nat_of_P p); [ intros Hrec1 | idtac ].
 generalize (Rec _ Hrec1 _ Hrec).
 CaseEq (Pdivless bound o1' base p0); simpl in |- *.
@@ -483,9 +530,11 @@ intros o4' n Eq1; rewrite nat_of_P_plus_morphism;
 intros (H'1, ((H'2, H'3), H'4)); repeat (split; auto).
 rewrite Ho1; rewrite H'1; ring.
 apply lt_le_trans with (S (nat_of_P o4') * nat_of_P base).
-simpl in |- *; rewrite (fun x y => plus_comm x (nat_of_P y)); auto with arith.
+simpl in |- *; rewrite (fun x y => plus_comm x (nat_of_P y));
+ auto with arith.
 rewrite (fun x y => mult_comm x (nat_of_P y)); auto with arith.
-intros bound' H'5 H'6; case (le_or_lt (nat_of_P bound) (nat_of_P o1'));
+intros bound' H'5 H'6;
+ case (le_or_lt (nat_of_P bound) (nat_of_P o1')); 
  intros H'7; auto.
 apply (H'4 bound'); auto.
 rewrite Pdivless1 in Eq1; auto.
@@ -495,7 +544,8 @@ intros n Eq1 (H'1, ((H'2, H'3), H'4)); repeat (split; auto).
 rewrite Ho1; rewrite H'1; ring.
 apply lt_le_trans with (nat_of_P base * 1); auto with arith.
 rewrite mult_comm; simpl in |- *; auto with arith.
-intros bound' H'5 H'6; case (le_or_lt (nat_of_P bound) (nat_of_P o1'));
+intros bound' H'5 H'6;
+ case (le_or_lt (nat_of_P bound) (nat_of_P o1')); 
  intros H'7; auto.
 apply (H'4 bound'); auto.
 rewrite Pdivless1 in Eq1; auto.
@@ -505,11 +555,15 @@ case (le_or_lt bound' (nat_of_P o1')); intros H'8; auto.
 rewrite H'5; auto with arith.
 Contradict H'6; auto.
 apply lt_not_le; rewrite Ho1; auto.
-apply lt_le_trans with (nat_of_P o1' * nat_of_P base + 1 * nat_of_P base);
+apply
+ lt_le_trans
+  with
+    (nat_of_P o1' * nat_of_P base + 1 * nat_of_P base);
  auto with arith.
 simpl in |- *; auto with arith.
 rewrite <- mult_plus_distr_r.
-replace (nat_of_P o1' + 1) with (S (nat_of_P o1')); auto with arith.
+replace (nat_of_P o1' + 1) with (S (nat_of_P o1'));
+ auto with arith.
 rewrite H'5; auto with arith.
 rewrite <- (fun x y => mult_comm (nat_of_P x) y); auto with arith.
 rewrite plus_comm; auto with arith.
@@ -520,10 +574,12 @@ intros o4' n Eq1; rewrite nat_of_P_plus_morphism;
 intros (H'1, ((H'2, H'3), H'4)); repeat (split; auto).
 rewrite Ho1; rewrite H'1; ring.
 apply lt_le_trans with (S (nat_of_P o4') * nat_of_P base).
-simpl in |- *; rewrite (fun x y => plus_comm x (nat_of_P y)); auto with arith.
+simpl in |- *; rewrite (fun x y => plus_comm x (nat_of_P y));
+ auto with arith.
 rewrite (fun x y => mult_comm x (nat_of_P y)); auto with arith.
 intros bound' H H0; apply (H'4 bound'); auto.
-case (le_or_lt (nat_of_P bound) (nat_of_P o1')); intros H'8; auto.
+case (le_or_lt (nat_of_P bound) (nat_of_P o1')); intros H'8;
+ auto.
 rewrite Pdivless1 in Eq1; auto.
 discriminate.
 apply nat_of_P_gt_Gt_compare_complement_morphism; auto.
@@ -532,28 +588,33 @@ rewrite Ho1; rewrite H'1; ring.
 apply lt_le_trans with (nat_of_P base * 1); auto with arith.
 rewrite mult_comm; simpl in |- *; auto with arith.
 intros bound' H H0; apply (H'4 bound'); auto.
-case (le_or_lt (nat_of_P bound) (nat_of_P o1')); intros H'8; auto.
+case (le_or_lt (nat_of_P bound) (nat_of_P o1')); intros H'8;
+ auto.
 rewrite Pdivless1 in Eq1; auto.
 discriminate.
 apply nat_of_P_gt_Gt_compare_complement_morphism; auto.
 rewrite Ho1; auto.
-apply lt_le_trans with (nat_of_P o1' * 1 + nat_of_P o2'); auto with arith.
+apply lt_le_trans with (nat_of_P o1' * 1 + nat_of_P o2');
+ auto with arith.
 rewrite mult_comm; simpl in |- *; auto with arith.
 apply le_lt_trans with (nat_of_P o1' + 0); auto with arith.
 apply plus_le_lt_compat; auto with arith.
 apply mult_S_le_reg_l with (n := pred (nat_of_P base)).
 replace (S (pred (nat_of_P base))) with (nat_of_P base).
-apply (fun p n m : nat => plus_le_reg_l n m p) with (p := nat_of_P o2').
+apply
+ (fun p n m : nat => plus_le_reg_l n m p) with (p := nat_of_P o2').
 rewrite (plus_comm (nat_of_P o2')); simpl in |- *; auto with arith.
 rewrite (mult_comm (nat_of_P base)); simpl in |- *; auto with arith.
 rewrite <- Ho1; auto with arith.
 apply le_trans with (1 := Hq0); auto with arith.
-replace (nat_of_P (xI p0)) with (1 + 2 * nat_of_P p0); auto with arith.
+replace (nat_of_P (xI p0)) with (1 + 2 * nat_of_P p0);
+ auto with arith.
 apply plus_le_compat; auto with arith.
 unfold nat_of_P in |- *; simpl in |- *; (rewrite ZL6; auto).
-generalize (lt_O_nat_of_P base); case (nat_of_P base); simpl in |- *; auto;
- intros tmp; inversion tmp.
-intros p0 Hq0; (cut (nat_of_P o1' <= nat_of_P p0); [ intros Hrec | idtac ]).
+generalize (lt_O_nat_of_P base); case (nat_of_P base);
+ simpl in |- *; auto; intros tmp; inversion tmp.
+intros p0 Hq0;
+ (cut (nat_of_P o1' <= nat_of_P p0); [ intros Hrec | idtac ]).
 cut (nat_of_P o1' < nat_of_P p); [ intros Hrec1 | idtac ].
 generalize (Rec _ Hrec1 _ Hrec).
 CaseEq (Pdivless bound o1' base p0); simpl in |- *.
@@ -565,9 +626,11 @@ intros o4' n Eq1; rewrite nat_of_P_plus_morphism;
 intros (H'1, ((H'2, H'3), H'4)); repeat (split; auto).
 rewrite Ho1; rewrite H'1; ring.
 apply lt_le_trans with (S (nat_of_P o4') * nat_of_P base).
-simpl in |- *; rewrite (fun x y => plus_comm x (nat_of_P y)); auto with arith.
+simpl in |- *; rewrite (fun x y => plus_comm x (nat_of_P y));
+ auto with arith.
 rewrite (fun x y => mult_comm x (nat_of_P y)); auto with arith.
-intros bound' H'5 H'6; case (le_or_lt (nat_of_P bound) (nat_of_P o1'));
+intros bound' H'5 H'6;
+ case (le_or_lt (nat_of_P bound) (nat_of_P o1')); 
  intros H'7; auto.
 apply (H'4 bound'); auto.
 rewrite Pdivless1 in Eq1; auto.
@@ -577,7 +640,8 @@ intros n Eq1 (H'1, ((H'2, H'3), H'4)); repeat (split; auto).
 rewrite Ho1; rewrite H'1; ring.
 apply lt_le_trans with (nat_of_P base * 1); auto with arith.
 rewrite mult_comm; simpl in |- *; auto with arith.
-intros bound' H'5 H'6; case (le_or_lt (nat_of_P bound) (nat_of_P o1'));
+intros bound' H'5 H'6;
+ case (le_or_lt (nat_of_P bound) (nat_of_P o1')); 
  intros H'7; auto.
 apply (H'4 bound'); auto.
 rewrite Pdivless1 in Eq1; auto.
@@ -587,11 +651,15 @@ case (le_or_lt bound' (nat_of_P o1')); intros H'8; auto.
 rewrite H'5; auto with arith.
 Contradict H'6; auto.
 apply lt_not_le; rewrite Ho1; auto.
-apply lt_le_trans with (nat_of_P o1' * nat_of_P base + 1 * nat_of_P base);
+apply
+ lt_le_trans
+  with
+    (nat_of_P o1' * nat_of_P base + 1 * nat_of_P base);
  auto with arith.
 simpl in |- *; auto with arith.
 rewrite <- mult_plus_distr_r.
-replace (nat_of_P o1' + 1) with (S (nat_of_P o1')); auto with arith.
+replace (nat_of_P o1' + 1) with (S (nat_of_P o1'));
+ auto with arith.
 rewrite H'5; auto with arith.
 rewrite <- (fun x y => mult_comm (nat_of_P x) y); auto with arith.
 rewrite plus_comm; auto with arith.
@@ -602,10 +670,12 @@ intros o4' n Eq1; rewrite nat_of_P_plus_morphism;
 intros (H'1, ((H'2, H'3), H'4)); repeat (split; auto).
 rewrite Ho1; rewrite H'1; ring.
 apply lt_le_trans with (S (nat_of_P o4') * nat_of_P base).
-simpl in |- *; rewrite (fun x y => plus_comm x (nat_of_P y)); auto with arith.
+simpl in |- *; rewrite (fun x y => plus_comm x (nat_of_P y));
+ auto with arith.
 rewrite (fun x y => mult_comm x (nat_of_P y)); auto with arith.
 intros bound' H H0; apply (H'4 bound'); auto.
-case (le_or_lt (nat_of_P bound) (nat_of_P o1')); intros H'8; auto.
+case (le_or_lt (nat_of_P bound) (nat_of_P o1')); intros H'8;
+ auto.
 rewrite Pdivless1 in Eq1; auto.
 discriminate.
 apply nat_of_P_gt_Gt_compare_complement_morphism; auto.
@@ -615,34 +685,40 @@ apply lt_le_trans with (nat_of_P base * 1); auto with arith.
 rewrite mult_comm; simpl in |- *; auto with arith.
 rewrite Ho1; auto.
 intros bound' H H0; apply (H'4 bound'); auto.
-case (le_or_lt (nat_of_P bound) (nat_of_P o1')); intros H'8; auto.
+case (le_or_lt (nat_of_P bound) (nat_of_P o1')); intros H'8;
+ auto.
 rewrite Pdivless1 in Eq1; auto.
 discriminate.
 apply nat_of_P_gt_Gt_compare_complement_morphism; auto.
-apply lt_le_trans with (nat_of_P o1' * 1 + nat_of_P o2'); auto with arith.
+apply lt_le_trans with (nat_of_P o1' * 1 + nat_of_P o2');
+ auto with arith.
 rewrite mult_comm; simpl in |- *; auto with arith.
 apply le_lt_trans with (nat_of_P o1' + 0); auto with arith.
 apply plus_le_lt_compat; auto with arith.
 rewrite Ho1; auto with arith.
 apply mult_S_le_reg_l with (n := pred (nat_of_P base)).
 replace (S (pred (nat_of_P base))) with (nat_of_P base).
-apply (fun p n m : nat => plus_le_reg_l n m p) with (p := nat_of_P o2').
+apply
+ (fun p n m : nat => plus_le_reg_l n m p) with (p := nat_of_P o2').
 rewrite (plus_comm (nat_of_P o2')); simpl in |- *; auto with arith.
 rewrite (mult_comm (nat_of_P base)); simpl in |- *; auto with arith.
 rewrite <- Ho1; auto with arith.
 apply le_trans with (1 := Hq0); auto with arith.
-replace (nat_of_P (xO p0)) with (0 + 2 * nat_of_P p0); auto with arith.
+replace (nat_of_P (xO p0)) with (0 + 2 * nat_of_P p0);
+ auto with arith.
 apply plus_le_compat; auto with arith.
 unfold nat_of_P in |- *; simpl in |- *; (rewrite ZL6; auto).
-generalize (lt_O_nat_of_P base); case (nat_of_P base); simpl in |- *; auto;
- intros tmp; inversion tmp.
+generalize (lt_O_nat_of_P base); case (nat_of_P base);
+ simpl in |- *; auto; intros tmp; inversion tmp.
 replace (nat_of_P 1) with 1; auto with arith.
 rewrite Ho1; generalize (lt_O_nat_of_P o2');
  (case (nat_of_P o2'); simpl in |- *).
 intros tmp; Contradict tmp; auto with arith.
-generalize (lt_O_nat_of_P o1'); (case (nat_of_P o1'); simpl in |- *).
+generalize (lt_O_nat_of_P o1');
+ (case (nat_of_P o1'); simpl in |- *).
 intros tmp; Contradict tmp; auto with arith.
-generalize (lt_O_nat_of_P base); (case (nat_of_P base); simpl in |- *).
+generalize (lt_O_nat_of_P base);
+ (case (nat_of_P base); simpl in |- *).
 intros tmp; Contradict tmp; auto with arith.
 intros n H n0 H0 n1 H01; rewrite (fun x y => plus_comm x (S y));
  simpl in |- *.
@@ -660,7 +736,8 @@ intros o4' n Eq1; rewrite nat_of_P_mult_morphism.
 intros (H'1, ((H'2, H'3), H'4)); repeat (split; auto).
 rewrite Ho1; rewrite H'1; ring.
 rewrite (fun x y => mult_comm x (nat_of_P y)); auto with arith.
-intros bound' H'5 H'6; case (le_or_lt (nat_of_P bound) (nat_of_P o1'));
+intros bound' H'5 H'6;
+ case (le_or_lt (nat_of_P bound) (nat_of_P o1')); 
  intros H'7; auto.
 apply (H'4 bound'); auto.
 rewrite Pdivless1 in Eq1; auto.
@@ -670,7 +747,8 @@ intros n Eq1 (H'1, ((H'2, H'3), H'4)); repeat (split; auto).
 rewrite Ho1; rewrite H'1; ring.
 apply lt_le_trans with (nat_of_P base * 1); auto with arith.
 rewrite mult_comm; simpl in |- *; auto with arith.
-intros bound' H'5 H'6; case (le_or_lt (nat_of_P bound) (nat_of_P o1'));
+intros bound' H'5 H'6;
+ case (le_or_lt (nat_of_P bound) (nat_of_P o1')); 
  intros H'7; auto.
 apply (H'4 bound'); auto.
 rewrite Pdivless1 in Eq1; auto.
@@ -680,11 +758,15 @@ case (le_or_lt bound' (nat_of_P o1')); intros H'8; auto.
 rewrite H'5; auto with arith.
 Contradict H'6; auto.
 apply lt_not_le; rewrite Ho1; auto.
-apply lt_le_trans with (nat_of_P o1' * nat_of_P base + 1 * nat_of_P base);
+apply
+ lt_le_trans
+  with
+    (nat_of_P o1' * nat_of_P base + 1 * nat_of_P base);
  auto with arith.
 simpl in |- *; auto with arith.
 rewrite <- mult_plus_distr_r.
-replace (nat_of_P o1' + 1) with (S (nat_of_P o1')); auto with arith.
+replace (nat_of_P o1' + 1) with (S (nat_of_P o1'));
+ auto with arith.
 rewrite H'5; auto with arith.
 rewrite <- (fun x y => mult_comm (nat_of_P x) y); auto with arith.
 rewrite plus_comm; auto with arith.
@@ -695,7 +777,8 @@ intros (H'1, ((H'2, H'3), H'4)); repeat (split; auto).
 rewrite Ho1; rewrite H'1; ring.
 rewrite (fun x y => mult_comm x (nat_of_P y)); auto with arith.
 intros bound' H H0; apply (H'4 bound'); auto.
-case (le_or_lt (nat_of_P bound) (nat_of_P o1')); intros H'8; auto.
+case (le_or_lt (nat_of_P bound) (nat_of_P o1')); intros H'8;
+ auto.
 rewrite Pdivless1 in Eq1; auto.
 discriminate.
 apply nat_of_P_gt_Gt_compare_complement_morphism; auto.
@@ -710,7 +793,7 @@ replace (S (pred (nat_of_P base))) with (nat_of_P base).
 rewrite (mult_comm (nat_of_P base)); simpl in |- *; auto with arith.
 rewrite (fun x => plus_comm x 0) in Ho1; simpl in Ho1; rewrite <- Ho1.
 generalize Hq0; clear Hq0;
- replace (nat_of_P (xI p0)) with (2 * nat_of_P p0 + 1); 
+ replace (nat_of_P (xI p0)) with (2 * nat_of_P p0 + 1);
  try intros Hq0.
 case (le_lt_or_eq _ _ Hq0); auto.
 rewrite (fun x y => plus_comm x (S y)); intros Hl1.
@@ -720,20 +803,22 @@ intros tmp; Contradict tmp; auto with arith.
 intros base'; case base'.
 intros tmp; Contradict tmp; auto with arith.
 intros base''; case base''.
-replace (nat_of_P (xI p0)) with (1 + 2 * nat_of_P p0); auto with arith.
+replace (nat_of_P (xI p0)) with (1 + 2 * nat_of_P p0);
+ auto with arith.
 intros Hb0 Ho0 H; Contradict H; rewrite Ho0.
 rewrite (fun x y => mult_comm x (S y)).
 apply Compare.not_eq_sym.
 apply odd_even_lem.
 unfold nat_of_P in |- *; simpl in |- *; (rewrite ZL6; auto).
 intros n Hb0 Ho0 H; rewrite H.
-apply le_trans with (S (S n) * nat_of_P p0 + nat_of_P p0); auto with arith.
+apply le_trans with (S (S n) * nat_of_P p0 + nat_of_P p0);
+ auto with arith.
 apply plus_le_compat; auto with arith.
 rewrite plus_comm; simpl in |- *; auto with arith.
 rewrite plus_comm; unfold nat_of_P in |- *; simpl in |- *;
  (rewrite ZL6; unfold nat_of_P in |- *; auto).
-generalize (lt_O_nat_of_P base); case (nat_of_P base); simpl in |- *; auto;
- intros tmp; inversion tmp.
+generalize (lt_O_nat_of_P base); case (nat_of_P base);
+ simpl in |- *; auto; intros tmp; inversion tmp.
 intros p0 Hq0 (Ho1, Ho2);
  (cut (nat_of_P o1' <= nat_of_P p0); [ intros Hrec | idtac ]).
 cut (nat_of_P o1' < nat_of_P p); [ intros Hrec1 | idtac ].
@@ -746,7 +831,8 @@ intros o4' n Eq1; rewrite nat_of_P_mult_morphism.
 intros (H'1, ((H'2, H'3), H'4)); repeat (split; auto).
 rewrite Ho1; rewrite H'1; ring.
 rewrite (fun x y => mult_comm x (nat_of_P y)); auto with arith.
-intros bound' H'5 H'6; case (le_or_lt (nat_of_P bound) (nat_of_P o1'));
+intros bound' H'5 H'6;
+ case (le_or_lt (nat_of_P bound) (nat_of_P o1')); 
  intros H'7; auto.
 apply (H'4 bound'); auto.
 rewrite Pdivless1 in Eq1; auto.
@@ -755,7 +841,8 @@ apply nat_of_P_gt_Gt_compare_complement_morphism; auto.
 intros n Eq1 (H'1, ((H'2, H'3), H'4)); repeat (split; auto).
 rewrite Ho1; rewrite H'1; ring.
 replace 0 with (0 * exp (nat_of_P base) n); auto with arith.
-intros bound' H'5 H'6; case (le_or_lt (nat_of_P bound) (nat_of_P o1'));
+intros bound' H'5 H'6;
+ case (le_or_lt (nat_of_P bound) (nat_of_P o1')); 
  intros H'7; auto.
 apply (H'4 bound'); auto.
 rewrite Pdivless1 in Eq1; auto.
@@ -765,11 +852,15 @@ case (le_or_lt bound' (nat_of_P o1')); intros H'8; auto.
 rewrite H'5; auto with arith.
 Contradict H'6; auto.
 apply lt_not_le; rewrite Ho1; auto.
-apply lt_le_trans with (nat_of_P o1' * nat_of_P base + 1 * nat_of_P base);
+apply
+ lt_le_trans
+  with
+    (nat_of_P o1' * nat_of_P base + 1 * nat_of_P base);
  auto with arith.
 simpl in |- *; auto with arith.
 rewrite <- mult_plus_distr_r.
-replace (nat_of_P o1' + 1) with (S (nat_of_P o1')); auto with arith.
+replace (nat_of_P o1' + 1) with (S (nat_of_P o1'));
+ auto with arith.
 rewrite H'5; auto with arith.
 rewrite <- (fun x y => mult_comm (nat_of_P x) y); auto with arith.
 rewrite plus_comm; auto with arith.
@@ -780,7 +871,8 @@ intros (H'1, ((H'2, H'3), H'4)); repeat (split; auto).
 rewrite Ho1; rewrite H'1; ring.
 rewrite (fun x y => mult_comm x (nat_of_P y)); auto with arith.
 intros bound' H H0; apply (H'4 bound'); auto.
-case (le_or_lt (nat_of_P bound) (nat_of_P o1')); intros H'8; auto.
+case (le_or_lt (nat_of_P bound) (nat_of_P o1')); intros H'8;
+ auto.
 rewrite Pdivless1 in Eq1; auto.
 discriminate.
 apply nat_of_P_gt_Gt_compare_complement_morphism; auto.
@@ -798,15 +890,17 @@ apply le_trans with (nat_of_P p); auto.
 rewrite Ho1; rewrite (fun x => plus_comm x 0); simpl in |- *; auto.
 rewrite (mult_comm (nat_of_P base)); simpl in |- *; auto with arith.
 apply le_trans with (1 := Hq0); auto with arith.
-replace (nat_of_P (xO p0)) with (2 * nat_of_P p0); auto with arith.
+replace (nat_of_P (xO p0)) with (2 * nat_of_P p0);
+ auto with arith.
 unfold nat_of_P in |- *; simpl in |- *; (rewrite ZL6; auto).
-generalize (lt_O_nat_of_P base); case (nat_of_P base); simpl in |- *; auto;
- intros tmp; inversion tmp.
+generalize (lt_O_nat_of_P base); case (nat_of_P base);
+ simpl in |- *; auto; intros tmp; inversion tmp.
 replace (nat_of_P 1) with 1; auto with arith.
 intros Hq0 (H, H0); Contradict Hq0.
 apply lt_not_le.
 rewrite H.
-generalize (lt_O_nat_of_P o1'); case (nat_of_P o1'); simpl in |- *; auto.
+generalize (lt_O_nat_of_P o1'); case (nat_of_P o1');
+ simpl in |- *; auto.
 intros tmp; Contradict tmp; auto with arith.
 intros n H2; generalize Hb.
 case (nat_of_P base); simpl in |- *; auto.
@@ -845,7 +939,8 @@ Theorem PdivBound_correct :
  (forall bound',
   nat_of_P bound = nat_of_P base * bound' ->
   nat_of_P bound <= nat_of_P p ->
-  nat_of_P bound <= nat_of_P base * oZ (fst (fst (PdivBound bound p base)))).
+  nat_of_P bound <=
+  nat_of_P base * oZ (fst (fst (PdivBound bound p base)))).
 intros; unfold PdivBound in |- *; apply Pdivless_correct; auto.
 Qed.
  
@@ -879,13 +974,14 @@ Theorem PdivBound_correct4 :
  1 < nat_of_P base ->
  nat_of_P bound = nat_of_P base * bound' ->
  nat_of_P bound <= nat_of_P p ->
- nat_of_P bound <= nat_of_P base * oZ (fst (fst (PdivBound bound p base))).
+ nat_of_P bound <=
+ nat_of_P base * oZ (fst (fst (PdivBound bound p base))).
 intros bound p base bound' H H1 H2; case (PdivBound_correct bound p base);
  auto; intros H'1 (H'2, H'3); apply (H'3 bound'); auto with arith.
 Qed.
 Transparent Pdiv.
-Eval compute in
-  (PdivBound (P_of_succ_nat 9)
-     ((fun (x : positive) (_ : positive -> positive) (y : positive) =>
-       (x * y)%positive) (P_of_succ_nat 10) (fun x => x) 
-        (P_of_succ_nat 10)) (P_of_succ_nat 9)).
+(* Eval Compute
+in (PdivBound
+    (anti_convert (9))
+    (times1 (anti_convert (10)) [x : ?]  x (anti_convert (10)))
+    (anti_convert (9))).*)

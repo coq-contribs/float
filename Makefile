@@ -29,7 +29,8 @@
 #                        #
 ##########################
 
-CAMLP4LIB=`camlp4 -where`
+CAMLP4LIB=`camlp5 -where 2> /dev/null || camlp4 -where`
+CAMLP4=`basename $CAMLP4LIB`
 COQSRC=-I $(COQTOP)/kernel -I $(COQTOP)/lib \
   -I $(COQTOP)/library -I $(COQTOP)/parsing \
   -I $(COQTOP)/pretyping -I $(COQTOP)/interp \
@@ -43,19 +44,18 @@ COQSRC=-I $(COQTOP)/kernel -I $(COQTOP)/lib \
   -I $(CAMLP4LIB)
 ZFLAGS=$(OCAMLLIBS) $(COQSRC)
 OPT=
-COQFLAGS=-q $(OPT) $(COQLIBS) $(COQ_XML)
+COQFLAGS=-q $(OPT) $(COQLIBS) $(OTHERFLAGS) $(COQ_XML)
 COQC=$(COQBIN)coqc
 GALLINA=gallina
-COQDOC=coqdoc
+COQDOC=$(COQBIN)coqdoc
 CAMLC=ocamlc -c
 CAMLOPTC=ocamlopt -c
 CAMLLINK=ocamlc
 CAMLOPTLINK=ocamlopt
 COQDEP=$(COQBIN)coqdep -c
-COQVO2XML=coq_vo2xml
 GRAMMARS=grammar.cma
-CAMLP4EXTEND=pa_extend.cmo pa_ifdef.cmo q_MLast.cmo
-PP=-pp "camlp4o -I . -I $(COQTOP)/parsing $(CAMLP4EXTEND) $(GRAMMARS) -impl"
+CAMLP4EXTEND=pa_extend.cmo pa_macro.cmo q_MLast.cmo
+PP=-pp "$(CAMLP4)o -I . -I $(COQTOP)/parsing $(CAMLP4EXTEND) $(GRAMMARS) -impl"
 
 #########################
 #                       #
@@ -88,7 +88,6 @@ VFILES=AllFloat.v\
   Finduct.v\
   Float.v\
   Fmin.v\
-  FminOp.v\
   Fnorm.v\
   Fodd.v\
   Fop.v\
@@ -104,8 +103,9 @@ VFILES=AllFloat.v\
   Power.v\
   Zdivides.v\
   Zenum.v\
-  ex.v\
-  sTactic.v
+  sTactic.v\
+  Rpow.v\
+  RND.v
 VOFILES=$(VFILES:.v=.vo)
 VIFILES=$(VFILES:.v=.vi)
 GFILES=$(VFILES:.v=.g)
@@ -128,7 +128,6 @@ all: AllFloat.vo\
   Finduct.vo\
   Float.vo\
   Fmin.vo\
-  FminOp.vo\
   Fnorm.vo\
   Fodd.vo\
   Fop.vo\
@@ -144,8 +143,9 @@ all: AllFloat.vo\
   Power.vo\
   Zdivides.vo\
   Zenum.vo\
-  ex.vo\
-  sTactic.vo
+  sTactic.vo\
+  Rpow.vo\
+  RND.vo
 
 spec: $(VIFILES)
 
@@ -161,43 +161,7 @@ all.ps: $(VFILES)
 all-gal.ps: $(VFILES)
 	$(COQDOC) -ps -g -o $@ `$(COQDEP) -sort -suffix .v $(VFILES)`
 
-xml:: .xml_time_stamp
-.xml_time_stamp: AllFloat.vo\
-  Closest.vo\
-  Closest2Plus.vo\
-  Closest2Prop.vo\
-  ClosestMult.vo\
-  ClosestPlus.vo\
-  ClosestProp.vo\
-  Digit.vo\
-  FPred.vo\
-  FSucc.vo\
-  Faux.vo\
-  Fbound.vo\
-  Fcomp.vo\
-  Finduct.vo\
-  Float.vo\
-  Fmin.vo\
-  FminOp.vo\
-  Fnorm.vo\
-  Fodd.vo\
-  Fop.vo\
-  Fprop.vo\
-  Fround.vo\
-  FroundMult.vo\
-  FroundPlus.vo\
-  FroundProp.vo\
-  MSB.vo\
-  MSBProp.vo\
-  Option.vo\
-  Paux.vo\
-  Power.vo\
-  Zdivides.vo\
-  Zenum.vo\
-  ex.vo\
-  sTactic.vo
-	$(COQVO2XML) $(COQFLAGS) $(?:%.o=%)
-	touch .xml_time_stamp
+
 
 ####################
 #                  #
@@ -205,7 +169,7 @@ xml:: .xml_time_stamp
 #                  #
 ####################
 
-.PHONY: all opt byte archclean clean install depend xml
+.PHONY: all opt byte archclean clean install depend html
 
 .SUFFIXES: .v .vo .vi .g .html .tex .g.tex .g.html
 
@@ -238,27 +202,28 @@ opt:
 
 include .depend
 
-depend:
-	rm .depend
-	$(COQDEP) -i $(COQLIBS) *.v *.ml *.mli >.depend
-	$(COQDEP) $(COQLIBS) -suffix .html *.v >>.depend
-
-xml::
+.depend depend:
+	rm -f .depend
+	$(COQDEP) -i $(COQLIBS) $(VFILES) *.ml *.mli >.depend
+	$(COQDEP) $(COQLIBS) -suffix .html $(VFILES) >>.depend
 
 install:
 	mkdir -p `$(COQC) -where`/user-contrib
-	cp -f *.vo `$(COQC) -where`/user-contrib
+	cp -f $(VOFILES) `$(COQC) -where`/user-contrib
 
 Makefile: Make
 	mv -f Makefile Makefile.bak
 	$(COQBIN)coq_makefile -f Make -o Makefile
 
+
 clean:
-	rm -f *.cmo *.cmi *.cmx *.o *.vo *.vi *.g *~
+	rm -f *.cmo *.cmi *.cmx *.o $(VOFILES) $(VIFILES) $(GFILES) *~
 	rm -f all.ps all-gal.ps $(HTMLFILES) $(GHTMLFILES)
 
 archclean:
 	rm -f *.cmx *.o
+
+html:
 
 # WARNING
 #

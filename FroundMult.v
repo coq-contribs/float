@@ -1,27 +1,19 @@
-(* This program is free software; you can redistribute it and/or      *)
-(* modify it under the terms of the GNU Lesser General Public License *)
-(* as published by the Free Software Foundation; either version 2.1   *)
-(* of the License, or (at your option) any later version.             *)
-(*                                                                    *)
-(* This program is distributed in the hope that it will be useful,    *)
-(* but WITHOUT ANY WARRANTY; without even the implied warranty of     *)
-(* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the      *)
-(* GNU General Public License for more details.                       *)
-(*                                                                    *)
-(* You should have received a copy of the GNU Lesser General Public   *)
-(* License along with this program; if not, write to the Free         *)
-(* Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA *)
-(* 02110-1301 USA                                                     *)
-
-
+(****************************************************************************
+                                                                             
+          IEEE754  :  FroundMult                                                     
+                                                                             
+          Laurent Thery, Sylvie Boldo                                                      
+                                                                             
+  ******************************************************************************)
 Require Export FroundProp.
-Require Import Zdivides.
+ 
 Section FRoundP.
 Variable b : Fbound.
 Variable radix : Z.
 Variable precision : nat.
  
-Coercion Local FtoRradix := FtoR radix.
+Let FtoRradix := FtoR radix.
+Coercion FtoRradix : float >-> R.
 Hypothesis radixMoreThanOne : (1 < radix)%Z.
  
 Let radixMoreThanZERO := Zlt_1_O _ (Zlt_le_weak _ _ radixMoreThanOne).
@@ -29,7 +21,7 @@ Hint Resolve radixMoreThanZERO: zarith.
 Hypothesis precisionGreaterThanOne : 1 < precision.
 Hypothesis pGivesBound : Zpos (vNum b) = Zpower_nat radix precision.
  
-Theorem minRepMult :
+Theorem errorBoundedMultMin :
  forall p q fmin : float,
  Fbounded b p ->
  Fbounded b q ->
@@ -43,7 +35,7 @@ intros p q fmin Fp Fq H' H'0 H'1 H'2.
 cut (0 <= Fnum p * Fnum q)%Z;
  [ intros multPos
  | apply Zle_mult_gen; apply (LeR0Fnum radix); auto with arith ].
-cut (ex (fun m : Z => fmin = Float m (Fexp (Fmult p q)) :>R)).
+cut (ex (fun m : Z => FtoRradix fmin = Float m (Fexp (Fmult p q)))).
 2: unfold FtoRradix in |- *;
     apply
      RoundedModeRep
@@ -95,7 +87,7 @@ apply Zplus_le_compat_l; auto.
 apply Zle_Zopp.
 apply le_IZR; auto.
 rewrite Rmult_IZR.
-rewrite Zpower_nat_powerRZ; auto with zarith.
+rewrite Zpower_nat_Z_powerRZ; auto with zarith.
 pattern (Fnum p * Fnum q)%Z at 1 in |- *; rewrite H'5; ring.
 rewrite pGivesBound.
 rewrite <- (Zabs_eq (Zpower_nat radix precision)); auto with zarith.
@@ -133,7 +125,7 @@ unfold FtoRradix in |- *; rewrite <- Fmult_correct; auto with zarith.
 unfold Fmult, FtoR in |- *; simpl in |- *.
 repeat rewrite (fun x => Rmult_comm x (powerRZ radix (Fexp p + Fexp q))).
 apply Rmult_le_compat_l; auto with real zarith.
-rewrite <- Zpower_nat_powerRZ; auto with zarith.
+rewrite <- Zpower_nat_Z_powerRZ; auto with zarith.
 pattern (Fnum p * Fnum q)%Z at 2 in |- *;
  rewrite <- (Zabs_eq (Fnum p * Fnum q)); auto.
 rewrite <- Rmult_IZR; apply Rle_IZR; apply Zle_Zabs_inv2; auto.
@@ -141,7 +133,7 @@ simpl in |- *; auto.
 apply Zmin_n_n; auto.
 Qed.
  
-Theorem maxRepMult :
+Theorem errorBoundedMultMax :
  forall p q fmax : float,
  Fbounded b p ->
  Fbounded b q ->
@@ -150,7 +142,8 @@ Theorem maxRepMult :
  (- dExp b <= Fexp p + Fexp q)%Z ->
  isMax b radix (p * q) fmax ->
  exists r : float,
-   r = (p * q - fmax)%R :>R /\ Fbounded b r /\ Fexp r = (Fexp p + Fexp q)%Z.
+   FtoRradix r = (p * q - fmax)%R /\
+   Fbounded b r /\ Fexp r = (Fexp p + Fexp q)%Z.
 intros p q fmax Fp Fq H' H'0 H'1 H'2.
 cut (0 <= Fnum p * Fnum q)%Z;
  [ intros multPos
@@ -198,7 +191,7 @@ apply Zle_Zmult_comp_l; auto with zarith.
 apply Zlt_le_weak; rewrite <- pGivesBound; case Fq; auto with float.
 auto with zarith.
 intros x (H'6, H'7).
-cut (FtoR radix (Fmult p q) = FtoR radix x :>R).
+cut (FtoR radix (Fmult p q) = FtoR radix x).
 intros H'8; rewrite H'8.
 apply sym_eq; apply (ProjectMax b radix); auto.
 rewrite <- H'8; auto.
@@ -208,9 +201,9 @@ unfold FtoRradix, FtoR in |- *; simpl in |- *.
 rewrite powerRZ_add with (n := Z_of_nat precision); auto with real zarith.
 pattern (Fnum p * Fnum q)%Z at 1 in |- *; rewrite H'3.
 rewrite plus_IZR; rewrite Rmult_IZR.
-repeat rewrite Zpower_nat_powerRZ; auto with real zarith.
-rewrite Z4; simpl; ring.
-cut (ex (fun m : Z => fmax = Float m (Fexp (Fmult p q)) :>R));
+repeat rewrite Zpower_nat_Z_powerRZ; auto with real zarith.
+rewrite Z4; simpl;ring.
+cut (ex (fun m : Z => FtoRradix fmax = Float m (Fexp (Fmult p q))));
  [ intros Z5 | idtac ].
 2: unfold FtoRradix in |- *;
     apply
@@ -282,7 +275,7 @@ replace
   powerRZ radix (precision + (Fexp p + Fexp q)))%R; 
  [ auto | idtac ].
 rewrite powerRZ_add; auto with real zarith.
-repeat rewrite Rmult_IZR; repeat rewrite Zpower_nat_powerRZ; auto with zarith.
+repeat rewrite Rmult_IZR; repeat rewrite Zpower_nat_Z_powerRZ; auto with zarith.
 ring.
 case
  (FboundedMbound _ radixMoreThanOne b precision)
@@ -339,7 +332,7 @@ rewrite Zabs_eq in H'5; auto with zarith; rewrite Zabs_eq in H'5;
 unfold Zsucc in |- *; repeat rewrite Rmult_IZR || rewrite plus_IZR;
  simpl in |- *.
 rewrite (powerRZ_add radix precision); auto with real zarith;
- rewrite <- (Zpower_nat_powerRZ radix precision); auto with real zarith; 
+ rewrite <- (Zpower_nat_Z_powerRZ radix precision); auto with real zarith; 
  ring.
 rewrite powerRZ_add; auto with real zarith; ring.
 unfold Fopp, Fminus, Fmult in |- *; simpl in |- *; auto.
@@ -415,7 +408,8 @@ unfold Fmult, FtoR in |- *; simpl in |- *; auto.
 rewrite powerRZ_add with (n := Z_of_nat (pred precision));
  auto with real arith.
 repeat rewrite <- Rmult_assoc.
-repeat rewrite (fun (z : Z) (x : R) => Rmult_comm x (powerRZ radix z)); auto.
+repeat rewrite (fun (z : Z) (x : R) => Rmult_comm x (powerRZ radix z));
+ auto.
 apply Rmult_le_compat_l; auto with real arith.
 rewrite <- Rmult_assoc.
 rewrite (fun x : R => Rmult_comm x radix).
@@ -427,7 +421,7 @@ replace 0%R with (IZR 0); unfold pPred in |- *; try apply Rle_IZR;
  auto with real zarith.
 replace 0%R with (IZR 0); unfold pPred in |- *; try apply Rle_IZR;
  auto with real zarith.
-unfold pPred in |- *; rewrite pGivesBound; rewrite <- Zpower_nat_powerRZ;
+unfold pPred in |- *; rewrite pGivesBound; rewrite <- Zpower_nat_Z_powerRZ;
  auto with real zarith.
 rewrite inj_pred; auto with arith zarith.
 auto with real zarith.
@@ -442,7 +436,7 @@ replace (Zsucc (Zpred precision + (Fexp p + Fexp q))) with
  ring.
 Qed.
  
-Theorem RepMult :
+Theorem errorBoundedMultPos :
  forall P,
  RoundedModeP b radix P ->
  forall p q f : float,
@@ -455,13 +449,100 @@ Theorem RepMult :
  exists r : float,
    r = (p * q - f)%R :>R /\ Fbounded b r /\ Fexp r = (Fexp p + Fexp q)%Z.
 intros P H p q f H0 H1 H2 H3 H4 H5.
-generalize minRepMult maxRepMult; intros H6 H7.
+generalize errorBoundedMultMin errorBoundedMultMax; intros H6 H7.
 cut (MinOrMaxP b radix P);
  [ intros | case H; intros H'1 (H'2, (H'3, H'4)); auto ].
 case (H8 (p * q)%R f); auto.
 Qed.
  
-Theorem multExactExp_aux :
+Theorem errorBoundedMultNeg :
+ forall P,
+ RoundedModeP b radix P ->
+ forall p q f : float,
+ Fbounded b p ->
+ Fbounded b q ->
+ (p <= 0)%R ->
+ (0 <= q)%R ->
+ (- dExp b <= Fexp p + Fexp q)%Z ->
+ P (p * q)%R f ->
+ exists r : float,
+   r = (p * q - f)%R :>R /\ Fbounded b r /\ Fexp r = (Fexp p + Fexp q)%Z.
+intros P H p q f H0 H1 H2 H3 H4 H5.
+generalize errorBoundedMultMin errorBoundedMultMax; intros H6 H7.
+cut (MinOrMaxP b radix P);
+ [ intros | case H; intros H'1 (H'2, (H'3, H'4)); auto ].
+case (H8 (p * q)%R f); auto; intros H9.
+generalize (H7 (Fopp p) q (Fopp f)); intros H12.
+lapply H12; auto with float; intros H10; clear H12.
+lapply H10; auto; intros H12; clear H10.
+lapply H12;
+ [ intros H10
+ | unfold FtoRradix in |- *; rewrite Fopp_correct; auto with real ];
+ clear H12.
+lapply H10; auto; intros H12; clear H10.
+lapply H12; [ intros H10 | simpl in |- *; auto ]; clear H12.
+lapply H10; [ intros H12 | idtac ]; clear H10.
+2: replace (Fopp p * q)%R with (- (p * q))%R;
+    [ apply MinOppMax; auto | idtac ].
+2: unfold FtoRradix in |- *; rewrite Fopp_correct; auto with real.
+elim H12; intros r H10; clear H12; elim H10; intros H11 H12; clear H10.
+elim H12; clear H12; intros H10 H12.
+exists (Fopp r); split; [ generalize H11 | split; auto with float ].
+unfold FtoRradix in |- *; repeat rewrite Fopp_correct; intros H13;
+ rewrite H13; ring.
+generalize (H6 (Fopp p) q (Fopp f)); intros H12.
+lapply H12; auto with float; intros H10; clear H12.
+lapply H10; auto; intros H12; clear H10.
+lapply H12;
+ [ intros H10
+ | unfold FtoRradix in |- *; rewrite Fopp_correct; auto with real ];
+ clear H12.
+lapply H10; auto; intros H12; clear H10.
+lapply H12; [ intros H10 | simpl in |- *; auto ]; clear H12.
+lapply H10; [ intros H12 | idtac ]; clear H10.
+2: replace (Fopp p * q)%R with (- (p * q))%R;
+    [ apply MaxOppMin; auto | idtac ].
+2: unfold FtoRradix in |- *; rewrite Fopp_correct; auto with real.
+elim H12; intros r H10; clear H12; elim H10; intros H11 H12; clear H10.
+elim H12; clear H12; intros H10 H12.
+exists (Fopp r); split; [ generalize H11 | split; auto with float ].
+unfold FtoRradix in |- *; repeat rewrite Fopp_correct; intros H13;
+ rewrite H13; ring.
+Qed.
+ 
+Theorem errorBoundedMult :
+ forall P,
+ RoundedModeP b radix P ->
+ forall p q f : float,
+ Fbounded b p ->
+ Fbounded b q ->
+ (- dExp b <= Fexp p + Fexp q)%Z ->
+ P (p * q)%R f ->
+ exists r : float,
+   r = (p * q - f)%R :>R /\ Fbounded b r /\ Fexp r = (Fexp p + Fexp q)%Z.
+intros P H p q f H0 H1 H2 H3.
+case (Rle_or_lt 0 p); intros H4; case (Rle_or_lt 0 q); intros H5.
+apply errorBoundedMultPos with P; auto.
+replace (Fexp p) with (Fexp (Fopp p)); auto with float.
+replace (Fexp q) with (Fexp (Fopp q)); auto with float.
+cut ((p * q)%R = (Fopp p * Fopp q)%R); [ intros H6; rewrite H6 | idtac ].
+apply errorBoundedMultNeg with P; auto with float real.
+unfold FtoRradix in |- *; rewrite Fopp_correct; auto with real.
+unfold FtoRradix in |- *; rewrite Fopp_correct; auto with real.
+rewrite <- H6; auto.
+unfold FtoRradix in |- *; repeat rewrite Fopp_correct; ring.
+apply errorBoundedMultNeg with P; auto with float real.
+replace (Fexp p) with (Fexp (Fopp p)); auto with float.
+replace (Fexp q) with (Fexp (Fopp q)); auto with float.
+cut ((p * q)%R = (Fopp p * Fopp q)%R); [ intros H6; rewrite H6 | idtac ].
+apply errorBoundedMultPos with P; auto with float real.
+unfold FtoRradix in |- *; rewrite Fopp_correct; auto with real.
+unfold FtoRradix in |- *; rewrite Fopp_correct; auto with real.
+rewrite <- H6; auto.
+unfold FtoRradix in |- *; repeat rewrite Fopp_correct; ring.
+Qed.
+ 
+Theorem errorBoundedMultExp_aux :
  forall n1 n2 : Z,
  (Zabs n1 < Zpos (vNum b))%Z ->
  (Zabs n2 < Zpos (vNum b))%Z ->
@@ -472,7 +553,8 @@ Theorem multExactExp_aux :
  exists nx : Z,
    (exists ex : Z,
       (n1 * n2)%R = (nx * powerRZ radix ex)%R :>R /\
-      (Zabs nx < Zpos (vNum b))%Z /\ (0 <= ex)%Z /\ (ex <= precision)%Z).
+      (Zabs nx < Zpos (vNum b))%Z /\
+      (0 <= ex)%Z /\ (ex <= precision)%Z).
 intros n1 n2 H H0 H1.
 case H1; intros ny (ey, (H2, H3)).
 case (Zle_or_lt 0 ey); intros Zl1.
@@ -505,7 +587,8 @@ rewrite <- (fun x y => Rabs_pos_eq (powerRZ x y)); auto with real zarith.
 rewrite <- Faux.Rabsolu_Zabs; rewrite <- Rabs_mult; rewrite <- H2.
 rewrite Rabs_mult; repeat rewrite Faux.Rabsolu_Zabs; auto with real zarith.
 case (Zle_lt_or_eq 0 (Zabs n2)); auto with zarith; intros Z1.
-apply Rlt_trans with (Zpos (vNum b) * Zabs n2)%R; auto with real zarith.
+apply Rlt_trans with (Zpos (vNum b) * Zabs n2)%R;
+ auto with real zarith.
 rewrite <- Z1; auto with real zarith.
 replace (Zabs n1 * 0%Z)%R with (0 * Zpos (vNum b))%R;
  [ auto with real zarith | simpl; ring ].
@@ -524,7 +607,7 @@ replace 1%R with (powerRZ radix 0); [ apply Rle_powerRZ | simpl in |- * ];
 rewrite Faux.Rabsolu_Zabs; auto with real zarith.
 Qed.
  
-Theorem multExactExp_pos :
+Theorem errorBoundedMultExpPos :
  forall P,
  RoundedModeP b radix P ->
  forall p q pq : float,
@@ -555,7 +638,7 @@ rewrite H7; unfold FtoRradix in |- *; apply FzeroisReallyZero.
 unfold FtoRradix in |- *; rewrite FzeroisReallyZero; rewrite <- H7.
 pattern (FtoRradix pq) at 1 in |- *; rewrite H7; auto with real.
 repeat (split; auto); simpl in |- *; auto with arith zarith.
-case (multExactExp_aux (Fnum p) (Fnum q)); auto with float real zarith.
+case (errorBoundedMultExp_aux (Fnum p) (Fnum q)); auto with float real zarith.
 exists (Fnum pq); exists (Fexp pq - (Fexp p + Fexp q))%Z; split.
 apply Rmult_eq_reg_l with (powerRZ radix (Fexp p + Fexp q));
  auto with real zarith.
@@ -569,7 +652,7 @@ rewrite Rmult_assoc; rewrite <- powerRZ_add; auto with real zarith.
 replace (Fexp pq - (Fexp p + Fexp q) + (Fexp p + Fexp q))%Z with (Fexp pq);
  auto; ring.
 cut (Fbounded b pq); [ intros Z1; case Z1 | idtac ]; auto with real zarith.
-apply (RoundedModeBounded b radix) with (P := P) (2 := H4); auto.
+apply (RoundedModeBounded b radix P (p * q)); auto.
 intros nx (ex, (H'4, (H'5, (H'6, H'7)))).
 cut (FtoRradix pq = FtoRradix (Float nx (ex + (Fexp p + Fexp q))) :>R);
  [ intros Eq1 | idtac ].
@@ -584,7 +667,7 @@ repeat rewrite <- Rmult_assoc; rewrite <- H'4; rewrite powerRZ_add;
 replace (FtoRradix p * FtoRradix q)%R with
  (pq + (FtoRradix p * FtoRradix q - FtoRradix pq))%R; 
  [ rewrite H6 | idtac ]; ring.
-case (RepMult P H p q pq); auto.
+case (errorBoundedMultPos P H p q pq); auto.
 intros s (H'4, (H'5, H'6)).
 exists r; exists s; repeat (split; auto with zarith).
 rewrite H'2; auto.
@@ -598,33 +681,76 @@ fold FtoRradix in |- *; rewrite H'2; auto with real.
 fold FtoRradix in |- *; rewrite H'4; auto with real.
 Qed.
  
-Theorem multExactExp :
- forall P,
- RoundedModeP b radix P ->
- SymmetricP P ->
+Theorem errorBoundedMultExp :
+ forall P, (RoundedModeP b radix P) -> 
  forall p q pq : float,
- Fbounded b p ->
- Fbounded b q ->
- P (p * q)%R pq ->
- (- dExp b <= Fexp p + Fexp q)%Z ->
- ex
-   (fun r : float =>
-    ex
-      (fun s : float =>
-       Fbounded b r /\
-       Fbounded b s /\
-       r = pq :>R /\
-       s = (p * q - r)%R :>R /\
-       Fexp s = (Fexp p + Fexp q)%Z :>Z /\
-       (Fexp s <= Fexp r)%Z /\ (Fexp r <= precision + (Fexp p + Fexp q))%Z)).
-intros P H H0 p q pq H1 H2 H3 H4.
+  (Fbounded b p) -> (Fbounded b q) ->
+  (P (p * q)%R pq) ->
+   (-(dExp b) <= Fexp p + Fexp q)%Z ->
+   exists r : float,
+   exists s : float,
+      (Fbounded b r) /\ (Fbounded b s) /\
+       r = pq :>R /\ s = (p * q - r)%R :>R /\
+       (Fexp s =  Fexp p + Fexp q)%Z /\
+       (Fexp s <= Fexp r)%Z /\ 
+       (Fexp r <= precision + (Fexp p + Fexp q))%Z.
+intros P H p q pq H1 H2 H3 H4.
+cut (MinOrMaxP b radix P);
+ [ intros | case H; intros H'1 (H'2, (H'3, H'4)); auto ].
+case H0 with (p*q)%R pq; auto; intros H0'; clear H0.
 case (Rle_or_lt 0 p); intros Rl1.
 case (Rle_or_lt 0 q); intros Rl2.
-apply (multExactExp_pos P); auto.
-case (multExactExp_pos P H p (Fopp q) (Fopp pq)); auto with float real.
+apply (errorBoundedMultExpPos P); auto.
+case errorBoundedMultExpPos with (isMax b radix) p (Fopp q) (Fopp pq); auto with float real.
+apply MaxRoundedModeP with precision; auto.
 rewrite (Fopp_correct radix); auto with real.
 replace (FtoRradix p * FtoRradix (Fopp q))%R with
- (- (FtoRradix p * FtoRradix q))%R; auto; rewrite (Fopp_correct radix);
+ (- (FtoRradix p * FtoRradix q))%R; [apply MinOppMax;auto|idtac].
+rewrite (Fopp_correct radix);
+ fold FtoRradix in |- *; auto with zarith; ring.
+intros r (s, (H5, (H6, (H7, (H8, H9))))); exists (Fopp r); exists (Fopp s);
+ repeat (split; simpl in |- *; auto with float real zarith).
+repeat rewrite (Fopp_correct radix); auto with zarith; fold FtoRradix in |- *;
+ rewrite H7; repeat rewrite (Fopp_correct radix); auto with zarith;
+ fold FtoRradix; ring.
+repeat rewrite (Fopp_correct radix); auto with zarith; fold FtoRradix in |- *;
+ rewrite H8; repeat rewrite (Fopp_correct radix); auto with zarith; 
+ fold FtoRradix; ring.
+case (Rle_or_lt 0 q); intros Rl2.
+case errorBoundedMultExpPos with (isMax b radix) (Fopp p) q (Fopp pq); auto with float real.
+apply MaxRoundedModeP with precision; auto.
+rewrite (Fopp_correct radix); auto with real.
+replace (FtoRradix (Fopp p) * FtoRradix q)%R with
+ (- (FtoRradix p * FtoRradix q))%R; [apply MinOppMax;auto|idtac].
+rewrite (Fopp_correct radix);
+ fold FtoRradix in |- *; auto with zarith; ring.
+intros r (s, (H5, (H6, (H7, (H8, H9))))); exists (Fopp r); exists (Fopp s);
+ repeat (split; simpl in |- *; auto with float real zarith).
+repeat rewrite (Fopp_correct radix); auto with zarith; fold FtoRradix in |- *;
+ rewrite H7; repeat rewrite (Fopp_correct radix); auto with zarith; 
+ fold FtoRradix; ring.
+repeat rewrite (Fopp_correct radix); auto with zarith; fold FtoRradix in |- *;
+ rewrite H8; repeat rewrite (Fopp_correct radix); auto with zarith; 
+ fold FtoRradix;ring.
+case (errorBoundedMultExpPos P H (Fopp p) (Fopp q) pq); auto with float real.
+rewrite (Fopp_correct radix); auto with real.
+rewrite (Fopp_correct radix); auto with real.
+replace (FtoRradix (Fopp p) * FtoRradix (Fopp q))%R with
+ (FtoRradix p * FtoRradix q)%R; auto; repeat rewrite (Fopp_correct radix);
+ fold FtoRradix in |- *; auto with zarith; ring.
+intros r (s, (H5, (H6, (H7, (H8, (H9, (H10, H11))))))); exists r; exists s;
+ repeat (split; simpl in |- *; auto with float real zarith).
+fold FtoRradix in |- *; rewrite H8; repeat rewrite (Fopp_correct radix);
+ auto with zarith; fold FtoRradix; ring.
+case (Rle_or_lt 0 p); intros Rl1.
+case (Rle_or_lt 0 q); intros Rl2.
+apply (errorBoundedMultExpPos P); auto.
+case errorBoundedMultExpPos with (isMin b radix) p (Fopp q) (Fopp pq); auto with float real.
+apply MinRoundedModeP with precision; auto.
+rewrite (Fopp_correct radix); auto with real.
+replace (FtoRradix p * FtoRradix (Fopp q))%R with
+ (- (FtoRradix p * FtoRradix q))%R; [apply MaxOppMin;auto|idtac].
+rewrite (Fopp_correct radix);
  fold FtoRradix in |- *; auto with zarith; ring.
 intros r (s, (H5, (H6, (H7, (H8, H9))))); exists (Fopp r); exists (Fopp s);
  repeat (split; simpl in |- *; auto with float real zarith).
@@ -635,10 +761,12 @@ repeat rewrite (Fopp_correct radix); auto with zarith; fold FtoRradix in |- *;
  rewrite H8; repeat rewrite (Fopp_correct radix); auto with zarith; 
  fold FtoRradix; ring.
 case (Rle_or_lt 0 q); intros Rl2.
-case (multExactExp_pos P H (Fopp p) q (Fopp pq)); auto with float real.
+case errorBoundedMultExpPos with (isMin b radix) (Fopp p) q (Fopp pq); auto with float real.
+apply MinRoundedModeP with precision; auto.
 rewrite (Fopp_correct radix); auto with real.
 replace (FtoRradix (Fopp p) * FtoRradix q)%R with
- (- (FtoRradix p * FtoRradix q))%R; auto; rewrite (Fopp_correct radix);
+ (- (FtoRradix p * FtoRradix q))%R; [apply MaxOppMin;auto|idtac].
+rewrite (Fopp_correct radix);
  fold FtoRradix in |- *; auto with zarith; ring.
 intros r (s, (H5, (H6, (H7, (H8, H9))))); exists (Fopp r); exists (Fopp s);
  repeat (split; simpl in |- *; auto with float real zarith).
@@ -647,8 +775,8 @@ repeat rewrite (Fopp_correct radix); auto with zarith; fold FtoRradix in |- *;
  fold FtoRradix; ring.
 repeat rewrite (Fopp_correct radix); auto with zarith; fold FtoRradix in |- *;
  rewrite H8; repeat rewrite (Fopp_correct radix); auto with zarith; 
- fold FtoRradix; ring.
-case (multExactExp_pos P H (Fopp p) (Fopp q) pq); auto with float real.
+ fold FtoRradix;ring.
+case (errorBoundedMultExpPos P H (Fopp p) (Fopp q) pq); auto with float real.
 rewrite (Fopp_correct radix); auto with real.
 rewrite (Fopp_correct radix); auto with real.
 replace (FtoRradix (Fopp p) * FtoRradix (Fopp q))%R with
@@ -659,4 +787,5 @@ intros r (s, (H5, (H6, (H7, (H8, (H9, (H10, H11))))))); exists r; exists s;
 fold FtoRradix in |- *; rewrite H8; repeat rewrite (Fopp_correct radix);
  auto with zarith; fold FtoRradix; ring.
 Qed.
+ 
 End FRoundP.

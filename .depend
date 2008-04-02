@@ -1,35 +1,102 @@
-AllFloat.vo: AllFloat.v ./Closest2Plus.vo ./ClosestMult.vo ./MSB.vo
-Closest2Plus.vo: Closest2Plus.v ./ClosestPlus.vo ./Closest2Prop.vo
-Closest2Prop.vo: Closest2Prop.v ./ClosestProp.vo
-ClosestMult.vo: ClosestMult.v ./FroundMult.vo ./ClosestProp.vo
-ClosestPlus.vo: ClosestPlus.v ./FroundPlus.vo ./ClosestProp.vo
-ClosestProp.vo: ClosestProp.v ./FroundProp.vo ./Closest.vo
-Closest.vo: Closest.v ./Fround.vo
-Digit.vo: Digit.v ./Faux.vo ./sTactic.vo
-ex.vo: ex.v ./AllFloat.vo ./FminOp.vo
-Faux.vo: Faux.v ./sTactic.vo
-Fbound.vo: Fbound.v ./Float.vo ./Fcomp.vo ./Fop.vo
-Fcomp.vo: Fcomp.v ./Float.vo
-Finduct.vo: Finduct.v ./Float.vo ./Fnorm.vo ./Fop.vo ./Fcomp.vo ./FSucc.vo ./FPred.vo
-Float.vo: Float.v ./Power.vo ./Faux.vo ./Digit.vo ./sTactic.vo
-FminOp.vo: FminOp.v ./AllFloat.vo ./Paux.vo ./Zdivides.vo ./Faux.vo ./Option.vo
-Fmin.vo: Fmin.v ./Float.vo ./Fnorm.vo ./Fop.vo ./Fcomp.vo ./FSucc.vo ./FPred.vo ./Zenum.vo
-Fnorm.vo: Fnorm.v ./Fbound.vo
-Fodd.vo: Fodd.v ./Float.vo ./Fnorm.vo ./Fop.vo ./Fcomp.vo ./FSucc.vo ./FPred.vo ./Fmin.vo
-Fop.vo: Fop.v ./Float.vo ./Fcomp.vo
-FPred.vo: FPred.v ./Float.vo ./Fnorm.vo ./Fop.vo ./Fcomp.vo ./FSucc.vo
-Fprop.vo: Fprop.v ./Fbound.vo
-FroundMult.vo: FroundMult.v ./FroundProp.vo ./Zdivides.vo
-FroundPlus.vo: FroundPlus.v ./FroundProp.vo ./Finduct.vo
-FroundProp.vo: FroundProp.v ./Fround.vo ./MSB.vo
-Fround.vo: Fround.v ./Float.vo ./Fnorm.vo ./Fop.vo ./Fcomp.vo ./FSucc.vo ./FPred.vo ./Fmin.vo ./Fodd.vo ./Fprop.vo
-FSucc.vo: FSucc.v ./Float.vo ./Fnorm.vo ./Fop.vo ./Fcomp.vo
-MSBProp.vo: MSBProp.v ./Float.vo ./Fop.vo ./Fnorm.vo ./MSB.vo
-MSB.vo: MSB.v ./Float.vo ./Fcomp.vo ./Fprop.vo ./Fop.vo ./Fnorm.vo ./Zdivides.vo
+AllFloat.vo: AllFloat.v RND.vo Closest2Plus.vo
+AllFloat.vi: AllFloat.v RND.vo Closest2Plus.vo
+Closest.vo: Closest.v Fround.vo
+Closest.vi: Closest.v Fround.vo
+Closest2Plus.vo: Closest2Plus.v ClosestPlus.vo Closest2Prop.vo
+Closest2Plus.vi: Closest2Plus.v ClosestPlus.vo Closest2Prop.vo
+Closest2Prop.vo: Closest2Prop.v ClosestProp.vo
+Closest2Prop.vi: Closest2Prop.v ClosestProp.vo
+ClosestMult.vo: ClosestMult.v FroundMult.vo ClosestProp.vo
+ClosestMult.vi: ClosestMult.v FroundMult.vo ClosestProp.vo
+ClosestPlus.vo: ClosestPlus.v FroundPlus.vo ClosestProp.vo
+ClosestPlus.vi: ClosestPlus.v FroundPlus.vo ClosestProp.vo
+ClosestProp.vo: ClosestProp.v FroundProp.vo Closest.vo
+ClosestProp.vi: ClosestProp.v FroundProp.vo Closest.vo
+Digit.vo: Digit.v Faux.vo
+Digit.vi: Digit.v Faux.vo
+FPred.vo: FPred.v FSucc.vo
+FPred.vi: FPred.v FSucc.vo
+FSucc.vo: FSucc.v Fnorm.vo
+FSucc.vi: FSucc.v Fnorm.vo
+Faux.vo: Faux.v sTactic.vo
+Faux.vi: Faux.v sTactic.vo
+Fbound.vo: Fbound.v Fop.vo
+Fbound.vi: Fbound.v Fop.vo
+Fcomp.vo: Fcomp.v Float.vo
+Fcomp.vi: Fcomp.v Float.vo
+Finduct.vo: Finduct.v FPred.vo
+Finduct.vi: Finduct.v FPred.vo
+Float.vo: Float.v Rpow.vo
+Float.vi: Float.v Rpow.vo
+Fmin.vo: Fmin.v Zenum.vo FPred.vo
+Fmin.vi: Fmin.v Zenum.vo FPred.vo
+Fnorm.vo: Fnorm.v Fbound.vo
+Fnorm.vi: Fnorm.v Fbound.vo
+Fodd.vo: Fodd.v Fmin.vo
+Fodd.vi: Fodd.v Fmin.vo
+Fop.vo: Fop.v Fcomp.vo
+Fop.vi: Fop.v Fcomp.vo
+Fprop.vo: Fprop.v Fbound.vo
+Fprop.vi: Fprop.v Fbound.vo
+Fround.vo: Fround.v Fprop.vo Fodd.vo
+Fround.vi: Fround.v Fprop.vo Fodd.vo
+FroundMult.vo: FroundMult.v FroundProp.vo
+FroundMult.vi: FroundMult.v FroundProp.vo
+FroundPlus.vo: FroundPlus.v Finduct.vo FroundProp.vo
+FroundPlus.vi: FroundPlus.v Finduct.vo FroundProp.vo
+FroundProp.vo: FroundProp.v Fround.vo MSB.vo
+FroundProp.vi: FroundProp.v Fround.vo MSB.vo
+MSB.vo: MSB.v Fprop.vo Zdivides.vo Fnorm.vo
+MSB.vi: MSB.v Fprop.vo Zdivides.vo Fnorm.vo
+MSBProp.vo: MSBProp.v MSB.vo
+MSBProp.vi: MSBProp.v MSB.vo
 Option.vo: Option.v
-Paux.vo: Paux.v ./Faux.vo ./sTactic.vo ./Digit.vo ./Option.vo
-Power.vo: Power.v ./Digit.vo ./Faux.vo ./sTactic.vo
-Rpower.vo: Rpower.v ./Digit.vo ./Faux.vo ./sTactic.vo
+Option.vi: Option.v
+Paux.vo: Paux.v Digit.vo Option.vo
+Paux.vi: Paux.v Digit.vo Option.vo
+Power.vo: Power.v Digit.vo Faux.vo sTactic.vo
+Power.vi: Power.v Digit.vo Faux.vo sTactic.vo
+Zdivides.vo: Zdivides.v Paux.vo
+Zdivides.vi: Zdivides.v Paux.vo
+Zenum.vo: Zenum.v Faux.vo
+Zenum.vi: Zenum.v Faux.vo
 sTactic.vo: sTactic.v
-Zdivides.vo: Zdivides.v ./Paux.vo ./sTactic.vo ./Digit.vo ./Faux.vo ./Option.vo
-Zenum.vo: Zenum.v ./sTactic.vo ./Faux.vo
+sTactic.vi: sTactic.v
+Rpow.vo: Rpow.v Digit.vo
+Rpow.vi: Rpow.v Digit.vo
+RND.vo: RND.v ClosestMult.vo
+RND.vi: RND.v ClosestMult.vo
+AllFloat.html: AllFloat.v RND.html Closest2Plus.html
+Closest.html: Closest.v Fround.html
+Closest2Plus.html: Closest2Plus.v ClosestPlus.html Closest2Prop.html
+Closest2Prop.html: Closest2Prop.v ClosestProp.html
+ClosestMult.html: ClosestMult.v FroundMult.html ClosestProp.html
+ClosestPlus.html: ClosestPlus.v FroundPlus.html ClosestProp.html
+ClosestProp.html: ClosestProp.v FroundProp.html Closest.html
+Digit.html: Digit.v Faux.html
+FPred.html: FPred.v FSucc.html
+FSucc.html: FSucc.v Fnorm.html
+Faux.html: Faux.v sTactic.html
+Fbound.html: Fbound.v Fop.html
+Fcomp.html: Fcomp.v Float.html
+Finduct.html: Finduct.v FPred.html
+Float.html: Float.v Rpow.html
+Fmin.html: Fmin.v Zenum.html FPred.html
+Fnorm.html: Fnorm.v Fbound.html
+Fodd.html: Fodd.v Fmin.html
+Fop.html: Fop.v Fcomp.html
+Fprop.html: Fprop.v Fbound.html
+Fround.html: Fround.v Fprop.html Fodd.html
+FroundMult.html: FroundMult.v FroundProp.html
+FroundPlus.html: FroundPlus.v Finduct.html FroundProp.html
+FroundProp.html: FroundProp.v Fround.html MSB.html
+MSB.html: MSB.v Fprop.html Zdivides.html Fnorm.html
+MSBProp.html: MSBProp.v MSB.html
+Option.html: Option.v
+Paux.html: Paux.v Digit.html Option.html
+Power.html: Power.v Digit.html Faux.html sTactic.html
+Zdivides.html: Zdivides.v Paux.html
+Zenum.html: Zenum.v Faux.html
+sTactic.html: sTactic.v
+Rpow.html: Rpow.v Digit.html
+RND.html: RND.v ClosestMult.html

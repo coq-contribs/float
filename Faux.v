@@ -1,19 +1,3 @@
-(* This program is free software; you can redistribute it and/or      *)
-(* modify it under the terms of the GNU Lesser General Public License *)
-(* as published by the Free Software Foundation; either version 2.1   *)
-(* of the License, or (at your option) any later version.             *)
-(*                                                                    *)
-(* This program is distributed in the hope that it will be useful,    *)
-(* but WITHOUT ANY WARRANTY; without even the implied warranty of     *)
-(* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the      *)
-(* GNU General Public License for more details.                       *)
-(*                                                                    *)
-(* You should have received a copy of the GNU Lesser General Public   *)
-(* License along with this program; if not, write to the Free         *)
-(* Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA *)
-(* 02110-1301 USA                                                     *)
-
-
 (****************************************************************************
                                                                              
           IEEE754  :  Faux                                                   
@@ -22,13 +6,13 @@
                                                                              
   *****************************************************************************
   Auxillary properties about natural numbers, relative numbers and reals *)
-Require Import Min.
-Require Import Arith.
-Require Import Reals.
-Require Import Zpower.
-Require Import ZArith.
-Require Import Zcomplements.
-Require Import sTactic.
+Require Export Min.
+Require Export Arith.
+Require Export Reals.
+Require Export Zpower.
+Require Export ZArith.
+Require Export Zcomplements.
+Require Export sTactic.
 Hint Resolve R1_neq_R0: real.
 (*Missing rule for nat *)
  
@@ -231,7 +215,7 @@ apply Rle_trans with (- p)%R; auto with real.
 apply RmaxLess1; auto.
 Qed.
  
-Theorem Rabsolu_Zabs : forall z : BinInt.Z, Rabs (IZR z) = IZR (Zabs z).
+Theorem Rabsolu_Zabs : forall z : Z, Rabs (IZR z) = IZR (Zabs z).
 intros z; case z; simpl in |- *; auto with real.
 apply Rabs_right; auto with real.
 intros p0; apply Rabs_right; auto with real zarith.
@@ -262,50 +246,50 @@ Qed.
 Hint Resolve Rle_R0_Ropp Rlt_R0_Ropp: real.
 (* Properties of Z *)
  
-Theorem convert_not_O : forall p : BinPos.positive, BinPos.nat_of_P p <> 0.
+Theorem convert_not_O : forall p : positive, nat_of_P p <> 0.
 intros p; elim p.
-intros p0 H'; unfold BinPos.nat_of_P in |- *; simpl in |- *; rewrite Pnat.ZL6.
-generalize H'; case (BinPos.nat_of_P p0); auto.
-intros p0 H'; unfold BinPos.nat_of_P in |- *; simpl in |- *; rewrite Pnat.ZL6.
-generalize H'; case (BinPos.nat_of_P p0); simpl in |- *; auto.
-unfold BinPos.nat_of_P in |- *; simpl in |- *; auto with arith.
+intros p0 H'; unfold nat_of_P in |- *; simpl in |- *; rewrite ZL6.
+generalize H'; case (nat_of_P p0); auto.
+intros p0 H'; unfold nat_of_P in |- *; simpl in |- *; rewrite ZL6.
+generalize H'; case (nat_of_P p0); simpl in |- *; auto.
+unfold nat_of_P in |- *; simpl in |- *; auto with arith.
 Qed.
 Hint Resolve convert_not_O: zarith arith.
 Hint Resolve Zlt_le_weak Zle_not_gt Zgt_irrefl Zlt_irrefl Zle_not_lt
-  Zlt_not_le Zlt_asym Znat.inj_lt Znat.inj_le: zarith.
+  Zlt_not_le Zlt_asym inj_lt inj_le: zarith.
  
 Theorem inj_abs :
- forall x : BinInt.Z, (0 <= x)%Z -> Z_of_nat (Zabs_nat x) = x.
+ forall x : Z, (0 <= x)%Z -> Z_of_nat (Zabs_nat x) = x.
 intros x; elim x; auto.
 unfold Zabs_nat in |- *.
 intros p.
 pattern p at 1 3 in |- *;
- rewrite <- (Pnat.pred_o_P_of_succ_nat_o_nat_of_P_eq_id p).
-generalize (convert_not_O p); case (BinPos.nat_of_P p); simpl in |- *;
+ rewrite <- (pred_o_P_of_succ_nat_o_nat_of_P_eq_id p).
+generalize (convert_not_O p); case (nat_of_P p); simpl in |- *;
  auto with arith.
 intros H'; case H'; auto.
-intros n H' H'0; rewrite BinPos.Ppred_succ; auto.
+intros n H' H'0; rewrite Ppred_succ; auto.
 intros p H'; Contradict H'; auto.
 Qed.
  
 Theorem inject_nat_convert :
- forall (p : BinInt.Z) (q : BinPos.positive),
- p = BinInt.Zpos q -> Z_of_nat (BinPos.nat_of_P q) = p.
+ forall (p : Z) (q : positive),
+ p = Zpos q -> Z_of_nat (nat_of_P q) = p.
 intros p q H'; rewrite H'.
-CaseEq (BinPos.nat_of_P q); simpl in |- *.
-elim q; unfold BinPos.nat_of_P in |- *; simpl in |- *; intros;
+CaseEq (nat_of_P q); simpl in |- *.
+elim q; unfold nat_of_P in |- *; simpl in |- *; intros;
  try discriminate.
-absurd (0%Z = BinInt.Zpos p0); auto.
+absurd (0%Z = Zpos p0); auto.
 red in |- *; intros H'0; try discriminate.
 apply H; auto.
-change (BinPos.nat_of_P p0 = 0) in |- *.
-generalize H0; rewrite Pnat.ZL6; case (BinPos.nat_of_P p0); simpl in |- *;
+change (nat_of_P p0 = 0) in |- *.
+generalize H0; rewrite ZL6; case (nat_of_P p0); simpl in |- *;
  auto; intros; try discriminate.
-intros n; rewrite <- Pnat.nat_of_P_o_P_of_succ_nat_eq_succ.
-intros H'0; apply f_equal with (f := BinInt.Zpos).
-apply Pnat.nat_of_P_inj; auto.
+intros n; rewrite <- nat_of_P_o_P_of_succ_nat_eq_succ.
+intros H'0; apply f_equal with (f := Zpos).
+apply nat_of_P_inj; auto.
 Qed.
-Hint Resolve Znat.inj_le Znat.inj_lt: zarith.
+Hint Resolve inj_le inj_lt: zarith.
  
 Theorem ZleLe : forall x y : nat, (Z_of_nat x <= Z_of_nat y)%Z -> x <= y.
 intros x y H'.
@@ -322,120 +306,120 @@ idtac; rewrite H'; auto with zarith.
 Qed.
  
 Theorem Zcompare_EGAL :
- forall p q : BinInt.Z, (p ?= q)%Z = Datatypes.Eq -> p = q.
+ forall p q : Z, (p ?= q)%Z = Datatypes.Eq -> p = q.
 intros p q; case p; case q; simpl in |- *; auto with arith;
  try (intros; discriminate); intros q1 p1.
-intros H1; rewrite (BinPos.Pcompare_Eq_eq p1 q1); auto.
-generalize (BinPos.Pcompare_Eq_eq p1 q1);
+intros H1; rewrite (Pcompare_Eq_eq p1 q1); auto.
+generalize (Pcompare_Eq_eq p1 q1);
  case ((p1 ?= q1)%positive Datatypes.Eq); simpl in |- *; 
  intros H H1; try discriminate; rewrite H; auto.
 Qed.
  
-Theorem Zlt_Zopp : forall x y : BinInt.Z, (x < y)%Z -> (- y < - x)%Z.
+Theorem Zlt_Zopp : forall x y : Z, (x < y)%Z -> (- y < - x)%Z.
 intros x y; case x; case y; simpl in |- *; auto with zarith; intros p p0;
- unfold Zlt in |- *; simpl in |- *; rewrite <- BinPos.ZC4; 
+ unfold Zlt in |- *; simpl in |- *; rewrite <- ZC4; 
  auto.
 Qed.
 Hint Resolve Zlt_Zopp: zarith.
  
-Theorem Zle_Zopp : forall x y : BinInt.Z, (x <= y)%Z -> (- y <= - x)%Z.
+Theorem Zle_Zopp : forall x y : Z, (x <= y)%Z -> (- y <= - x)%Z.
 intros x y H'; case (Zle_lt_or_eq _ _ H'); auto with zarith.
 Qed.
 Hint Resolve Zle_Zopp: zarith.
  
 Theorem absolu_INR : forall n : nat, Zabs_nat (Z_of_nat n) = n.
 intros n; case n; simpl in |- *; auto with arith.
-intros n0; rewrite Pnat.nat_of_P_o_P_of_succ_nat_eq_succ; auto with arith.
+intros n0; rewrite nat_of_P_o_P_of_succ_nat_eq_succ; auto with arith.
 Qed.
  
-Theorem absolu_Zopp : forall p : BinInt.Z, Zabs_nat (- p) = Zabs_nat p.
+Theorem absolu_Zopp : forall p : Z, Zabs_nat (- p) = Zabs_nat p.
 intros p; case p; simpl in |- *; auto.
 Qed.
  
-Theorem Zabs_absolu : forall z : BinInt.Z, Zabs z = Z_of_nat (Zabs_nat z).
+Theorem Zabs_absolu : forall z : Z, Zabs z = Z_of_nat (Zabs_nat z).
 intros z; case z; simpl in |- *; auto; intros p; apply sym_equal;
  apply inject_nat_convert; auto.
 Qed.
  
 Theorem absolu_comp_mult :
- forall p q : BinInt.Z, Zabs_nat (p * q) = Zabs_nat p * Zabs_nat q.
+ forall p q : Z, Zabs_nat (p * q) = Zabs_nat p * Zabs_nat q.
 intros p q; case p; case q; simpl in |- *; auto; intros p0 p1;
  apply
-  ((fun (x y : BinPos.positive) (_ : BinPos.positive -> BinPos.positive) =>
-    Pnat.nat_of_P_mult_morphism x y) p1 p0 (fun x => x)).
+  ((fun (x y : positive) (_ : positive -> positive) =>
+    nat_of_P_mult_morphism x y) p1 p0 (fun x => x)).
 Qed.
  
-Theorem Zmin_sym : forall m n : BinInt.Z, Zmin n m = Zmin m n.
+Theorem Zmin_sym : forall m n : Z, Zmin n m = Zmin m n.
 intros m n; unfold Zmin in |- *.
 case n; case m; simpl in |- *; auto.
-intros p p0; rewrite (BinPos.ZC4 p p0).
-generalize (BinPos.Pcompare_Eq_eq p0 p).
+intros p p0; rewrite (ZC4 p p0).
+generalize (Pcompare_Eq_eq p0 p).
 case ((p0 ?= p)%positive Datatypes.Eq); simpl in |- *; auto.
 intros H'; rewrite H'; auto.
-intros p p0; rewrite (BinPos.ZC4 p p0).
-generalize (BinPos.Pcompare_Eq_eq p0 p).
+intros p p0; rewrite (ZC4 p p0).
+generalize (Pcompare_Eq_eq p0 p).
 case ((p0 ?= p)%positive Datatypes.Eq); simpl in |- *; auto.
 intros H'; rewrite H'; auto.
 Qed.
  
-Theorem Zpower_nat_O : forall z : BinInt.Z, Zpower_nat z 0 = Z_of_nat 1.
+Theorem Zpower_nat_O : forall z : Z, Zpower_nat z 0 = Z_of_nat 1.
 intros z; unfold Zpower_nat in |- *; simpl in |- *; auto.
 Qed.
  
-Theorem Zpower_nat_1 : forall z : BinInt.Z, Zpower_nat z 1 = z.
+Theorem Zpower_nat_1 : forall z : Z, Zpower_nat z 1 = z.
 intros z; unfold Zpower_nat in |- *; simpl in |- *; rewrite Zmult_1_r; auto.
 Qed.
  
-Theorem Zmin_le1 : forall z1 z2 : BinInt.Z, (z1 <= z2)%Z -> Zmin z1 z2 = z1.
+Theorem Zmin_le1 : forall z1 z2 : Z, (z1 <= z2)%Z -> Zmin z1 z2 = z1.
 intros z1 z2; unfold Zle, Zmin in |- *; case (z1 ?= z2)%Z; auto; intros H;
  Contradict H; auto.
 Qed.
  
-Theorem Zmin_le2 : forall z1 z2 : BinInt.Z, (z2 <= z1)%Z -> Zmin z1 z2 = z2.
+Theorem Zmin_le2 : forall z1 z2 : Z, (z2 <= z1)%Z -> Zmin z1 z2 = z2.
 intros z1 z2 H; rewrite Zmin_sym; apply Zmin_le1; auto.
 Qed.
  
 Theorem Zmin_Zle :
- forall z1 z2 z3 : BinInt.Z,
+ forall z1 z2 z3 : Z,
  (z1 <= z2)%Z -> (z1 <= z3)%Z -> (z1 <= Zmin z2 z3)%Z.
 intros z1 z2 z3 H' H'0; unfold Zmin in |- *.
 case (z2 ?= z3)%Z; auto.
 Qed.
  
 Theorem Zminus_n_predm :
- forall n m : BinInt.Z, Zsucc (n - m) = (n - Zpred m)%Z.
+ forall n m : Z, Zsucc (n - m) = (n - Zpred m)%Z.
 intros n m.
 unfold Zpred in |- *; unfold Zsucc in |- *; ring.
 Qed.
  
-Theorem Zopp_Zpred_Zs : forall z : BinInt.Z, (- Zpred z)%Z = Zsucc (- z).
+Theorem Zopp_Zpred_Zs : forall z : Z, (- Zpred z)%Z = Zsucc (- z).
 intros z; unfold Zpred, Zsucc in |- *; ring.
 Qed.
  
 Theorem Zle_mult_gen :
- forall x y : BinInt.Z, (0 <= x)%Z -> (0 <= y)%Z -> (0 <= x * y)%Z.
+ forall x y : Z, (0 <= x)%Z -> (0 <= y)%Z -> (0 <= x * y)%Z.
 intros x y H' H'0; case (Zle_lt_or_eq _ _ H').
-intros H'1; rewrite BinInt.Zmult_comm; apply Zmult_gt_0_le_0_compat; auto;
+intros H'1; rewrite Zmult_comm; apply Zmult_gt_0_le_0_compat; auto;
  apply Zlt_gt; auto.
 intros H'1; rewrite <- H'1; simpl in |- *; auto with zarith.
 Qed.
 Hint Resolve Zle_mult_gen: zarith.
  
-Definition Zmax : forall x_ x_ : BinInt.Z, BinInt.Z :=
-  fun n m : BinInt.Z =>
+Definition Zmax : forall x_ x_ : Z, Z :=
+  fun n m : Z =>
   match (n ?= m)%Z with
   | Datatypes.Eq => m
   | Datatypes.Lt => m
   | Datatypes.Gt => n
   end.
  
-Theorem ZmaxLe1 : forall z1 z2 : BinInt.Z, (z1 <= Zmax z1 z2)%Z.
+Theorem ZmaxLe1 : forall z1 z2 : Z, (z1 <= Zmax z1 z2)%Z.
 intros z1 z2; unfold Zmax in |- *; CaseEq (z1 ?= z2)%Z; simpl in |- *;
  auto with zarith.
 unfold Zle in |- *; intros H; rewrite H; red in |- *; intros; discriminate.
 Qed.
  
-Theorem ZmaxSym : forall z1 z2 : BinInt.Z, Zmax z1 z2 = Zmax z2 z1.
+Theorem ZmaxSym : forall z1 z2 : Z, Zmax z1 z2 = Zmax z2 z1.
 intros z1 z2; unfold Zmax in |- *; CaseEq (z1 ?= z2)%Z; CaseEq (z2 ?= z1)%Z;
  intros H1 H2; try case (Zcompare_EGAL _ _ H1); auto;
  try case (Zcompare_EGAL _ _ H2); auto; Contradict H1.
@@ -445,39 +429,39 @@ case (Zcompare.Zcompare_Gt_Lt_antisym z1 z2); auto.
 intros H'; rewrite H'; auto; intros; red in |- *; intros; discriminate.
 Qed.
  
-Theorem Zmax_le2 : forall z1 z2 : BinInt.Z, (z1 <= z2)%Z -> Zmax z1 z2 = z2.
+Theorem Zmax_le2 : forall z1 z2 : Z, (z1 <= z2)%Z -> Zmax z1 z2 = z2.
 intros z1 z2; unfold Zle, Zmax in |- *; case (z1 ?= z2)%Z; auto.
 intros H'; case H'; auto.
 Qed.
  
-Theorem Zmax_le1 : forall z1 z2 : BinInt.Z, (z2 <= z1)%Z -> Zmax z1 z2 = z1.
+Theorem Zmax_le1 : forall z1 z2 : Z, (z2 <= z1)%Z -> Zmax z1 z2 = z1.
 intros z1 z2 H'; rewrite ZmaxSym; apply Zmax_le2; auto.
 Qed.
  
-Theorem ZmaxLe2 : forall z1 z2 : BinInt.Z, (z2 <= Zmax z1 z2)%Z.
+Theorem ZmaxLe2 : forall z1 z2 : Z, (z2 <= Zmax z1 z2)%Z.
 intros z1 z2; rewrite ZmaxSym; apply ZmaxLe1.
 Qed.
 Hint Resolve ZmaxLe1 ZmaxLe2: zarith.
  
 Theorem Zeq_Zs :
- forall p q : BinInt.Z, (p <= q)%Z -> (q < Zsucc p)%Z -> p = q.
+ forall p q : Z, (p <= q)%Z -> (q < Zsucc p)%Z -> p = q.
 intros p q H' H'0; apply Zle_antisym; auto.
 apply Zlt_succ_le; auto.
 Qed.
  
-Theorem Zmin_Zmax : forall z1 z2 : BinInt.Z, (Zmin z1 z2 <= Zmax z1 z2)%Z.
+Theorem Zmin_Zmax : forall z1 z2 : Z, (Zmin z1 z2 <= Zmax z1 z2)%Z.
 intros z1 z2; case (Zle_or_lt z1 z2); unfold Zle, Zlt, Zmin, Zmax in |- *;
  CaseEq (z1 ?= z2)%Z; auto; intros H1 H2; try rewrite H1; 
  try rewrite H2; red in |- *; intros; discriminate.
 Qed.
  
 Theorem Zabs_Zmult :
- forall z1 z2 : BinInt.Z, Zabs (z1 * z2) = (Zabs z1 * Zabs z2)%Z.
+ forall z1 z2 : Z, Zabs (z1 * z2) = (Zabs z1 * Zabs z2)%Z.
 intros z1 z2; case z1; case z2; simpl in |- *; auto with zarith.
 Qed.
  
 Theorem Zle_Zmult_comp_r :
- forall x y z : BinInt.Z, (0 <= z)%Z -> (x <= y)%Z -> (x * z <= y * z)%Z.
+ forall x y z : Z, (0 <= z)%Z -> (x <= y)%Z -> (x * z <= y * z)%Z.
 intros x y z H' H'0; case (Zle_lt_or_eq _ _ H'); intros Zlt1.
 apply Zmult_gt_0_le_compat_r; auto.
 apply Zlt_gt; auto.
@@ -485,28 +469,28 @@ rewrite <- Zlt1; repeat rewrite <- Zmult_0_r_reverse; auto with zarith.
 Qed.
  
 Theorem Zle_Zmult_comp_l :
- forall x y z : BinInt.Z, (0 <= z)%Z -> (x <= y)%Z -> (z * x <= z * y)%Z.
-intros x y z H' H'0; repeat rewrite (BinInt.Zmult_comm z);
+ forall x y z : Z, (0 <= z)%Z -> (x <= y)%Z -> (z * x <= z * y)%Z.
+intros x y z H' H'0; repeat rewrite (Zmult_comm z);
  apply Zle_Zmult_comp_r; auto.
 Qed.
  
 Theorem NotZmultZero :
- forall z1 z2 : BinInt.Z, z1 <> 0%Z -> z2 <> 0%Z -> (z1 * z2)%Z <> 0%Z.
+ forall z1 z2 : Z, z1 <> 0%Z -> z2 <> 0%Z -> (z1 * z2)%Z <> 0%Z.
 intros z1 z2; case z1; case z2; simpl in |- *; intros; auto; try discriminate.
 Qed.
 Hint Resolve NotZmultZero: zarith.
 (* Conversions from R <-> Z  <-> N *)
  
-Theorem IZR_zero : forall p : BinInt.Z, p = 0%Z -> IZR p = 0%R.
+Theorem IZR_zero : forall p : Z, p = 0%Z -> IZR p = 0%R.
 intros p H'; rewrite H'; auto.
 Qed.
 Hint Resolve not_O_INR: real.
  
-Theorem IZR_zero_r : forall p : BinInt.Z, IZR p = 0%R -> p = 0%Z.
+Theorem IZR_zero_r : forall p : Z, IZR p = 0%R -> p = 0%Z.
 intros p; case p; simpl in |- *; auto.
 intros p1 H'; Contradict H'; auto with real zarith.
-intros p1 H'; absurd (INR (BinPos.nat_of_P p1) = 0%R); auto with real zarith.
-rewrite <- (Ropp_involutive (INR (BinPos.nat_of_P p1))).
+intros p1 H'; absurd (INR (nat_of_P p1) = 0%R); auto with real zarith.
+rewrite <- (Ropp_involutive (INR (nat_of_P p1))).
 rewrite H'; auto with real.
 Qed.
  
@@ -549,20 +533,20 @@ intros n; elim n; simpl in |- *; auto with arith.
 Qed.
 Hint Resolve not_O_lt: arith.
  
-Theorem NEq_IZRO : forall n : BinInt.Z, n <> 0%Z -> IZR n <> 0%R.
+Theorem NEq_IZRO : forall n : Z, n <> 0%Z -> IZR n <> 0%R.
 intros n H; Contradict H.
 apply IZR_zero_r; auto.
 Qed.
 Hint Resolve NEq_IZRO: real.
  
-Theorem Rlt_IZR : forall p q : BinInt.Z, (p < q)%Z -> (IZR p < IZR q)%R.
+Theorem Rlt_IZR : forall p q : Z, (p < q)%Z -> (IZR p < IZR q)%R.
 intros p q H; case (Rle_or_lt (IZR q) (IZR p)); auto.
 intros H1; Contradict H; apply Zle_not_lt.
 apply le_IZR; auto.
 Qed.
 Hint Resolve Rlt_IZR: real.
  
-Theorem Rle_IZR : forall x y : BinInt.Z, (x <= y)%Z -> (IZR x <= IZR y)%R.
+Theorem Rle_IZR : forall x y : Z, (x <= y)%Z -> (IZR x <= IZR y)%R.
 intros x y H'.
 case (Zle_lt_or_eq _ _ H'); clear H'; intros H'.
 apply Rlt_le; auto with real.
@@ -570,22 +554,22 @@ rewrite <- H'; auto with real.
 Qed.
 Hint Resolve Rle_IZR: real.
  
-Theorem Rlt_IZRO : forall p : BinInt.Z, (0 < p)%Z -> (0 < IZR p)%R.
+Theorem Rlt_IZRO : forall p : Z, (0 < p)%Z -> (0 < IZR p)%R.
 intros p H; replace 0%R with (IZR 0); auto with real.
 Qed.
 Hint Resolve Rlt_IZRO: real.
  
-Theorem Rle_IZRO : forall x y : BinInt.Z, (0 <= y)%Z -> (0 <= IZR y)%R.
+Theorem Rle_IZRO : forall x y : Z, (0 <= y)%Z -> (0 <= IZR y)%R.
 intros; replace 0%R with (IZR 0); auto with real.
 Qed.
 Hint Resolve Rle_IZRO: real.
  
-Theorem Rlt_IZR1 : forall p q : BinInt.Z, (1 < q)%Z -> (1 < IZR q)%R.
+Theorem Rlt_IZR1 : forall p q : Z, (1 < q)%Z -> (1 < IZR q)%R.
 intros; replace 1%R with (IZR 1); auto with real.
 Qed.
 Hint Resolve Rlt_IZR1: real.
  
-Theorem Rle_IZR1 : forall x y : BinInt.Z, (1 <= y)%Z -> (1 <= IZR y)%R.
+Theorem Rle_IZR1 : forall x y : Z, (1 <= y)%Z -> (1 <= IZR y)%R.
 intros; replace 1%R with (IZR 1); auto with real.
 Qed.
 Hint Resolve Rle_IZR1: real.
@@ -630,63 +614,63 @@ intros H'0; apply lt_le_weak; apply lt_Rlt; auto.
 intros H'0; rewrite <- (INR_inv _ _ H'0); auto with arith.
 Qed.
  
-Theorem Rmult_IZR : forall z t : BinInt.Z, IZR (z * t) = (IZR z * IZR t)%R.
+Theorem Rmult_IZR : forall z t : Z, IZR (z * t) = (IZR z * IZR t)%R.
 intros z t; case z; case t; simpl in |- *; auto with real.
-intros t1 z1; rewrite Pnat.nat_of_P_mult_morphism; auto with real.
-intros t1 z1; rewrite Pnat.nat_of_P_mult_morphism; auto with real.
+intros t1 z1; rewrite nat_of_P_mult_morphism; auto with real.
+intros t1 z1; rewrite nat_of_P_mult_morphism; auto with real.
 rewrite Rmult_comm.
 rewrite Ropp_mult_distr_l_reverse; auto with real.
 apply Ropp_eq_compat; rewrite mult_comm; auto with real.
-intros t1 z1; rewrite Pnat.nat_of_P_mult_morphism; auto with real.
+intros t1 z1; rewrite nat_of_P_mult_morphism; auto with real.
 rewrite Ropp_mult_distr_l_reverse; auto with real.
-intros t1 z1; rewrite Pnat.nat_of_P_mult_morphism; auto with real.
+intros t1 z1; rewrite nat_of_P_mult_morphism; auto with real.
 rewrite Rmult_opp_opp; auto with real.
 Qed.
  
 Theorem absolu_Zs :
- forall z : BinInt.Z, (0 <= z)%Z -> Zabs_nat (Zsucc z) = S (Zabs_nat z).
+ forall z : Z, (0 <= z)%Z -> Zabs_nat (Zsucc z) = S (Zabs_nat z).
 intros z; case z.
 3: intros p H'; Contradict H'; auto with zarith.
 replace (Zsucc 0) with (Z_of_nat 1).
 intros H'; rewrite absolu_INR; simpl in |- *; auto.
 simpl in |- *; auto.
 intros p H'; rewrite <- Zpos_succ_morphism; simpl in |- *; auto with zarith.
-unfold BinPos.nat_of_P in |- *; rewrite Pnat.Pmult_nat_succ_morphism; auto.
+unfold nat_of_P in |- *; rewrite Pmult_nat_succ_morphism; auto.
 Qed.
 Hint Resolve Zlt_le_succ: zarith.
  
 Theorem Zlt_next :
- forall n m : BinInt.Z, (n < m)%Z -> m = Zsucc n \/ (Zsucc n < m)%Z.
+ forall n m : Z, (n < m)%Z -> m = Zsucc n \/ (Zsucc n < m)%Z.
 intros n m H'; case (Zle_lt_or_eq (Zsucc n) m); auto with zarith.
 Qed.
  
 Theorem Zle_next :
- forall n m : BinInt.Z, (n <= m)%Z -> m = n \/ (Zsucc n <= m)%Z.
+ forall n m : Z, (n <= m)%Z -> m = n \/ (Zsucc n <= m)%Z.
 intros n m H'; case (Zle_lt_or_eq _ _ H'); auto with zarith.
 Qed.
  
-Theorem Zlt_Zopp_Inv : forall p q : BinInt.Z, (- p < - q)%Z -> (q < p)%Z.
+Theorem Zlt_Zopp_Inv : forall p q : Z, (- p < - q)%Z -> (q < p)%Z.
 intros x y H'; case (Zle_or_lt x y); auto with zarith.
 Qed.
  
-Theorem Zle_Zopp_Inv : forall p q : BinInt.Z, (- p <= - q)%Z -> (q <= p)%Z.
+Theorem Zle_Zopp_Inv : forall p q : Z, (- p <= - q)%Z -> (q <= p)%Z.
 intros p q H'; case (Zle_lt_or_eq _ _ H'); auto with zarith.
 Qed.
  
 Theorem absolu_Zs_neg :
- forall z : BinInt.Z, (z < 0)%Z -> S (Zabs_nat (Zsucc z)) = Zabs_nat z.
+ forall z : Z, (z < 0)%Z -> S (Zabs_nat (Zsucc z)) = Zabs_nat z.
 intros z H'; apply inject_nat_eq.
-rewrite Znat.inj_S.
+rewrite inj_S.
 repeat rewrite <- (absolu_Zopp (Zsucc z)).
 repeat rewrite <- (absolu_Zopp z).
 repeat rewrite inj_abs; replace 0%Z with (- (0))%Z; auto with zarith.
 Qed.
  
 Theorem Zlt_absolu :
- forall (x : BinInt.Z) (n : nat), Zabs_nat x < n -> (x < Z_of_nat n)%Z.
+ forall (x : Z) (n : nat), Zabs_nat x < n -> (x < Z_of_nat n)%Z.
 intros x n; case x; simpl in |- *; auto with zarith.
 replace 0%Z with (Z_of_nat 0); auto with zarith.
-intros p; rewrite <- (inject_nat_convert (BinInt.Zpos p) p); auto with zarith.
+intros p; rewrite <- (inject_nat_convert (Zpos p) p); auto with zarith.
 case n; simpl in |- *; intros; red in |- *; simpl in |- *; auto.
 Qed.
  
@@ -694,19 +678,19 @@ Theorem inj_pred :
  forall n : nat, n <> 0 -> Z_of_nat (pred n) = Zpred (Z_of_nat n).
 intros n; case n; auto.
 intros H'; Contradict H'; auto.
-intros n0 H'; rewrite Znat.inj_S; rewrite <- Zpred_succ; auto.
+intros n0 H'; rewrite inj_S; rewrite <- Zpred_succ; auto.
 Qed.
  
-Theorem Zle_abs : forall p : BinInt.Z, (p <= Z_of_nat (Zabs_nat p))%Z.
+Theorem Zle_abs : forall p : Z, (p <= Z_of_nat (Zabs_nat p))%Z.
 intros p; case p; simpl in |- *; auto with zarith; intros q;
- rewrite inject_nat_convert with (p := BinInt.Zpos q); 
+ rewrite inject_nat_convert with (p := Zpos q); 
  auto with zarith.
 unfold Zle in |- *; red in |- *; intros H'2; discriminate.
 Qed.
 Hint Resolve Zle_abs: zarith.
  
 Theorem ZleAbs :
- forall (z : BinInt.Z) (n : nat),
+ forall (z : Z) (n : nat),
  (- Z_of_nat n <= z)%Z -> (z <= Z_of_nat n)%Z -> Zabs_nat z <= n.
 intros z n H' H'0; case (le_or_lt (Zabs_nat z) n); auto; intros lt.
 case (Zle_or_lt 0 z); intros Zle0.
@@ -724,24 +708,22 @@ Qed.
 Theorem lt_Zlt_inv : forall n m : nat, (Z_of_nat n < Z_of_nat m)%Z -> n < m.
 intros n m H'; case (le_or_lt n m); auto.
 intros H'0.
-case (le_lt_or_eq _ _ H'0); auto; intros H'1.
-Contradict H'.
-apply Zle_not_lt; auto with zarith.
-intros H'0.
+case (le_lt_or_eq _ _ H'0); auto with zarith.
+intros H'1.
 Contradict H'.
 apply Zle_not_lt; auto with zarith.
 Qed.
  
-Theorem NconvertO : forall p : BinPos.positive, BinPos.nat_of_P p <> 0.
-intros p; elim p; unfold BinPos.nat_of_P in |- *; simpl in |- *.
+Theorem NconvertO : forall p : positive, nat_of_P p <> 0.
+intros p; elim p; unfold nat_of_P in |- *; simpl in |- *.
 intros p0 H'; red in |- *; intros H'0; discriminate.
-intros p0; rewrite Pnat.ZL6; unfold BinPos.nat_of_P in |- *.
-case (BinPos.Pmult_nat p0 1); simpl in |- *; auto.
+intros p0; rewrite ZL6; unfold nat_of_P in |- *.
+case (Pmult_nat p0 1); simpl in |- *; auto.
 red in |- *; intros H'; discriminate.
 Qed.
 Hint Resolve NconvertO: zarith.
  
-Theorem absolu_lt_nz : forall z : BinInt.Z, z <> 0%Z -> 0 < Zabs_nat z.
+Theorem absolu_lt_nz : forall z : Z, z <> 0%Z -> 0 < Zabs_nat z.
 intros z; case z; simpl in |- *; auto; try (intros H'; case H'; auto; fail);
  intros p; generalize (NconvertO p); auto with arith.
 Qed.
@@ -794,35 +776,35 @@ apply sym_equal; apply tech_up; auto.
 replace (Z_of_nat n + Z_of_nat 1)%Z with (Z_of_nat (S n)).
 repeat rewrite <- INR_IZR_INZ.
 apply INR_lt_nm; auto.
-rewrite BinInt.Zplus_comm; rewrite <- Znat.inj_plus; simpl in |- *; auto.
+rewrite Zplus_comm; rewrite <- inj_plus; simpl in |- *; auto.
 rewrite plus_IZR; simpl in |- *; auto with real.
 repeat rewrite <- INR_IZR_INZ; auto with real.
 Qed.
  
-Theorem Int_part_IZR : forall z : BinInt.Z, Int_part (IZR z) = z.
+Theorem Int_part_IZR : forall z : Z, Int_part (IZR z) = z.
 intros z; unfold Int_part in |- *.
 cut (up (IZR z) = (z + 1)%Z).
-intros Z1; rewrite Z1; rewrite BinInt.Zplus_comm; apply Zminus_plus;
+intros Z1; rewrite Z1; rewrite Zplus_comm; apply Zminus_plus;
  auto with zarith.
 apply sym_equal; apply tech_up; simpl in |- *; auto with real zarith.
 replace (IZR z) with (IZR z + IZR 0)%R; try rewrite plus_IZR;
  auto with real zarith.
 Qed.
  
-Theorem Zlt_Rlt : forall z1 z2 : BinInt.Z, (IZR z1 < IZR z2)%R -> (z1 < z2)%Z.
+Theorem Zlt_Rlt : forall z1 z2 : Z, (IZR z1 < IZR z2)%R -> (z1 < z2)%Z.
 intros z1 z2 H; case (Zle_or_lt z2 z1); auto.
 intros H1; Contradict H; auto with real zarith.
 apply Rle_not_lt; auto with real zarith.
 Qed.
  
 Theorem Zle_Rle :
- forall z1 z2 : BinInt.Z, (IZR z1 <= IZR z2)%R -> (z1 <= z2)%Z.
+ forall z1 z2 : Z, (IZR z1 <= IZR z2)%R -> (z1 <= z2)%Z.
 intros z1 z2 H; case (Zle_or_lt z1 z2); auto.
 intros H1; Contradict H; auto with real zarith.
 apply Rlt_not_le; auto with real zarith.
 Qed.
  
-Theorem IZR_inv : forall z1 z2 : BinInt.Z, IZR z1 = IZR z2 :>R -> z1 = z2.
+Theorem IZR_inv : forall z1 z2 : Z, IZR z1 = IZR z2 :>R -> z1 = z2.
 intros z1 z2 H; apply Zle_antisym; apply Zle_Rle; rewrite H; auto with real.
 Qed.
  
@@ -831,7 +813,7 @@ intros x; case x; simpl in |- *; auto.
 intros p H; Contradict H; auto with zarith.
 Qed.
  
-Theorem Zabs_Zs : forall z : BinInt.Z, (Zabs (Zsucc z) <= Zsucc (Zabs z))%Z.
+Theorem Zabs_Zs : forall z : Z, (Zabs (Zsucc z) <= Zsucc (Zabs z))%Z.
 intros z; case z; auto.
 simpl in |- *; auto with zarith.
 repeat rewrite Zabs_eq; auto with zarith.
@@ -839,25 +821,25 @@ intros p; rewrite Zabs_eq_opp; auto with zarith.
 2: unfold Zsucc in |- *; replace 0%Z with (-1 + 1)%Z; auto with zarith.
 2: case p; simpl in |- *; intros; red in |- *; simpl in |- *; intros;
     red in |- *; intros; discriminate.
-replace (- Zsucc (BinInt.Zneg p))%Z with (BinInt.Zpos p - 1)%Z.
-replace (Zsucc (Zabs (BinInt.Zneg p))) with (BinInt.Zpos p + 1)%Z;
+replace (- Zsucc (Zneg p))%Z with (Zpos p - 1)%Z.
+replace (Zsucc (Zabs (Zneg p))) with (Zpos p + 1)%Z;
  auto with zarith.
-unfold Zsucc in |- *; rewrite BinInt.Zopp_plus_distr.
+unfold Zsucc in |- *; rewrite Zopp_plus_distr.
 auto with zarith.
 Qed.
 Hint Resolve Zabs_Zs: zarith.
  
-Theorem Zle_Zpred : forall x y : BinInt.Z, (x < y)%Z -> (x <= Zpred y)%Z.
+Theorem Zle_Zpred : forall x y : Z, (x < y)%Z -> (x <= Zpred y)%Z.
 intros x y H; apply Zlt_succ_le.
 rewrite <- Zsucc_pred; auto.
 Qed.
 Hint Resolve Zle_Zpred: zarith.
  
-Theorem Zabs_Zopp : forall z : BinInt.Z, Zabs (- z) = Zabs z.
+Theorem Zabs_Zopp : forall z : Z, Zabs (- z) = Zabs z.
 intros z; case z; simpl in |- *; auto.
 Qed.
  
-Theorem Zle_Zabs : forall z : BinInt.Z, (z <= Zabs z)%Z.
+Theorem Zle_Zabs : forall z : Z, (z <= Zabs z)%Z.
 intros z; case z; simpl in |- *; red in |- *; simpl in |- *; auto;
  try (red in |- *; intros; discriminate; fail).
 intros p; elim p; simpl in |- *; auto;
@@ -866,23 +848,23 @@ Qed.
 Hint Resolve Zle_Zabs: zarith.
  
 Theorem Zlt_mult_simpl_l :
- forall a b c : BinInt.Z, (0 < c)%Z -> (c * a < c * b)%Z -> (a < b)%Z.
+ forall a b c : Z, (0 < c)%Z -> (c * a < c * b)%Z -> (a < b)%Z.
 intros a b0 c H H0; apply Zgt_lt.
 apply Zmult_gt_reg_r with (p := c); try apply Zlt_gt; auto with zarith.
-repeat rewrite (fun x => BinInt.Zmult_comm x c); auto with zarith.
+repeat rewrite (fun x => Zmult_comm x c); auto with zarith.
 Qed.
 (* An equality function on Z that return a bool *)
  
-Fixpoint pos_eq_bool (a b : BinPos.positive) {struct b} : bool :=
+Fixpoint pos_eq_bool (a b : positive) {struct b} : bool :=
   match a, b with
-  | BinPos.xH, BinPos.xH => true
-  | BinPos.xI a', BinPos.xI b' => pos_eq_bool a' b'
-  | BinPos.xO a', BinPos.xO b' => pos_eq_bool a' b'
+  | xH, xH => true
+  | xI a', xI b' => pos_eq_bool a' b'
+  | xO a', xO b' => pos_eq_bool a' b'
   | _, _ => false
   end.
  
 Theorem pos_eq_bool_correct :
- forall p q : BinPos.positive,
+ forall p q : positive,
  match pos_eq_bool p q with
  | true => p = q
  | false => p <> q
@@ -910,14 +892,14 @@ Hint Resolve Z_O_1: zarith.
  
 Definition Z_eq_bool a b :=
   match a, b with
-  | BinInt.Z0, BinInt.Z0 => true
-  | BinInt.Zpos a', BinInt.Zpos b' => pos_eq_bool a' b'
-  | BinInt.Zneg a', BinInt.Zneg b' => pos_eq_bool a' b'
+  | Z0, Z0 => true
+  | Zpos a', Zpos b' => pos_eq_bool a' b'
+  | Zneg a', Zneg b' => pos_eq_bool a' b'
   | _, _ => false
   end.
  
 Theorem Z_eq_bool_correct :
- forall p q : BinInt.Z,
+ forall p q : Z,
  match Z_eq_bool p q with
  | true => p = q
  | false => p <> q
@@ -935,66 +917,66 @@ intros H1; Contradict H1; injection H1; auto.
 Qed.
  
 Theorem Zlt_mult_ZERO :
- forall x y : BinInt.Z, (0 < x)%Z -> (0 < y)%Z -> (0 < x * y)%Z.
+ forall x y : Z, (0 < x)%Z -> (0 < y)%Z -> (0 < x * y)%Z.
 intros x y; case x; case y; unfold Zlt in |- *; simpl in |- *; auto.
 Qed.
 Hint Resolve Zlt_mult_ZERO: zarith.
  
 Theorem Zlt_Zminus_ZERO :
- forall z1 z2 : BinInt.Z, (z2 < z1)%Z -> (0 < z1 - z2)%Z.
+ forall z1 z2 : Z, (z2 < z1)%Z -> (0 < z1 - z2)%Z.
 intros z1 z2; rewrite (Zminus_diag_reverse z2); auto with zarith.
 Qed.
  
 Theorem Zle_Zminus_ZERO :
- forall z1 z2 : BinInt.Z, (z2 <= z1)%Z -> (0 <= z1 - z2)%Z.
+ forall z1 z2 : Z, (z2 <= z1)%Z -> (0 <= z1 - z2)%Z.
 intros z1 z2; rewrite (Zminus_diag_reverse z2); auto with zarith.
 Qed.
 Hint Resolve Zle_Zminus_ZERO Zlt_Zminus_ZERO: zarith.
  
 Theorem Zle_Zpred_Zpred :
- forall z1 z2 : BinInt.Z, (z1 <= z2)%Z -> (Zpred z1 <= Zpred z2)%Z.
+ forall z1 z2 : Z, (z1 <= z2)%Z -> (Zpred z1 <= Zpred z2)%Z.
 intros z1 z2 H; apply Zsucc_le_reg.
 repeat rewrite <- Zsucc_pred; auto.
 Qed.
 Hint Resolve Zle_Zpred_Zpred: zarith.
  
-Theorem Zle_ZERO_Zabs : forall z : BinInt.Z, (0 <= Zabs z)%Z.
+Theorem Zle_ZERO_Zabs : forall z : Z, (0 <= Zabs z)%Z.
 intros z; case z; simpl in |- *; auto with zarith.
 Qed.
 Hint Resolve Zle_ZERO_Zabs: zarith.
  
 Theorem Zlt_Zabs_inv1 :
- forall z1 z2 : BinInt.Z, (Zabs z1 < z2)%Z -> (- z2 < z1)%Z.
+ forall z1 z2 : Z, (Zabs z1 < z2)%Z -> (- z2 < z1)%Z.
 intros z1 z2 H; case (Zle_or_lt 0 z1); intros H1.
 apply Zlt_le_trans with (- (0))%Z; auto with zarith.
 apply Zlt_Zopp; apply Zle_lt_trans with (2 := H); auto with zarith.
-rewrite <- (BinInt.Zopp_involutive z1); rewrite <- (Zabs_eq_opp z1);
+rewrite <- (Zopp_involutive z1); rewrite <- (Zabs_eq_opp z1);
  auto with zarith.
 Qed.
  
 Theorem Zlt_Zabs_inv2 :
- forall z1 z2 : BinInt.Z, (Zabs z1 < Zabs z2)%Z -> (z1 < Zabs z2)%Z.
+ forall z1 z2 : Z, (Zabs z1 < Zabs z2)%Z -> (z1 < Zabs z2)%Z.
 intros z1 z2; case z1; case z2; simpl in |- *; auto with zarith.
 Qed.
  
 Theorem Zle_Zabs_inv1 :
- forall z1 z2 : BinInt.Z, (Zabs z1 <= z2)%Z -> (- z2 <= z1)%Z.
+ forall z1 z2 : Z, (Zabs z1 <= z2)%Z -> (- z2 <= z1)%Z.
 intros z1 z2 H; case (Zle_or_lt 0 z1); intros H1.
 apply Zle_trans with (- (0))%Z; auto with zarith.
 apply Zle_Zopp; apply Zle_trans with (2 := H); auto with zarith.
-rewrite <- (BinInt.Zopp_involutive z1); rewrite <- (Zabs_eq_opp z1);
+rewrite <- (Zopp_involutive z1); rewrite <- (Zabs_eq_opp z1);
  auto with zarith.
 Qed.
  
 Theorem Zle_Zabs_inv2 :
- forall z1 z2 : BinInt.Z, (Zabs z1 <= z2)%Z -> (z1 <= z2)%Z.
+ forall z1 z2 : Z, (Zabs z1 <= z2)%Z -> (z1 <= z2)%Z.
 intros z1 z2 H; case (Zle_or_lt 0 z1); intros H1.
 rewrite <- (Zabs_eq z1); auto.
 apply Zle_trans with (Zabs z1); auto with zarith.
 Qed.
  
 Theorem Zlt_Zabs_Zpred :
- forall z1 z2 : BinInt.Z,
+ forall z1 z2 : Z,
  (Zabs z1 < z2)%Z -> z1 <> Zpred z2 -> (Zabs (Zsucc z1) < z2)%Z.
 intros z1 z2 H H0; case (Zle_or_lt 0 z1); intros H1.
 rewrite Zabs_eq; auto with zarith.
@@ -1006,58 +988,58 @@ repeat rewrite Zabs_eq_opp; auto with zarith.
 Qed.
  
 Theorem Zle_n_Zpred :
- forall z1 z2 : BinInt.Z, (Zpred z1 <= Zpred z2)%Z -> (z1 <= z2)%Z.
+ forall z1 z2 : Z, (Zpred z1 <= Zpred z2)%Z -> (z1 <= z2)%Z.
 intros z1 z2 H; rewrite (Zsucc_pred z1); rewrite (Zsucc_pred z2);
  auto with zarith.
 Qed.
  
-Theorem Zpred_Zopp_Zs : forall z : BinInt.Z, Zpred (- z) = (- Zsucc z)%Z.
+Theorem Zpred_Zopp_Zs : forall z : Z, Zpred (- z) = (- Zsucc z)%Z.
 intros z; unfold Zpred, Zsucc in |- *; ring.
 Qed.
  
-Theorem Zlt_1_O : forall z : BinInt.Z, (1 <= z)%Z -> (0 < z)%Z.
+Theorem Zlt_1_O : forall z : Z, (1 <= z)%Z -> (0 < z)%Z.
 intros z H; apply Zsucc_lt_reg; simpl in |- *; auto with zarith.
 Qed.
 Hint Resolve Zlt_succ Zsucc_lt_compat Zle_lt_succ: zarith.
  
-Theorem Zlt_not_eq : forall p q : BinInt.Z, (p < q)%Z -> p <> q.
+Theorem Zlt_not_eq : forall p q : Z, (p < q)%Z -> p <> q.
 intros p q H; Contradict H; rewrite H; auto with zarith.
 Qed.
  
-Theorem Zlt_not_eq_rev : forall p q : BinInt.Z, (q < p)%Z -> p <> q.
+Theorem Zlt_not_eq_rev : forall p q : Z, (q < p)%Z -> p <> q.
 intros p q H; Contradict H; rewrite H; auto with zarith.
 Qed.
 Hint Resolve Zlt_not_eq Zlt_not_eq_rev: zarith.
  
 Theorem Zle_Zpred_Zlt :
- forall z1 z2 : BinInt.Z, (z1 <= z2)%Z -> (Zpred z1 < z2)%Z.
+ forall z1 z2 : Z, (z1 <= z2)%Z -> (Zpred z1 < z2)%Z.
 intros z1 z2 H; apply Zsucc_lt_reg; rewrite <- Zsucc_pred; auto with zarith.
 Qed.
 Hint Resolve Zle_Zpred_Zlt: zarith.
  
 Theorem Zle_Zpred_inv :
- forall z1 z2 : BinInt.Z, (z1 <= Zpred z2)%Z -> (z1 < z2)%Z.
+ forall z1 z2 : Z, (z1 <= Zpred z2)%Z -> (z1 < z2)%Z.
 intros z1 z2 H; rewrite (Zsucc_pred z2); auto with zarith.
 Qed.
  
 Theorem Zabs_intro :
- forall (P : BinInt.Z -> Prop) (z : BinInt.Z), P (- z)%Z -> P z -> P (Zabs z).
+ forall (P : Z -> Prop) (z : Z), P (- z)%Z -> P z -> P (Zabs z).
 intros P z; case z; simpl in |- *; auto.
 Qed.
  
 Theorem Zpred_Zle_Zabs_intro :
- forall z1 z2 : BinInt.Z,
+ forall z1 z2 : Z,
  (- Zpred z2 <= z1)%Z -> (z1 <= Zpred z2)%Z -> (Zabs z1 < z2)%Z.
 intros z1 z2 H H0; apply Zle_Zpred_inv.
 apply Zabs_intro with (P := fun x => (x <= Zpred z2)%Z); auto with zarith.
 Qed.
  
-Theorem Zlt_ZERO_Zle_ONE : forall z : BinInt.Z, (0 < z)%Z -> (1 <= z)%Z.
+Theorem Zlt_ZERO_Zle_ONE : forall z : Z, (0 < z)%Z -> (1 <= z)%Z.
 intros z H; replace 1%Z with (Zsucc 0); auto with zarith; simpl in |- *; auto.
 Qed.
 Hint Resolve Zlt_ZERO_Zle_ONE: zarith.
  
-Theorem ptonat_def1 : forall p q, 1 < BinPos.Pmult_nat p (S (S q)).
+Theorem ptonat_def1 : forall p q, 1 < Pmult_nat p (S (S q)).
 intros p; elim p; simpl in |- *; auto with arith.
 Qed.
 Hint Resolve ptonat_def1: arith.
@@ -1068,8 +1050,8 @@ Qed.
 Hint Resolve lt_S_le: arith.
  
 Theorem Zlt_Zabs_intro :
- forall z1 z2 : BinInt.Z, (- z2 < z1)%Z -> (z1 < z2)%Z -> (Zabs z1 < z2)%Z.
+ forall z1 z2 : Z, (- z2 < z1)%Z -> (z1 < z2)%Z -> (Zabs z1 < z2)%Z.
 intros z1 z2; case z1; case z2; simpl in |- *; auto with zarith.
-intros p p0 H H0; change (- BinInt.Zneg p0 < - BinInt.Zneg p)%Z in |- *;
+intros p p0 H H0; change (- Zneg p0 < - Zneg p)%Z in |- *;
  auto with zarith.
 Qed.

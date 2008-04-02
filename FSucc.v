@@ -1,24 +1,12 @@
-(* This program is free software; you can redistribute it and/or      *)
-(* modify it under the terms of the GNU Lesser General Public License *)
-(* as published by the Free Software Foundation; either version 2.1   *)
-(* of the License, or (at your option) any later version.             *)
-(*                                                                    *)
-(* This program is distributed in the hope that it will be useful,    *)
-(* but WITHOUT ANY WARRANTY; without even the implied warranty of     *)
-(* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the      *)
-(* GNU General Public License for more details.                       *)
-(*                                                                    *)
-(* You should have received a copy of the GNU Lesser General Public   *)
-(* License along with this program; if not, write to the Free         *)
-(* Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA *)
-(* 02110-1301 USA                                                     *)
-
-
-Require Import List.
-Require Import Float.
-Require Import Fnorm.
-Require Import Fop.
-Require Import Fcomp.
+(****************************************************************************
+                                                                             
+          IEEE754  :  FSucc                                                     
+                                                                             
+          Laurent Thery                                                      
+                                                                             
+  ******************************************************************************)
+Require Export List.
+Require Export Fnorm.
 Section suc.
 Variable b : Fbound.
 Variable radix : Z.
@@ -225,7 +213,8 @@ apply Zlt_not_le.
 replace 0%Z with (- 0%nat)%Z; unfold nNormMin in |- *; auto with zarith.
 intros H'4; repeat split; simpl in |- *; auto with float zarith arith.
 apply Zle_lt_trans with (Zsucc (Zabs (Fnum a))); auto with float zarith.
-case (Zlt_next (Zabs (Fnum a)) (Zpos (vNum b))); auto with float zarith arith.
+case (Zlt_next (Zabs (Fnum a)) (Zpos (vNum b)));
+ auto with float zarith arith.
 intros H1; Contradict H'3.
 unfold pPred in |- *; rewrite H1; rewrite Zabs_eq; auto with zarith.
 unfold Zsucc, Zpred in |- *; ring.
@@ -245,7 +234,7 @@ Theorem FSuccSubnormNotNearNormMin :
  Fnum a <> Zpred (nNormMin radix precision) -> Fsubnormal radix b (FSucc a).
 intros a H' H'0.
 cut (Fbounded b a);
- [ intros B0 | apply FsubnormalFbounded with (2 := H'); auto ].
+ [ intros B0 | apply FsubnormalFbounded with (1 := H'); auto ].
 unfold FSucc in |- *.
 generalize (Z_eq_bool_correct (Fnum a) (pPred (vNum b)));
  case (Z_eq_bool (Fnum a) (pPred (vNum b))); auto.
@@ -267,7 +256,13 @@ rewrite digitnNormMin; auto with arith.
 case (nNormMin radix precision); simpl in |- *; auto.
 apply FsubnormalDigit with (b := b); auto.
 intros H'4; repeat split; simpl in |- *; auto with float zarith arith.
-case H'; auto.
+apply Zle_lt_trans with (m := Zsucc (Zabs (Fnum a)));
+ auto with float zarith arith.
+apply Zlt_le_trans with (m := Zsucc (nNormMin radix precision));
+ auto with float zarith arith.
+apply Zsucc_lt_compat; apply pSubnormal_absolu_min with (3 := pGivesBound);
+ auto with float zarith arith.
+case H'; intros H1 (H2, H3); auto with float.
 rewrite Zabs_Zmult.
 rewrite (Zabs_eq radix); auto with zarith.
 apply Zlt_le_trans with (m := (radix * nNormMin radix precision)%Z);
@@ -286,8 +281,7 @@ Theorem FSuccSubnormNearNormMin :
  Fsubnormal radix b a ->
  Fnum a = Zpred (nNormMin radix precision) -> Fnormal radix b (FSucc a).
 intros a H' H'0.
-cut (Fbounded b a);
- [ intros Fb0 | apply FsubnormalFbounded with (2 := H'); auto ].
+cut (Fbounded b a); [ intros Fb0 | apply FsubnormalFbounded with (1 := H') ].
 unfold FSucc in |- *.
 generalize (Z_eq_bool_correct (Fnum a) (pPred (vNum b)));
  case (Z_eq_bool (Fnum a) (pPred (vNum b))); auto.
@@ -445,6 +439,12 @@ generalize (Z_eq_bool_correct (- dExp b) (- dExp b));
  case (Z_eq_bool (- dExp b) (- dExp b)); intros H'1.
 2: Contradict H'1; auto.
 repeat split; simpl in |- *; auto with zarith.
+apply Zle_lt_trans with (m := nNormMin radix precision);
+ auto with float zarith.
+rewrite <- Zopp_Zpred_Zs; rewrite Zabs_Zopp; rewrite Zabs_eq;
+ auto with float zarith.
+apply Zle_Zpred; simpl in |- *; auto with float zarith.
+apply nNormPos; auto with float zarith.
 rewrite Zabs_Zmult; rewrite (Zabs_eq radix); auto with zarith.
 rewrite (PosNormMin radix) with (precision := precision); auto with zarith.
 apply Zmult_gt_0_lt_compat_l; auto with float zarith.
@@ -516,10 +516,8 @@ Theorem FSuccPropPos :
  (0 <= x)%R ->
  Fcanonic radix b x -> Fcanonic radix b y -> (x < y)%R -> (FSucc x <= y)%R.
 intros x y H' H'0 H'1 H'2.
-cut (Fbounded b x);
- [ intros Fb0 | apply FcanonicBound with (2 := H'0); auto ].
-cut (Fbounded b y);
- [ intros Fb1 | apply FcanonicBound with (2 := H'1); auto ].
+cut (Fbounded b x); [ intros Fb0 | apply FcanonicBound with (1 := H'0) ].
+cut (Fbounded b y); [ intros Fb1 | apply FcanonicBound with (1 := H'1) ].
 case FcanonicLtPos with (p := x) (q := y) (3 := pGivesBound); auto.
 case (Z_eq_dec (Fnum x) (pPred (vNum b))); intros H'4.
 rewrite FSuccSimpl1; auto.
@@ -533,7 +531,7 @@ apply pNormal_absolu_min with (b := b); auto.
 case H'1; auto with float.
 intros H'7; Contradict H'5; apply Zle_not_lt.
 replace (Fexp y) with (- dExp b)%Z; auto with float.
-case H'7; intros H'8 H'9; auto.
+case H'7; intros H'8 (H'9, H'10); auto.
 apply LeR0Fnum with (radix := radix); auto with zarith.
 apply Rle_trans with (r2 := FtoR radix x); auto with real.
 case y; auto.
@@ -564,7 +562,8 @@ apply nNormPos; auto.
 apply LeR0Fnum with (radix := radix); auto with zarith.
 intros H'4; elim H'4; intros H'5 H'6; clear H'4.
 generalize (Z_eq_bool_correct (Fnum x) (Zpos (vNum b)));
- case (Z_eq_bool (Fnum x) (Zpos (vNum b))); intros H'4.
+ case (Z_eq_bool (Fnum x) (Zpos (vNum b))); 
+ intros H'4.
 Contradict H'6; auto.
 apply Zle_not_lt; apply Zlt_le_weak.
 rewrite H'4; auto with float zarith.
@@ -644,10 +643,8 @@ Theorem FSuccPropNeg :
  (x < 0)%R ->
  Fcanonic radix b x -> Fcanonic radix b y -> (x < y)%R -> (FSucc x <= y)%R.
 intros x y H' H'0 H'1 H'2.
-cut (Fbounded b x);
- [ intros Fb0 | apply FcanonicBound with (2 := H'0); auto ].
-cut (Fbounded b y);
- [ intros Fb1 | apply FcanonicBound with (2 := H'1); auto ].
+cut (Fbounded b x); [ intros Fb0 | apply FcanonicBound with (1 := H'0) ].
+cut (Fbounded b y); [ intros Fb1 | apply FcanonicBound with (1 := H'1) ].
 case (Rle_or_lt 0 y); intros Rle0.
 apply Rle_trans with (r2 := 0%R); auto.
 apply R0RltRleSucc; auto.
@@ -834,11 +831,11 @@ rewrite Zopp_mult_distr_l_reverse.
 rewrite (Zmult_comm radix).
 apply Zopp_Zpred_Zs.
 unfold Fshift in |- *; simpl in |- *.
-replace (Zpos (P_of_succ_nat (Zabs_nat (Fexp q - Fexp p)))) with
- (Zsucc (Fexp q - Fexp p)).
+replace (Zpos (P_of_succ_nat (Zabs_nat (Fexp q - Fexp p))))
+ with (Zsucc (Fexp q - Fexp p)).
 unfold Zsucc, Zpred in |- *; ring.
 rewrite <- (inj_abs (Fexp q - Fexp p)); auto with zarith.
-rewrite <- Znat.inj_S; simpl in |- *; auto.
+rewrite <- inj_S; simpl in |- *; auto.
 rewrite inj_abs; auto with zarith.
 rewrite FSuccSimpl4; auto.
 intros H'2 H'3.
@@ -979,7 +976,7 @@ Theorem FNSuccFNSuccMid :
 intros p Fb; unfold FNSucc in |- *.
 intros H' H'0.
 rewrite
- FcanonicFormalizeEq
+ FcanonicFnormalizeEq
                      with
                      (p := 
                        FSucc b radix precision
@@ -992,5 +989,6 @@ rewrite FnormalizeCorrect; auto.
 apply Zlt_trans with 1%Z; auto with zarith.
 apply Zlt_trans with 1%Z; auto with zarith.
 Qed.
+
 End suc1.
 Hint Resolve nNormMimLtvNum: float.

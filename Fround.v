@@ -1,19 +1,3 @@
-(* This program is free software; you can redistribute it and/or      *)
-(* modify it under the terms of the GNU Lesser General Public License *)
-(* as published by the Free Software Foundation; either version 2.1   *)
-(* of the License, or (at your option) any later version.             *)
-(*                                                                    *)
-(* This program is distributed in the hope that it will be useful,    *)
-(* but WITHOUT ANY WARRANTY; without even the implied warranty of     *)
-(* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the      *)
-(* GNU General Public License for more details.                       *)
-(*                                                                    *)
-(* You should have received a copy of the GNU Lesser General Public   *)
-(* License along with this program; if not, write to the Free         *)
-(* Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA *)
-(* 02110-1301 USA                                                     *)
-
-
 (****************************************************************************
                                                                              
           IEEE754  :  Fround                                                     
@@ -21,15 +5,8 @@
           Laurent Thery                                                      
                                                                              
   ******************************************************************************)
-Require Export Float.
-Require Export Fnorm.
-Require Export Fop.
-Require Export Fcomp.
-Require Export FSucc.
-Require Export FPred.
-Require Export Fmin.
-Require Export Fodd.
 Require Export Fprop.
+Require Export Fodd.
 Section FRound.
 Variable b : Fbound.
 Variable radix : Z.
@@ -324,10 +301,6 @@ unfold FtoRradix in Eq0; rewrite <- Eq0; auto.
 apply (MaxUniqueP r); auto.
 Qed.
  
-Theorem FnOddNEven :
- forall n : float, FNodd b radix precision n -> ~ FNeven b radix precision n.
-intros n H'; unfold FNeven, Feven in |- *; apply OddNEven; auto.
-Qed.
  
 Theorem MinOrMaxRep :
  forall P,
@@ -370,7 +343,29 @@ left; split; auto.
 replace 0%R with (-0)%R; auto with real.
 apply MaxOppMin; auto.
 Qed.
-
+ 
+Theorem ScalableRoundedModeP :
+ forall P (f s t : float),
+ RoundedModeP P ->
+ Fbounded b f -> P (radix * f)%R s -> P (s / radix)%R t -> f = t :>R.
+intros P f s t HP Ff H1 H2.
+cut (ProjectorP b radix P);
+ [ unfold ProjectorP in |- *; intros HP2 | apply RoundedProjector; auto ].
+cut (FtoR radix (Float (Fnum f) (Zsucc (Fexp f))) = (radix * FtoR radix f)%R);
+ [ intros V | idtac].
+2: unfold FtoR, Zsucc in |- *; simpl in |- *; ring_simplify.
+2: rewrite powerRZ_add; [ simpl in |- *; ring | auto with zarith real ].
+unfold FtoRradix in |- *; apply HP2; auto.
+replace (FtoR radix f) with (FtoR radix s / radix)%R; auto.
+replace (FtoR radix s) with (radix * FtoR radix f)%R;
+ [ unfold Rdiv in |- * | rewrite <- V ].
+rewrite Rmult_comm; rewrite <- Rmult_assoc; rewrite Rinv_l;
+ auto with real zarith.
+apply HP2; auto with float.
+repeat (split; simpl in |- *; auto with zarith float).
+rewrite V; auto.
+Qed.
+ 
 Theorem RoundLessThanIsMax :
  forall P,
  RoundedModeP P ->
@@ -386,7 +381,6 @@ elim H1; intros; elim H7; intros; auto with real.
 intros; replace (FtoRradix p) with (FtoRradix m); auto with real.
 unfold FtoRradix in |- *; apply MaxEq with b x; auto.
 Qed.
-
 End FRound.
 Hint Resolve RoundedProjector MinCompatible MinRoundedModeP MaxCompatible
   MaxRoundedModeP ToZeroTotal ToZeroCompatible ToZeroMinOrMax ToZeroMonotone
