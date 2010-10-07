@@ -251,7 +251,7 @@ replace (Fabs f) with f; auto; unfold Fabs in |- *; apply floatEq;
 apply sym_eq; apply Zabs_eq; apply LeR0Fnum with radix; auto with zarith real.
 replace (Fabs f) with (Fopp f);
  [ rewrite Fnormalize_Fopp | apply floatEq; simpl in |- * ]; 
- auto.
+ auto with arith.
 apply sym_eq; apply Zabs_eq_opp; apply R0LeFnum with radix;
  auto with zarith real.
 Qed.

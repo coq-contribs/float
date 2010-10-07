@@ -314,13 +314,13 @@ Qed.
  
 Theorem FNevenFop : forall p : float, FNeven p -> FNeven (Fopp p).
 intros p; unfold FNeven in |- *.
-rewrite Fnormalize_Fopp; auto.
+rewrite Fnormalize_Fopp; auto with arith.
 intros; apply FevenFop; auto.
 Qed.
  
 Theorem FNoddFop : forall p : float, FNodd p -> FNodd (Fopp p).
 intros p; unfold FNodd in |- *.
-rewrite Fnormalize_Fopp; auto.
+rewrite Fnormalize_Fopp; auto with arith.
 intros; apply FoddFop; auto.
 Qed.
  
