@@ -5,10 +5,12 @@
           Laurent Thery                                                      
                                                                              
   ******************************************************************************)
+
 Require Export Digit.
 Require Export Option.
 Require Export Inverse_Image.
 Require Export Wf_nat.
+Require Import BinPos.
  
 Fixpoint exp (n m : nat) {struct m} : nat :=
   match m with
@@ -140,7 +142,8 @@ intros p'; simpl in |- *; case (Pdiv p' q); simpl in |- *;
 unfold nat_of_P in |- *; simpl in |- *.
 rewrite ZL6; rewrite H1.
 case q1; case r1; simpl in |- *.
-intros r2 q2; CaseEq ((xI r2 ?= q)%positive Datatypes.Eq);
+intros r2 q2. rewrite Z.pos_sub_spec; unfold Pos.compare.
+CaseEq (Pcompare (xI r2) q Datatypes.Eq);
  simpl in |- *; auto.
 intros H3; rewrite <- (Pcompare_Eq_eq _ _ H3); simpl in |- *;
  unfold nat_of_P in |- *; simpl in |- *.
@@ -162,7 +165,8 @@ apply
     repeat rewrite ZL6; unfold nat_of_P in |- *;
     apply f_equal with (f := S)
  | unfold nat_of_P in |- * ]; ring.
-intros r2; CaseEq ((1 ?= q)%positive Datatypes.Eq); simpl in |- *; auto.
+intros r2. rewrite Z.pos_sub_spec; unfold Pos.compare.
+CaseEq (Pcompare 1 q Datatypes.Eq); simpl in |- *; auto.
 intros H3; rewrite <- (Pcompare_Eq_eq _ _ H3); simpl in |- *;
  repeat rewrite ZL6; unfold nat_of_P in |- *; simpl in |- *; 
  apply f_equal with (f := S);ring.
@@ -181,7 +185,8 @@ intros H3; case (Pminus_mask_Gt _ _ H3); intros h (H4, (H5, H6));
     repeat rewrite ZL6; unfold nat_of_P in |- *;
     apply f_equal with (f := S)
  | unfold nat_of_P in |- * ]; ring.
-intros r2; CaseEq ((xI r2 ?= q)%positive Datatypes.Eq); simpl in |- *;
+intros r2. rewrite Z.pos_sub_spec; unfold Pos.compare.
+ CaseEq (Pcompare (xI r2) q Datatypes.Eq); simpl in |- *;
  auto.
 intros H3; rewrite <- (Pcompare_Eq_eq _ _ H3); simpl in |- *;
  unfold nat_of_P in |- *; simpl in |- *; repeat rewrite ZL6;
@@ -200,7 +205,8 @@ intros H3; case (Pminus_mask_Gt _ _ H3); intros h (H4, (H5, H6));
  | unfold nat_of_P in |- * ]; ring.
 case q; simpl in |- *; auto.
 generalize H2; case q1; case r1; simpl in |- *; auto.
-intros r2 q2; CaseEq ((xI r2 ?= q)%positive Datatypes.Eq);
+intros r2 q2. rewrite Z.pos_sub_spec; unfold Pos.compare.
+CaseEq (Pcompare (xI r2) q Datatypes.Eq);
  simpl in |- *; auto.
 intros; apply lt_O_nat_of_P; auto.
 intros H H0; apply nat_of_P_lt_Lt_compare_morphism; auto.
@@ -217,7 +223,8 @@ intros p2; case p2; unfold nat_of_P in |- *; simpl in |- *;
  auto with arith.
 intros p2; case p2; unfold nat_of_P in |- *; simpl in |- *;
  auto with arith.
-intros r2 HH; CaseEq ((xI r2 ?= q)%positive Datatypes.Eq);
+intros r2 HH. rewrite Z.pos_sub_spec; unfold Pos.compare.
+CaseEq (Pcompare (xI r2) q Datatypes.Eq);
  simpl in |- *.
 intros; apply lt_O_nat_of_P; auto.
 intros H3; apply nat_of_P_lt_Lt_compare_morphism; auto.
@@ -238,7 +245,8 @@ intros p'; simpl in |- *; case (Pdiv p' q); simpl in |- *;
  intros q1 r1 (H1, H2); split.
 unfold nat_of_P in |- *; simpl in |- *; rewrite ZL6; rewrite H1.
 case q1; case r1; simpl in |- *; auto.
-intros r2 q2; CaseEq ((xO r2 ?= q)%positive Datatypes.Eq);
+intros r2 q2. rewrite Z.pos_sub_spec; unfold Pos.compare.
+CaseEq (Pcompare (xO r2) q Datatypes.Eq);
  simpl in |- *; auto.
 intros H3; rewrite <- (Pcompare_Eq_eq _ _ H3); simpl in |- *;
  unfold nat_of_P in |- *; simpl in |- *; repeat rewrite ZL6;
@@ -260,7 +268,8 @@ intros H3; case (Pminus_mask_Gt _ _ H3); intros h (H4, (H5, H6));
 intros H3; unfold nat_of_P in |- *; simpl in |- *;
  repeat rewrite ZL6; unfold nat_of_P in |- *; 
  ring.
-intros r2; CaseEq ((xO r2 ?= q)%positive Datatypes.Eq); simpl in |- *;
+intros r2. rewrite Z.pos_sub_spec; unfold Pos.compare.
+CaseEq (Pcompare (xO r2) q Datatypes.Eq); simpl in |- *;
  auto.
 intros H3; rewrite <- (Pcompare_Eq_eq _ _ H3); simpl in |- *;
  unfold nat_of_P in |- *; simpl in |- *; repeat rewrite ZL6;
@@ -276,7 +285,8 @@ intros H3; case (Pminus_mask_Gt _ _ H3); intros h (H4, (H5, H6));
     repeat rewrite ZL6; unfold nat_of_P in |- *
  | unfold nat_of_P in |- * ]; ring.
 generalize H2; case q1; case r1; simpl in |- *.
-intros r2 q2; CaseEq ((xO r2 ?= q)%positive Datatypes.Eq);
+intros r2 q2. rewrite Z.pos_sub_spec; unfold Pos.compare.
+CaseEq (Pcompare (xO r2) q Datatypes.Eq);
  simpl in |- *; auto.
 intros; apply lt_O_nat_of_P; auto.
 intros H H0; apply nat_of_P_lt_Lt_compare_morphism; auto.
@@ -290,7 +300,8 @@ intros H3 H7; case (Pminus_mask_Gt _ _ H3); intros h (H4, (H5, H6));
  apply lt_trans with (Pmult_nat r2 1 + Pmult_nat q 1);
  auto with arith.
 intros; apply lt_O_nat_of_P; auto.
-intros r2 HH; CaseEq ((xO r2 ?= q)%positive Datatypes.Eq);
+intros r2 HH. rewrite Z.pos_sub_spec; unfold Pos.compare.
+CaseEq (Pcompare (xO r2) q Datatypes.Eq);
  simpl in |- *.
 intros; apply lt_O_nat_of_P; auto.
 intros H3; apply nat_of_P_lt_Lt_compare_morphism; auto.
@@ -313,7 +324,7 @@ Variable
  
 Fixpoint PdivlessAux (bound p base length : positive) {struct length}
  : Option positive * Option positive * nat :=
-  match (bound ?= p)%positive Datatypes.Eq with
+  match Pcompare bound p Datatypes.Eq with
   | Datatypes.Gt => (Some _ p, None _, 0)
   | _ =>
       match PdivAux p base with
@@ -381,14 +392,14 @@ Definition Pdivless := PdivlessAux Pdiv.
  
 Theorem Pdivless1 :
  forall bound p q base,
- (bound ?= p)%positive Datatypes.Eq = Datatypes.Gt ->
+ Pcompare bound p Datatypes.Eq = Datatypes.Gt ->
  Pdivless bound p base q = (Some _ p, None _, 0).
 intros bound p q base H; case q; simpl in |- *; auto; intros; rewrite H; auto.
 Qed.
  
 Theorem Pdivless2 :
  forall bound p length base,
- (bound ?= p)%positive Datatypes.Eq <> Datatypes.Gt ->
+ Pcompare bound p Datatypes.Eq <> Datatypes.Gt ->
  Pdivless bound p base length =
  match Pdiv p base with
  | (None, None) => (None _, None _, 1)
@@ -449,15 +460,15 @@ Theorem Pdivless2 :
      end
  end.
 intros bound p length base; case length; simpl in |- *;
- case ((bound ?= p)%positive Datatypes.Eq); auto;
+ case (Pcompare bound p Datatypes.Eq); auto;
  (intros H; case H; auto; fail) || (intros p' H; case H; auto).
 Qed.
  
 Theorem compare_SUP_dec :
  forall p q : positive,
- (p ?= q)%positive Datatypes.Eq = Datatypes.Gt \/
- (p ?= q)%positive Datatypes.Eq <> Datatypes.Gt.
-intros p q; case ((p ?= q)%positive Datatypes.Eq); auto; right; red in |- *;
+ Pcompare p q Datatypes.Eq = Datatypes.Gt \/
+ Pcompare p q Datatypes.Eq <> Datatypes.Gt.
+intros p q; case (Pcompare p q Datatypes.Eq); auto; right; red in |- *;
  intros; discriminate.
 Qed.
 Hint Resolve lt_O_nat_of_P: arith.

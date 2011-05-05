@@ -310,14 +310,15 @@ Theorem Zcompare_EGAL :
 intros p q; case p; case q; simpl in |- *; auto with arith;
  try (intros; discriminate); intros q1 p1.
 intros H1; rewrite (Pcompare_Eq_eq p1 q1); auto.
+unfold Pos.compare.
 generalize (Pcompare_Eq_eq p1 q1);
- case ((p1 ?= q1)%positive Datatypes.Eq); simpl in |- *; 
+ case (Pcompare p1 q1 Datatypes.Eq); simpl in |- *; 
  intros H H1; try discriminate; rewrite H; auto.
 Qed.
  
 Theorem Zlt_Zopp : forall x y : Z, (x < y)%Z -> (- y < - x)%Z.
 intros x y; case x; case y; simpl in |- *; auto with zarith; intros p p0;
- unfold Zlt in |- *; simpl in |- *; rewrite <- ZC4; 
+ unfold Zlt in |- *; simpl in |- *; unfold Pos.compare; rewrite <- ZC4;
  auto.
 Qed.
 Hint Resolve Zlt_Zopp: zarith.
@@ -351,14 +352,14 @@ Qed.
  
 Theorem Zmin_sym : forall m n : Z, Zmin n m = Zmin m n.
 intros m n; unfold Zmin in |- *.
-case n; case m; simpl in |- *; auto.
+case n; case m; simpl in |- *; auto; unfold Pos.compare.
 intros p p0; rewrite (ZC4 p p0).
 generalize (Pcompare_Eq_eq p0 p).
-case ((p0 ?= p)%positive Datatypes.Eq); simpl in |- *; auto.
+case (Pcompare p0 p Datatypes.Eq); simpl in |- *; auto.
 intros H'; rewrite H'; auto.
 intros p p0; rewrite (ZC4 p p0).
 generalize (Pcompare_Eq_eq p0 p).
-case ((p0 ?= p)%positive Datatypes.Eq); simpl in |- *; auto.
+case (Pcompare p0 p Datatypes.Eq); simpl in |- *; auto.
 intros H'; rewrite H'; auto.
 Qed.
  

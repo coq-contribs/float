@@ -156,8 +156,8 @@ Theorem powerRZ_add :
  e <> 0%R -> powerRZ e (n + m) = (powerRZ e n * powerRZ e m)%R.
 intros e n m; case n; case m; simpl in |- *; auto with real.
 intros n1 m1; rewrite nat_of_P_plus_morphism; auto with real.
-intros n1 m1; CaseEq ((m1 ?= n1)%positive Datatypes.Eq); simpl in |- *;
- auto with real.
+intros n1 m1. rewrite Z.pos_sub_spec; unfold Pos.compare.
+CaseEq (Pcompare m1 n1 Datatypes.Eq); simpl in |- *; auto with real.
 intros H' H'0; rewrite Pcompare_Eq_eq with (1 := H'); auto with real.
 intros H' H'0; rewrite (nat_of_P_minus_morphism n1 m1); auto with real.
 rewrite (pow_RN_plus e (nat_of_P n1 - nat_of_P m1) (nat_of_P m1));
@@ -175,23 +175,23 @@ rewrite plus_comm; rewrite le_plus_minus_r; auto with real.
 apply lt_le_weak.
 change (nat_of_P m1 > nat_of_P n1) in |- *.
 apply nat_of_P_gt_Gt_compare_morphism; auto.
-intros n1 m1; CaseEq ((m1 ?= n1)%positive Datatypes.Eq); simpl in |- *;
- auto with real.
+intros n1 m1. rewrite Z.pos_sub_spec; unfold Pos.compare.
+CaseEq (Pcompare n1 m1 Datatypes.Eq); simpl in |- *; auto with real.
 intros H' H'0; rewrite Pcompare_Eq_eq with (1 := H'); auto with real.
-intros H' H'0; rewrite (nat_of_P_minus_morphism n1 m1); auto with real.
-rewrite (pow_RN_plus e (nat_of_P n1 - nat_of_P m1) (nat_of_P m1));
- auto with real.
-rewrite plus_comm; rewrite le_plus_minus_r; auto with real.
-apply lt_le_weak.
-apply nat_of_P_lt_Lt_compare_morphism; auto.
-apply ZC2; auto.
 intros H' H'0; rewrite (nat_of_P_minus_morphism m1 n1); auto with real.
 rewrite (pow_RN_plus e (nat_of_P m1 - nat_of_P n1) (nat_of_P n1));
  auto with real.
 rewrite plus_comm; rewrite le_plus_minus_r; auto with real.
 rewrite Rinv_mult_distr; auto with real.
 apply lt_le_weak.
-change (nat_of_P m1 > nat_of_P n1) in |- *.
+apply nat_of_P_lt_Lt_compare_morphism; auto.
+apply ZC2; auto.
+intros H' H'0; rewrite (nat_of_P_minus_morphism n1 m1); auto with real.
+rewrite (pow_RN_plus e (nat_of_P n1 - nat_of_P m1) (nat_of_P m1));
+ auto with real.
+rewrite plus_comm; rewrite le_plus_minus_r; auto with real.
+apply lt_le_weak.
+change (nat_of_P n1 > nat_of_P m1) in |- *.
 apply nat_of_P_gt_Gt_compare_morphism; auto.
 intros n1 m1; rewrite nat_of_P_plus_morphism; auto with real.
 intros H'; rewrite pow_add; auto with real.
