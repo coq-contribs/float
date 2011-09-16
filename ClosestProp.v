@@ -585,7 +585,6 @@ generalize (Z_eq_bool_correct (Fnum f) (nNormMin radix precision));
 generalize (Z_eq_bool_correct (Fexp f) (- dExp b));
  case (Z_eq_bool (Fexp f) (- dExp b)); intros H3; simpl in |- *;
  auto with zarith.
-unfold Zsucc, Zpred in |- *; auto with zarith.
 Qed.
  
 Theorem ClosestErrorBoundNormal2_aux :

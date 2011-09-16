@@ -982,8 +982,6 @@ Theorem Zlt_Zabs_Zpred :
 intros z1 z2 H H0; case (Zle_or_lt 0 z1); intros H1.
 rewrite Zabs_eq; auto with zarith.
 rewrite Zabs_eq in H; auto with zarith.
-case (Zlt_next _ _ H); auto with zarith.
-intros H2; Contradict H0; rewrite H2; unfold Zsucc, Zpred in |- *; ring.
 apply Zlt_trans with (2 := H).
 repeat rewrite Zabs_eq_opp; auto with zarith.
 Qed.

@@ -217,7 +217,6 @@ case (Zlt_next (Zabs (Fnum a)) (Zpos (vNum b)));
  auto with float zarith arith.
 intros H1; Contradict H'3.
 unfold pPred in |- *; rewrite H1; rewrite Zabs_eq; auto with zarith.
-unfold Zsucc, Zpred in |- *; ring.
 apply LeR0Fnum with (radix := radix); auto with zarith.
 apply Zle_trans with (Zabs (radix * Fnum a)); auto with float zarith.
 case H'0; auto.

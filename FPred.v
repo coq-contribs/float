@@ -391,11 +391,6 @@ generalize (Z_eq_bool_correct (Zpred (Fnum x)) (- nNormMin radix precision));
 intros H' H'0 H'1 H'2 H'3;
  absurd (Zpred (nNormMin radix precision) = (- nNormMin radix precision)%Z);
  auto with zarith.
-case (nNormMin radix precision); simpl in |- *; auto;
- try (intros; red in |- *; intros; discriminate).
-intros p; case p; simpl in |- *; auto;
- try (intros; red in |- *; intros; discriminate).
-rewrite <- H'; rewrite <- H'2; auto.
 intros H' H'0 H'1 H'2 H'3; apply floatEq; simpl in |- *; auto;
  unfold Zpred, Zsucc in |- *; ring.
 generalize (Z_eq_bool_correct (pPred (vNum b)) (pPred (vNum b)));

@@ -262,8 +262,6 @@ apply Rplus_lt_compat_l.
 rewrite <- Faux.Rabsolu_left1; auto.
 rewrite <- (Fabs_correct radix); auto with arith.
 unfold FtoRradix in |- *; apply maxMaxBis with (b := b); auto with zarith.
-apply Zsucc_lt_reg; auto with zarith.
-replace (Zsucc (Zpred (Fexp p))) with (Fexp p); auto with zarith.
 apply Rlt_le; auto.
 apply
  Rle_trans with (radix * Float (nNormMin radix precision) (Zpred (Fexp p)))%R.

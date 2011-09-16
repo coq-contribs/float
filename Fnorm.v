@@ -932,7 +932,6 @@ replace (Zpos (vNum b)) with (1 + Zpred (Zpos (vNum b)))%Z;
  unfold pPred in |- *; auto with zarith.
 apply Zplus_le_compat_r; apply Zle_Zpred.
 apply vNumbMoreThanOne.
-unfold Zpred in |- *; ring.
 Qed.
  
 Theorem FcanonicPpred :
