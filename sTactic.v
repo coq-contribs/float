@@ -7,6 +7,9 @@
                                                                              
 *****************************************************************************
 *)
+
+Global Set Asymmetric Patterns.
+
 (* Some simple tactics *)
 
 Theorem Contradict1 : forall a b : Prop, b -> (a -> ~ b) -> ~ a.
