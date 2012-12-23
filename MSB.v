@@ -29,7 +29,7 @@ Fixpoint maxDiv (v : Z) (p : nat) {struct p} : nat :=
  
 Theorem maxDivLess : forall (v : Z) (p : nat), maxDiv v p <= p.
 intros v p; elim p; simpl in |- *; auto.
-intros n H'; case (ZdividesP v (Zpower_nat radix (S n))); auto.
+intros n H'; case (ZdividesP v (radix * Zpower_nat radix n)); auto.
 Qed.
  
 Theorem maxDivLt :
@@ -38,7 +38,7 @@ Theorem maxDivLt :
 intros v p; case p; simpl in |- *; auto.
 intros H'; case H'.
 apply Zdivides1.
-intros n H'; case (ZdividesP v (Zpower_nat radix (S n))); auto.
+intros n H'; case (ZdividesP v (radix * Zpower_nat radix n)); auto.
 intros H'0; case H'; auto.
 intros H'0; generalize (maxDivLess v n); auto with arith.
 Qed.
@@ -49,7 +49,7 @@ intros v p; elim p.
 unfold maxDiv in |- *; rewrite Zpower_nat_O; auto.
 apply Zdivides1.
 simpl in |- *.
-intros n H'; case (ZdividesP v (Zpower_nat radix (S n))); simpl in |- *;
+intros n H'; case (ZdividesP v (radix * Zpower_nat radix n)); simpl in |- *;
  auto with zarith.
 Qed.
  
@@ -57,11 +57,11 @@ Theorem maxDivSimplAux :
  forall (v : Z) (p q : nat),
  p = maxDiv v (S (q + p)) -> p = maxDiv v (S p).
 intros v p q; elim q.
-simpl in |- *; case (ZdividesP v (Zpower_nat radix (S p))); auto.
+simpl in |- *; case (ZdividesP v (radix * Zpower_nat radix p)); auto.
 intros n H' H'0.
 apply H'; auto; clear H'.
 simpl in H'0; generalize H'0; clear H'0.
-case (ZdividesP v (Zpower_nat radix (S (S (n + p))))).
+case (ZdividesP v (radix * (radix * Zpower_nat radix (n + p)))).
 2: simpl in |- *; auto.
 intros H' H'0; Contradict H'0; auto with zarith.
 Qed.
@@ -80,10 +80,10 @@ Theorem maxDivSimplInvAux :
 intros v p q H'; elim q.
 simpl in |- *; auto.
 intros n; simpl in |- *.
-case (ZdividesP v (Zpower_nat radix (S (n + p)))); auto.
-case (ZdividesP v (Zpower_nat radix (S (S (n + p))))); auto.
+case (ZdividesP v (radix * Zpower_nat radix (n + p))); auto.
+case (ZdividesP v (radix * (radix * Zpower_nat radix (n + p)))); auto.
 intros H'0 H'1 H'2; Contradict H'2; auto with zarith.
-case (ZdividesP v (Zpower_nat radix (S (S (n + p))))); auto.
+case (ZdividesP v (radix * (radix * Zpower_nat radix (n + p)))); auto.
 intros H'0 H'1 H'2; case H'1.
 case H'0; intros z1 Hz1; exists (radix * z1)%Z;rewrite Hz1.
 unfold Zpower_nat; simpl; ring.
@@ -106,7 +106,7 @@ rewrite H'.
 apply maxDivCorrect; auto.
 red in |- *; intros H'0; generalize H'; clear H'.
 simpl in |- *.
-case (ZdividesP v (Zpower_nat radix (S p))); simpl in |- *; auto.
+case (ZdividesP v (radix * Zpower_nat radix p)); simpl in |- *; auto.
 intros H' H'1; Contradict H'1; auto with zarith.
 Qed.
  
@@ -127,11 +127,11 @@ Theorem maxDivUniqueInverse :
  Zdivides v (Zpower_nat radix p) ->
  ~ Zdivides v (Zpower_nat radix (S p)) -> p = maxDiv v (S p).
 intros v p H' H'0; simpl in |- *.
-case (ZdividesP v (Zpower_nat radix (S p))); auto.
+case (ZdividesP v (radix * Zpower_nat radix p)); auto.
 intros H'1; case H'0; simpl in |- *; auto.
 intros H'1.
 generalize H'; case p; simpl in |- *; auto.
-intros n H'2; case (ZdividesP v (Zpower_nat radix (S n))); auto.
+intros n H'2; case (ZdividesP v (radix * Zpower_nat radix n)); auto.
 intros H'3; case H'3; auto.
 Qed.
  
@@ -202,8 +202,8 @@ Qed.
 Theorem maxDiv_opp :
  forall (v : Z) (p : nat), maxDiv v p = maxDiv (- v) p.
 intros v p; elim p; simpl in |- *; auto.
-intros n H; case (ZdividesP v (Zpower_nat radix (S n)));
- case (ZdividesP (- v) (Zpower_nat radix (S n))); auto.
+intros n H; case (ZdividesP v (radix * Zpower_nat radix n));
+ case (ZdividesP (- v) (radix * Zpower_nat radix n)); auto.
 intros Z1 Z2; case Z1.
 case Z2; intros z1 Hz1; exists (- z1)%Z; rewrite Hz1; ring.
 intros Z1 Z2; case Z2.
@@ -220,13 +220,12 @@ Qed.
 Theorem maxDiv_abs :
  forall (v : Z) (p : nat), maxDiv v p = maxDiv (Zabs v) p.
 intros v p; elim p; simpl in |- *; auto.
-intros n H; case (ZdividesP v (Zpower_nat radix (S n)));
- case (ZdividesP (Zabs v) (Zpower_nat radix (S n))); 
+intros n H; case (ZdividesP v (radix * Zpower_nat radix n));
+ case (ZdividesP (Zabs v) (radix  * Zpower_nat radix n));
  auto.
 intros Z1 Z2; case Z1.
 case Z2; intros z1 Hz1; exists (Zabs z1); rewrite Hz1.
-rewrite Zabs_Zmult; rewrite (fun x => Zabs_eq (Zpower_nat radix x));
- auto with zarith.
+rewrite Zabs_Zmult; f_equal. apply Zabs_eq. auto with zarith.
 intros Z1 Z2; case Z2.
 case Z1; intros z1 Hz1.
 case (Zle_or_lt v 0); intros Z4.
@@ -234,7 +233,7 @@ exists (- z1)%Z; rewrite <- (Zopp_involutive v);
  rewrite <- (Zabs_eq_opp v); auto; rewrite Hz1; ring.
 exists z1; rewrite <- (Zabs_eq v); auto with zarith; rewrite Hz1; ring.
 Qed.
- 
+
 Theorem LSB_abs : forall x : float, LSB x = LSB (Fabs x).
 intros x; unfold LSB in |- *; simpl in |- *.
 rewrite Fdigit_abs; auto.

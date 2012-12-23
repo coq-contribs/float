@@ -117,14 +117,14 @@ unfold FtoRradix, FtoR, Fminus, Fopp, Fplus in |- *; simpl in |- *; auto.
 repeat rewrite Zmin_le2; auto with zarith.
 rewrite <- Zminus_succ_l; repeat rewrite <- Zminus_diag_reverse.
 rewrite absolu_Zs; auto with zarith; simpl in |- *.
-rewrite Zpower_nat_O; rewrite Zpower_nat_1.
 rewrite H'1; unfold pPred in |- *; rewrite pGivesBound;
  unfold nNormMin in |- *.
-replace (Zpower_nat radix (pred precision) * radix)%Z with
- (Zpower_nat radix precision).
-rewrite plus_IZR; rewrite Rmult_IZR; rewrite Ropp_Ropp_IZR; simpl in |- *.
-unfold Zpred in |- *; unfold Zminus in |- *; rewrite plus_IZR; simpl in |- *;
- ring; ring.
+replace (Zpower_nat radix (pred precision) * (radix * 1))%Z with
+ (Zpower_nat radix precision). f_equal. unfold Zpred.
+rewrite Z.opp_add_distr. rewrite Z.mul_1_r. rewrite Z.add_assoc. now rewrite Z.add_opp_diag_r.
+(*rewrite plus_IZR; rewrite Rmult_IZR; simpl in |- *.
+unfold Zpred in |- *; unfold Zminus in |- *; simpl in |- *.
+repeat ring_simplify. ring.*) rewrite Z.mul_1_r.
 pattern precision at 1 in |- *; replace precision with (pred precision + 1).
 rewrite Zpower_nat_is_exp; rewrite Zpower_nat_1; auto.
 generalize precisionNotZero; case precision; simpl in |- *;
@@ -132,7 +132,7 @@ generalize precisionNotZero; case precision; simpl in |- *;
 rewrite FSuccSimpl4; auto.
 unfold FtoRradix, FtoR, Fminus, Fopp, Fplus in |- *; simpl in |- *; auto.
 repeat rewrite Zmin_n_n; repeat rewrite <- Zminus_diag_reverse; simpl in |- *.
-rewrite Zpower_nat_O; repeat rewrite Zmult_1_r.
+repeat rewrite Zmult_1_r.
 replace (Zsucc (Fnum x) + - Fnum x)%Z with (Z_of_nat 1).
 simpl in |- *; auto.
 simpl in |- *; unfold Zsucc in |- *; ring.
@@ -147,7 +147,7 @@ rewrite H'; rewrite H'0; rewrite FSuccSimpl3; auto.
 unfold FtoRradix, FtoR, Fminus, Fopp, Fplus in |- *; simpl in |- *; auto.
 repeat rewrite Zmin_n_n; repeat rewrite <- Zminus_diag_reverse;
  auto with zarith.
-simpl in |- *; rewrite Zpower_nat_O; repeat rewrite Zmult_1_r.
+simpl in |- *; repeat rewrite Zmult_1_r.
 rewrite Zplus_succ_l; rewrite Zplus_opp_r; simpl in |- *; auto.
 case x; simpl in |- *; auto.
 Qed.
@@ -163,14 +163,13 @@ repeat rewrite Zmin_le1; auto with zarith.
 rewrite <- Zminus_diag_reverse; rewrite <- Zminus_n_predm;
  repeat rewrite <- Zminus_diag_reverse.
 rewrite absolu_Zs; auto with zarith; simpl in |- *.
-rewrite Zpower_nat_O; rewrite Zpower_nat_1.
 rewrite H'; unfold pPred in |- *; rewrite pGivesBound;
  unfold nNormMin in |- *.
-rewrite Zopp_involutive; rewrite Zmult_1_r.
+rewrite Zopp_involutive; repeat rewrite Zmult_1_r.
 replace (Zpower_nat radix (pred precision) * radix)%Z with
  (Zpower_nat radix precision).
 unfold Zpred in |- *; simpl in |- *;
- repeat rewrite plus_IZR || rewrite Ropp_Ropp_IZR.
+ repeat rewrite plus_IZR || rewrite Ropp_Ropp_IZR. f_equal.
 simpl in |- *; ring.
 pattern precision at 1 in |- *; replace precision with (pred precision + 1).
 rewrite Zpower_nat_is_exp; rewrite Zpower_nat_1; auto.
@@ -761,7 +760,7 @@ rewrite FSuccSimpl1; simpl in |- *; auto with arith.
 rewrite inj_abs; auto with zarith.
 unfold Fshift in |- *; simpl in |- *.
 rewrite FSuccSimpl1; simpl in |- *; auto with arith.
-rewrite Zpower_nat_1.
+rewrite Z.mul_1_r.
 rewrite H'0.
 unfold pPred in |- *; rewrite <- Zsucc_pred.
 rewrite (PosNormMin radix) with (precision := precision); auto with zarith;
@@ -822,7 +821,7 @@ rewrite FSuccSimpl2; auto with arith.
 rewrite FSuccSimpl2; auto with arith.
 rewrite FSuccSimpl2; auto with arith.
 unfold Fshift in |- *; simpl in |- *.
-rewrite Zpower_nat_1; auto.
+rewrite Z.mul_1_r; auto.
 unfold pPred in |- *;
  rewrite (PosNormMin radix) with (precision := precision); 
  auto with zarith; rewrite H'1.
@@ -919,11 +918,9 @@ apply Zplus_lt_compat_r; auto.
 apply Zlt_succ_pred.
 replace (Zsucc 0) with (Z_of_nat 1); [ idtac | simpl in |- *; auto ].
 rewrite <- (Zpower_nat_O radix); unfold nNormMin in |- *.
-generalize precisionNotZero; case precision; simpl in |- *; auto with zarith.
-unfold Zpred in |- *; apply Zplus_le_compat_r.
-apply Zle_Zmult_comp_r; auto with float zarith.
-apply Zlt_le_weak; auto with zarith.
-apply nNormPos; auto with zarith.
+apply Zpower_nat_monotone_lt. assumption. now apply lt_pred.
+apply Zle_Zpred_Zpred. apply Zle_Zmult_comp_r; auto with zarith.
+apply Z.lt_le_incl; apply nNormPos; auto with zarith.
 Qed.
  
 Theorem FSucFSucMid :

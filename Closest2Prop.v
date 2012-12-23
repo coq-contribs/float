@@ -28,7 +28,7 @@ intros H'2; Contradict H'2; auto with zarith.
 intros n; case n.
 intros H'2; Contradict H'2; auto with zarith.
 intros n0 H'2; replace (pred (S (S n0))) with (S n0).
-simpl in |- *; apply EvenExp; auto.
+apply EvenExp; auto.
 exists 1%Z; ring.
 simpl in |- *; auto.
 Qed.

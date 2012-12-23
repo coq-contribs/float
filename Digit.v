@@ -19,11 +19,8 @@ Let nMoreThanOne := Zlt_1_O _ (Zlt_le_weak _ _ nMoreThan1).
 Hint Resolve nMoreThanOne: zarith.
  
 Theorem Zpower_nat_less : forall q : nat, (0 < Zpower_nat n q)%Z.
-intros q; elim q; simpl in |- *.
-rewrite Zpower_nat_O; simpl in |- *; auto with zarith.
-intros n0 H; replace (S n0) with (1 + n0);
- [ rewrite Zpower_nat_is_exp | auto with zarith ].
-rewrite Zpower_nat_1; auto with zarith.
+intros q; elim q; simpl in |- *;
+auto with zarith.
 Qed.
 Hint Resolve Zpower_nat_less: zarith.
  
@@ -203,32 +200,18 @@ Theorem pos_length_pow :
  forall p : positive, (Zpos p < Zpower_nat n (S (pos_length p)))%Z.
 intros p; elim p; simpl in |- *; auto.
 intros p0 H; rewrite Zpos_xI.
-apply Zlt_le_trans with (Z_of_nat 2 * Zpower_nat n (S (pos_length p0)))%Z.
-replace (Z_of_nat 2) with (1 + 1)%Z; [ idtac | simpl in |- *; auto ].
-replace 2%Z with (1 + 1)%Z; [ auto with zarith | simpl in |- *; auto ].
-replace (S (S (pos_length p0))) with (1 + S (pos_length p0));
- [ rewrite Zpower_nat_is_exp | auto with arith ].
-rewrite Zpower_nat_1; auto with zarith.
-cut (Z_of_nat 2 <= n)%Z; [ auto with zarith | idtac ].
-replace (Z_of_nat 2) with (Zsucc 1);
- [ auto with zarith | simpl in |- *; auto ].
+apply Zlt_le_trans with (2 * (n * Zpower_nat n (pos_length p0)))%Z;
+auto with zarith.
 intros p0 H; rewrite Zpos_xO.
-apply Zlt_le_trans with (Z_of_nat 2 * Zpower_nat n (S (pos_length p0)))%Z.
-replace (Z_of_nat 2) with (1 + 1)%Z; [ idtac | simpl in |- *; auto ].
-replace 2%Z with (1 + 1)%Z; [ auto with zarith | simpl in |- *; auto ].
-replace (S (S (pos_length p0))) with (1 + S (pos_length p0));
- [ rewrite Zpower_nat_is_exp | auto with arith ].
-rewrite Zpower_nat_1; auto with zarith.
-cut (Z_of_nat 2 <= n)%Z; [ auto with zarith | idtac ].
-replace (Z_of_nat 2) with (Zsucc 1);
- [ auto with zarith | simpl in |- *; auto ].
-rewrite Zpower_nat_1; auto.
+apply Zlt_le_trans with (2 * (n * Zpower_nat n (pos_length p0)))%Z;
+auto with zarith.
+auto with zarith.
 Qed.
 (* digit is correct (second part) *)
  
 Theorem digitMore : forall q : Z, (Zabs q < Zpower_nat n (digit q))%Z.
 intros q; case q.
-simpl in |- *; rewrite Zpower_nat_O; simpl in |- *; auto with zarith.
+easy.
 intros q'; rewrite <- (Zmult_1_r (Zpower_nat n (digit (Zpos q')))).
 unfold digit in |- *; apply digitAuxMore; auto with zarith.
 rewrite Zmult_1_r.

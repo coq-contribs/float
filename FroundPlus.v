@@ -382,7 +382,7 @@ repeat rewrite Zmin_n_n; repeat rewrite <- Zminus_diag_reverse; simpl in |- *;
 rewrite H.
 repeat rewrite Zmin_n_n; repeat rewrite <- Zminus_diag_reverse; simpl in |- *;
  auto.
-rewrite Zpower_nat_O; repeat rewrite Zmult_1_r.
+repeat rewrite Zmult_1_r.
 apply floatEq; simpl in |- *; auto; unfold Zpred in |- *; ring.
 case (Z_eq_dec (Fnum q0) (nNormMin radix precision)); intros Zeq2.
 case (Z_eq_dec (Fexp q0) (- dExp b)); intros Zeq1.

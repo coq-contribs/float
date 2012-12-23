@@ -179,11 +179,9 @@ Qed.
  
 Theorem OddExp :
  forall (n : Z) (m : nat), Odd n -> Odd (Zpower_nat n m).
-intros n m; elim m; simpl in |- *.
-rewrite Zpower_nat_O; simpl in |- *; auto with zarith.
+intros n m; elim m; simpl in |- *. auto with zarith.
 intros n0 H H0; replace (S n0) with (1 + n0); auto with arith.
-rewrite Zpower_nat_is_exp; rewrite Zpower_nat_1; simpl in |- *;
- auto with zarith.
+auto with zarith.
 Qed.
 Hint Resolve OddExp EvenExp: zarith.
  

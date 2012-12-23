@@ -230,8 +230,7 @@ replace
  (Fnum p * Fnum q)%Z.
 2: replace (Fexp p + Fexp q - (Fexp p + Fexp q))%Z with 0%Z;
     auto with zarith arith; simpl in |- *.
-2: rewrite Zpower_nat_O.
-2: replace (Z_of_nat 1) with 1%Z; auto with zarith.
+2: auto with zarith.
 exists
  ((Fnum p * Fnum q +
    - Fnum r * Zpower_nat radix (Zabs_nat (Fexp r - (Fexp p + Fexp q)))) *
