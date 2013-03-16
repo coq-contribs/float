@@ -14,9 +14,10 @@ Hypothesis radixMoreThanOne : (1 < radix)%Z.
  
 Let radixMoreThanZERO := Zlt_1_O _ (Zlt_le_weak _ _ radixMoreThanOne).
 Hint Resolve radixMoreThanZERO: zarith.
- 
-Coercion Local FtoRradix := FtoR radix.
- 
+
+Let FtoRradix := FtoR radix.
+Local Coercion FtoRradix : float >-> R.
+
 Fixpoint maxDiv (v : Z) (p : nat) {struct p} : nat :=
   match p with
   | O => 0

@@ -12,7 +12,8 @@ Variable precision : nat.
  
 Let radix := 2%Z.
  
-Coercion Local FtoRradix := FtoR radix.
+Let FtoRradix := FtoR radix.
+Local Coercion FtoRradix : float >-> R.
  
 Theorem TwoMoreThanOne : (1 < radix)%Z.
 unfold radix in |- *; red in |- *; simpl in |- *; auto.

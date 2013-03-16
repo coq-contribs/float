@@ -16,9 +16,10 @@ Hint Resolve radixMoreThanZERO: zarith.
 Definition Fdiff (x y : float) :=
   (Fnum x * Zpower_nat radix (Zabs_nat (Fexp x - Zmin (Fexp x) (Fexp y))) -
    Fnum y * Zpower_nat radix (Zabs_nat (Fexp y - Zmin (Fexp x) (Fexp y))))%Z.
- 
-Coercion Local FtoRradix := FtoR radix.
- 
+
+Let FtoRradix := FtoR radix.
+Local Coercion FtoRradix : float >-> R.
+
 Theorem Fdiff_correct :
  forall x y : float,
  (Fdiff x y * powerRZ radix (Zmin (Fexp x) (Fexp y)))%R = (x - y)%R.

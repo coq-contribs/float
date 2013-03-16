@@ -11,7 +11,9 @@ Variable b : Fbound.
 Variable radix : Z.
 Variable precision : nat.
  
-Coercion Local FtoRradix := FtoR radix.
+Let FtoRradix := FtoR radix.
+Local Coercion FtoRradix : float >-> R.
+
 Hypothesis radixMoreThanOne : (1 < radix)%Z.
 Hypothesis precisionNotZero : precision <> 0.
 Hypothesis pGivesBound : Zpos (vNum b) = Zpower_nat radix precision.

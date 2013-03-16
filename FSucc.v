@@ -11,8 +11,10 @@ Section suc.
 Variable b : Fbound.
 Variable radix : Z.
 Variable precision : nat.
- 
-Coercion Local FtoRradix := FtoR radix.
+
+Let FtoRradix := FtoR radix.
+Local Coercion FtoRradix : float >-> R.
+
 Hypothesis radixMoreThanOne : (1 < radix)%Z.
  
 Let radixMoreThanZERO := Zlt_1_O _ (Zlt_le_weak _ _ radixMoreThanOne).
@@ -898,7 +900,9 @@ Variable b : Fbound.
 Variable radix : Z.
 Variable precision : nat.
  
-Coercion Local FtoRradix := FtoR radix.
+Let FtoRradix := FtoR radix.
+Local Coercion FtoRradix : float >-> R.
+
 Hypothesis radixMoreThanOne : (1 < radix)%Z.
 Hypothesis precisionNotZero : 1 < precision.
 Hypothesis pGivesBound : Zpos (vNum b) = Zpower_nat radix precision.

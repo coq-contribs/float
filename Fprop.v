@@ -10,7 +10,9 @@ Section Fprop.
 Variable radix : Z.
 Hypothesis radixMoreThanOne : (1 < radix)%Z.
  
-Coercion Local FtoRradix := FtoR radix.
+Let FtoRradix := FtoR radix.
+Local Coercion FtoRradix : float >-> R.
+
 Variable b : Fbound.
  
 Theorem SterbenzAux :

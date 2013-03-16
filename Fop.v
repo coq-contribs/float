@@ -8,8 +8,10 @@
 Require Export Fcomp.
 Section operations.
 Variable radix : Z.
- 
-Coercion Local FtoRradix := FtoR radix.
+
+Let FtoRradix := FtoR radix.
+Local Coercion FtoRradix : float >-> R.
+
 Hypothesis radixNotZero : (0 < radix)%Z.
  
 Definition Fplus (x y : float) :=

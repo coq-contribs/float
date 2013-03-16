@@ -53,19 +53,19 @@ Coercion Z_of_nat : nat >-> Z.
  
 Definition FtoR (x : float) := (Fnum x * powerRZ (IZR radix) (Fexp x))%R.
  
-Coercion Local FtoR1 := FtoR.
+Local Coercion FtoR : float >-> R.
  
 Theorem FzeroisReallyZero : forall z : Z, Fzero z = 0%R :>R.
-intros z; unfold FtoR1, FtoR in |- *; simpl in |- *; auto with real.
+intros z; unfold FtoR in |- *; simpl in |- *; auto with real.
 Qed.
  
 Theorem is_Fzero_rep1 : forall x : float, is_Fzero x -> x = 0%R :>R.
-intros x H; unfold FtoR1, FtoR in |- *.
+intros x H; unfold FtoR in |- *.
 red in H; rewrite H; simpl in |- *; auto with real.
 Qed.
  
 Theorem LtFnumZERO : forall x : float, (0 < Fnum x)%Z -> (0 < x)%R.
-intros x; case x; unfold FtoR1, FtoR in |- *; simpl in |- *.
+intros x; case x; unfold FtoR in |- *; simpl in |- *.
 intros Fnum1 Fexp1 H'; replace 0%R with (Fnum1 * 0)%R;
  [ apply Rmult_lt_compat_l | ring ]; auto with real zarith.
 Qed.
@@ -120,7 +120,7 @@ Theorem FtoREqInv1 :
  forall p q : float, ~ is_Fzero p -> p = q :>R -> Fnum p = Fnum q -> p = q.
 intros p q H' H'0 H'1.
 apply floatEq; auto.
-unfold FtoR1, FtoR in H'0.
+unfold FtoR in H'0.
 apply Rpow_eq_inv with (r := IZR radix); auto 6 with real zarith.
 apply Rlt_dichotomy_converse; right; red in |- *.
 unfold Rabs in |- *; case (Rcase_abs radix).
@@ -159,14 +159,14 @@ Qed.
  
 Theorem oneExp_le :
  forall x y : Z, (x <= y)%Z -> (Float 1%nat x <= Float 1%nat y)%R.
-intros x y H'; unfold FtoR1, FtoR in |- *; simpl in |- *.
+intros x y H'; unfold FtoR in |- *; simpl in |- *.
 repeat rewrite Rmult_1_l; auto with real zarith.
 apply Rle_powerRZ; try replace 1%R with (IZR 1); auto with real zarith zarith.
 Qed.
  
 Theorem oneExp_lt :
  forall x y : Z, (x < y)%Z -> (Float 1%nat x < Float 1%nat y)%R.
-intros x y H'; unfold FtoR1, FtoR in |- *; simpl in |- *.
+intros x y H'; unfold FtoR in |- *; simpl in |- *.
 repeat rewrite Rmult_1_l; auto with real zarith.
 Qed.
  
@@ -188,7 +188,7 @@ Definition Fshift (n : nat) (x : float) :=
   Float (Fnum x * Zpower_nat radix n) (Fexp x - n).
  
 Theorem sameExpEq : forall p q : float, p = q :>R -> Fexp p = Fexp q -> p = q.
-intros p q; case p; case q; unfold FtoR1, FtoR in |- *; simpl in |- *.
+intros p q; case p; case q; unfold FtoR in |- *; simpl in |- *.
 intros Fnum1 Fexp1 Fnum2 Fexp2 H' H'0; rewrite H'0; rewrite H'0 in H'.
 cut (Fnum1 = Fnum2).
 intros H'1; rewrite <- H'1; auto.
@@ -208,7 +208,7 @@ intros p1 p2 H; apply digitAdd; auto.
 Qed.
  
 Theorem FshiftCorrect : forall (n : nat) (x : float), Fshift n x = x :>R.
-intros n x; unfold FtoR1, FtoR in |- *; simpl in |- *.
+intros n x; unfold FtoR in |- *; simpl in |- *.
 rewrite Rmult_IZR.
 rewrite Zpower_nat_Z_powerRZ; auto.
 repeat rewrite Rmult_assoc.
