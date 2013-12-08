@@ -108,7 +108,7 @@ apply Rmult_lt_reg_l with (r := IZR radix); auto with real.
 rewrite <- Rmult_assoc; rewrite Rinv_r.
 rewrite Rmult_plus_distr_l.
 rewrite Rmult_1_l.
-apply Rplus_lt_reg_r with (r := (- (radix * p))%R).
+apply Rplus_lt_reg_l with (r := (- (radix * p))%R).
 replace (- (radix * p) + FtoR radix p)%R with (- p)%R;
  [ idtac | simpl in |- *; unfold FtoRradix in |- *; ring; auto; ring ].
 replace (- (radix * p) + (radix * p + radix * q))%R with (radix * q)%R;

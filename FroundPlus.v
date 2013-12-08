@@ -315,7 +315,7 @@ cut (0 <= Fnormalize radix b precision r')%R; [ intros Rle2 | idtac ].
 cut (Fnormalize radix b precision r' < q0)%R; [ intros Rle3 | idtac ].
 2: rewrite (FnormalizeCorrect radix); auto with arith.
 2: unfold FtoRradix in H'14; rewrite H'14.
-2: apply Rplus_lt_reg_r with (r := (- q0)%R).
+2: apply Rplus_lt_reg_l with (r := (- q0)%R).
 2: replace (- q0 + (FtoR radix q0 - FtoR radix p))%R with (- p)%R;
     [ idtac | unfold FtoRradix in |- *; ring; ring ].
 2: replace (- q0 + q0)%R with (-0)%R; [ auto with real | ring ].

@@ -687,7 +687,7 @@ unfold Rminus in |- *; apply Rplus_lt_compat_r; auto with real float zarith.
 unfold FtoRradix in |- *; apply FPredLt; auto with real float zarith.
 generalize H1; unfold Closest in |- *; intros H'; elim H'; intros tmp H10.
 clear tmp; apply H10; auto with float zarith arith.
-apply Rplus_lt_reg_r with (- x)%R; auto with real.
+apply Rplus_lt_reg_l with (- x)%R; auto with real.
 ring_simplify (- x + x)%R; apply Rle_lt_trans with (2 := H9); right; ring.
 Qed.
  

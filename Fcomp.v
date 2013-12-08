@@ -121,7 +121,7 @@ Theorem Flt_bool_correct_r :
  forall x y : float, Flt x y -> Flt_bool x y = true.
 intros x y H'.
 cut (0 < y - x)%R; auto with arith.
-2: apply Rplus_lt_reg_r with (r := FtoRradix x); rewrite Rplus_0_r;
+2: apply Rplus_lt_reg_l with (r := FtoRradix x); rewrite Rplus_0_r;
     rewrite Rplus_minus; auto with real.
 intros H'0.
 cut (Fdiff x y < 0)%R; auto with arith.

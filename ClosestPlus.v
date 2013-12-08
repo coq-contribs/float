@@ -248,7 +248,7 @@ apply Rlt_IZR; apply nNormPos; auto with zarith.
 unfold Zpred in |- *; auto with real float zarith arith.
 pattern (FtoRradix p) at 1 in |- *; replace (FtoRradix p) with (p + 0)%R;
  auto with real.
-apply Rplus_lt_reg_r with (r := (- q)%R); auto.
+apply Rplus_lt_reg_l with (r := (- q)%R); auto.
 replace (- q + (p + q))%R with (FtoRradix p); [ idtac | ring ].
 apply
  Rlt_le_trans with (FtoRradix (Float (nNormMin radix precision) (Fexp p)));

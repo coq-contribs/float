@@ -265,9 +265,9 @@ apply Rgt_not_le.
 rewrite (Faux.Rabsolu_left1 (min - r)).
 rewrite Rabs_right.
 replace (- (min - r))%R with (r - min)%R; [ idtac | ring ].
-red in |- *; apply Rplus_lt_reg_r with (r := FtoRradix min).
+red in |- *; apply Rplus_lt_reg_l with (r := FtoRradix min).
 repeat rewrite Rplus_minus; auto.
-apply Rplus_lt_reg_r with (r := r).
+apply Rplus_lt_reg_l with (r := r).
 replace (r + r)%R with (2%nat * r)%R; [ idtac | simpl in |- *; ring ].
 replace (r + (min + (max - r)))%R with (min + max)%R; [ idtac | ring ]; auto.
 apply Rle_ge; apply Rplus_le_reg_l with (r := r).
@@ -300,9 +300,9 @@ apply Rgt_not_le.
 rewrite (Faux.Rabsolu_left1 (min - r)).
 rewrite Rabs_right.
 replace (- (min - r))%R with (r - min)%R; [ idtac | ring ].
-red in |- *; apply Rplus_lt_reg_r with (r := FtoRradix min).
+red in |- *; apply Rplus_lt_reg_l with (r := FtoRradix min).
 repeat rewrite Rplus_minus; auto.
-apply Rplus_lt_reg_r with (r := r).
+apply Rplus_lt_reg_l with (r := r).
 replace (r + r)%R with (2%nat * r)%R; [ idtac | simpl in |- *; ring ].
 replace (r + (min + (max - r)))%R with (min + max)%R; [ idtac | ring ]; auto.
 apply Rle_ge; apply Rplus_le_reg_l with (r := r).
@@ -383,7 +383,7 @@ red in |- *; apply Rle_lt_trans with (1 := Rl3).
 replace (p' - p)%R with (p' - q + (q - p))%R.
 pattern (p' - q)%R at 1 in |- *; replace (p' - q)%R with (p' - q + 0)%R.
 apply Rplus_lt_compat_l; auto.
-apply Rplus_lt_reg_r with (r := p).
+apply Rplus_lt_reg_l with (r := p).
 repeat rewrite Rplus_minus; auto.
 rewrite Rplus_0_r; auto.
 rewrite Rplus_0_r; auto.
@@ -407,7 +407,7 @@ red in |- *; apply Rlt_trans with (1 := Rl3).
 replace (q - q')%R with (p - q' + (q - p))%R.
 pattern (p - q')%R at 1 in |- *; replace (p - q')%R with (p - q' + 0)%R.
 apply Rplus_lt_compat_l; auto.
-apply Rplus_lt_reg_r with (r := p).
+apply Rplus_lt_reg_l with (r := p).
 repeat rewrite Rplus_minus; auto.
 rewrite Rplus_0_r; auto.
 rewrite Rplus_0_r; auto.

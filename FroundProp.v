@@ -272,7 +272,7 @@ intros H'1 H'2; elim H'2; intros H'3 H'4; elim H'4; intros H'5 H'6;
 rewrite Rabs_right; auto.
 cut (Fbounded b q); [ intros B0 | case H'5; auto ].
 apply Rlt_le_trans with (2 := FulpSuc q B0).
-apply Rplus_lt_reg_r with (r := FtoR radix q).
+apply Rplus_lt_reg_l with (r := FtoR radix q).
 repeat rewrite Rplus_minus; auto.
 case (Rle_or_lt (FNSucc b radix precision q) p); auto.
 intros H'2; absurd (FNSucc b radix precision q <= q)%R; auto.
@@ -289,7 +289,7 @@ rewrite Ropp_minus_distr; auto.
 cut (Fbounded b q); [ intros B0 | case H'5; auto ].
 apply Rlt_le_trans with (2 := FulpPred q B0).
 apply Ropp_lt_cancel; repeat rewrite Rminus_0_l.
-apply Rplus_lt_reg_r with (r := FtoR radix q).
+apply Rplus_lt_reg_l with (r := FtoR radix q).
 repeat rewrite Rplus_minus; auto.
 case (Rle_or_lt p (FNPred b radix precision q)); auto.
 intros H'2; absurd (q <= FNPred b radix precision q)%R; auto.
