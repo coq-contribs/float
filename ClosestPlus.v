@@ -496,8 +496,7 @@ replace (Fulp b radix precision r) with
   (radix * / Zpos (vNum b)))%R.
 apply Rmult_le_compat_r.
 replace 0%R with (radix * 0)%R; [ apply Rmult_le_compat_l | ring ];
- apply Rlt_le; auto with real arith.
-apply Rinv_0_lt_compat; replace 0%R with (INR 0); auto with float real arith.
+ apply Rlt_le; auto with real arith;
 rewrite INR_IZR_INZ; apply Rlt_IZR; simpl in |- *; apply Zlt_1_O;
  apply Zlt_le_weak;
  apply (vNumbMoreThanOne radix) with (precision := precision);
