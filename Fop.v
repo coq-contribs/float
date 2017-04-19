@@ -87,7 +87,7 @@ rewrite <- Ropp_mult_distr_l_reverse;
  apply Rmult_eq_compat_l; auto.
 cut (Fnum1 <= 0)%Z.
 unfold Zabs, Zle in |- *.
-case Fnum1; simpl in |- *; auto with real.
+case Fnum1; unfold IZR; auto with real.
 intros p H'0; case H'0; auto.
 apply Znot_gt_le.
 Contradict H'.
