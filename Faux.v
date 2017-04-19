@@ -617,16 +617,16 @@ intros H'0; rewrite <- (INR_inv _ _ H'0); auto with arith.
 Qed.
  
 Theorem Rmult_IZR : forall z t : Z, IZR (z * t) = (IZR z * IZR t)%R.
-intros z t; case z; case t; simpl in |- *; auto with real.
-intros t1 z1; rewrite nat_of_P_mult_morphism; auto with real.
-intros t1 z1; rewrite nat_of_P_mult_morphism; auto with real.
-rewrite Rmult_comm.
-rewrite Ropp_mult_distr_l_reverse; auto with real.
-apply Ropp_eq_compat; rewrite mult_comm; auto with real.
-intros t1 z1; rewrite nat_of_P_mult_morphism; auto with real.
-rewrite Ropp_mult_distr_l_reverse; auto with real.
-intros t1 z1; rewrite nat_of_P_mult_morphism; auto with real.
-rewrite Rmult_opp_opp; auto with real.
+intros z t; case z; case t; simpl in |- *; auto with real; unfold IZR; intros t1 z1; repeat rewrite <- INR_IPR.
+- rewrite nat_of_P_mult_morphism; auto with real.
+- rewrite nat_of_P_mult_morphism; auto with real.
+  rewrite Rmult_comm.
+  rewrite Ropp_mult_distr_l_reverse; auto with real.
+  apply Ropp_eq_compat; rewrite mult_comm; auto with real.
+- rewrite nat_of_P_mult_morphism; auto with real.
+  rewrite Ropp_mult_distr_l_reverse; auto with real.
+- rewrite nat_of_P_mult_morphism; auto with real.
+  rewrite Rmult_opp_opp; auto with real.
 Qed.
  
 Theorem absolu_Zs :
