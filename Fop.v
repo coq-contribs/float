@@ -76,7 +76,6 @@ apply Rgt_not_le; auto.
 rewrite Rmult_comm.
 replace 0%R with (powerRZ radix Fexp1 * 0)%R; auto with real.
 red in |- *; apply Rmult_lt_compat_l; auto with real zarith.
-replace 0%R with (IZR 0); auto with real zarith arith.
 Qed.
  
 Theorem Fabs_correct2 :
