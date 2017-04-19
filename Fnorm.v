@@ -496,7 +496,7 @@ rewrite <- Zpower_nat_is_exp.
 replace (pred precision + 1) with precision.
 replace (INR (nat_of_P (vNum b))) with (IZR (Zpos (vNum b))).
 rewrite pGivesBound; auto with real.
-simpl in |- *; auto.
+simpl; unfold IZR; rewrite <- INR_IPR; auto.
 generalize precisionNotZero; case precision; simpl in |- *; auto with arith.
 intros H'1; Contradict H'1; auto.
 intros; rewrite plus_comm; simpl in |- *; auto.
