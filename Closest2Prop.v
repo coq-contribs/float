@@ -68,7 +68,7 @@ Theorem AScal2 :
  forall p : float, Float (Fnum p) (Fexp p + 1%nat) = (radix * p)%R :>R.
 intros p.
 unfold FtoRradix in |- *; rewrite FvalScale; auto.
-replace (powerRZ radix 1%nat) with (INR 2); [ idtac | simpl in |- *; ring ];
+replace (powerRZ radix 1%nat) with (INR 2); [ idtac | simpl in |- *; unfold radix; ring ];
  auto.
 Qed.
 End F2.

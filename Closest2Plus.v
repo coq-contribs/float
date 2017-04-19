@@ -38,22 +38,22 @@ case (Rle_or_lt p q); intros Rltp.
 apply RmaxAbs; auto.
 apply (RoundedModeMultLess b radix) with (P := P) (r := (p + q)%R); auto.
 replace (radix * FtoR radix p)%R with (p + p)%R;
- [ auto with real | simpl in |- *; fold FtoRradix; ring ].
+ [ auto with real | unfold radix at 1; fold FtoRradix; ring].
 unfold FtoRradix in |- *;
  apply (RoundedModeMult b radix) with (P := P) (r := (p + q)%R); 
  auto.
 replace (radix * FtoR radix q)%R with (q + q)%R;
- [ auto with real | simpl in |- *; fold FtoRradix; ring ].
+ [ auto with real | unfold radix at 1; fold FtoRradix; ring ].
 rewrite RmaxSym.
 apply RmaxAbs; auto.
 apply (RoundedModeMultLess b radix) with (P := P) (r := (p + q)%R); auto.
 replace (radix * FtoR radix q)%R with (q + q)%R;
- [ auto with real | simpl in |- *; fold FtoRradix; ring ].
+ [ auto with real | unfold radix at 1; fold FtoRradix; ring ].
 unfold FtoRradix in |- *;
  apply (RoundedModeMult b radix) with (P := P) (r := (p + q)%R); 
  auto.
 replace (radix * FtoR radix p)%R with (p + p)%R;
- [ auto with real zarith | simpl in |- *; fold FtoRradix; ring ].
+ [ auto with real zarith | unfold radix at 1; fold FtoRradix; ring].
 apply Rle_ge; auto with real zarith.
 Qed.
  
@@ -110,7 +110,7 @@ rewrite Rmult_plus_distr_l.
 rewrite Rmult_1_l.
 apply Rplus_lt_reg_l with (r := (- (radix * p))%R).
 replace (- (radix * p) + FtoR radix p)%R with (- p)%R;
- [ idtac | simpl in |- *; unfold FtoRradix in |- *; ring; auto; ring ].
+ [ idtac | unfold radix at 1; unfold FtoRradix; ring].
 replace (- (radix * p) + (radix * p + radix * q))%R with (radix * q)%R;
  [ idtac | simpl in |- *; ring ].
 rewrite <- (Ropp_involutive (radix * q)); apply Ropp_lt_contravar.
