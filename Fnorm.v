@@ -895,9 +895,6 @@ pattern (Fexp p) at 2 in |- *; replace (Fexp p) with (Zsucc (Zpred (Fexp p)));
  | unfold Zsucc, Zpred in |- *; ring ].
 repeat rewrite <- Rmult_assoc.
 apply Rmult_le_compat_r; auto with real arith.
-repeat rewrite INR_IZR_INZ;
- rewrite (fun x => inject_nat_convert (Zpos x) x); 
- auto.
 rewrite <- Rmult_IZR; apply Rle_IZR.
 rewrite <- (Zabs_eq radix); auto with zarith.
 rewrite <- Zabs_Zmult; rewrite Zmult_comm; auto with float.
