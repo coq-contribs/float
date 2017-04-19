@@ -840,8 +840,8 @@ Theorem roundedModeMoreMult :
 intros P p r H' H'0 H'1.
 cut (Float (- 1%nat) (- dExp b) < 0)%R;
  [ intros Rl0
- | unfold FtoRradix, FtoR in |- *; simpl in |- *;
-    rewrite Ropp_mult_distr_l_reverse; rewrite Rmult_1_l;
+ | unfold FtoRradix, FtoR in |- *; simpl in |- *; unfold IZR at 1; rewrite Ropp_mult_distr_l_reverse;
+   rewrite Rmult_1_l;
     auto with real arith ].
 2: replace 0%R with (-0)%R; auto with real arith; ring.
 cut (r < 0)%R; [ intros Rl1 | apply Rle_lt_trans with (2 := Rl0) ]; auto.
