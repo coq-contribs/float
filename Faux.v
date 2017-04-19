@@ -219,7 +219,7 @@ Theorem Rabsolu_Zabs : forall z : Z, Rabs (IZR z) = IZR (Zabs z).
 intros z; case z; simpl in |- *; auto with real.
 apply Rabs_right; auto with real.
 intros p0; apply Rabs_right; auto with real zarith.
-intros p0; rewrite Rabs_Ropp.
+intros p0; unfold IZR; rewrite <- INR_IPR; rewrite Rabs_Ropp.
 apply Rabs_right; auto with real zarith.
 Qed.
  
@@ -492,6 +492,7 @@ intros p; case p; simpl in |- *; auto.
 intros p1 H'; Contradict H'; auto with real zarith.
 intros p1 H'; absurd (INR (nat_of_P p1) = 0%R); auto with real zarith.
 rewrite <- (Ropp_involutive (INR (nat_of_P p1))).
+unfold IZR in H'; rewrite <- INR_IPR in H'.
 rewrite H'; auto with real.
 Qed.
  
