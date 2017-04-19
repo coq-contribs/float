@@ -54,7 +54,6 @@ unfold FtoRradix in |- *;
  auto.
 replace (radix * FtoR radix p)%R with (p + p)%R;
  [ auto with real zarith | unfold radix at 1; fold FtoRradix; ring].
-apply Rle_ge; auto with real zarith.
 Qed.
  
 Theorem plusErrorBound2 :
