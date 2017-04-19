@@ -167,13 +167,12 @@ rewrite Rabs_mult.
 apply Rmult_le_compat; auto with real arith.
 generalize H'3; case (Fnum x); simpl in |- *; auto with real zarith.
 intros H'5; case H'5; auto.
-intros p0 H'5; rewrite Rabs_right; auto with real arith.
-replace 1%R with (INR 1); auto with real arith.
+intros p0 H'5; rewrite Rabs_right; auto with real.
+replace 1%R with (INR 1); unfold IZR; repeat rewrite <- INR_IPR; auto with real arith.
 intros p0 H'5; rewrite Faux.Rabsolu_left1; auto.
-rewrite Ropp_involutive.
-replace 1%R with (INR 1); auto with real arith.
-replace 0%R with (- 0%nat)%R; auto with real; apply Ropp_le_ge_contravar;
- auto with real arith.
+unfold IZR; rewrite Ropp_involutive.
+repeat rewrite <- INR_IPR; simpl; replace 1%R with (INR 1); auto with real arith.
+unfold IZR; repeat rewrite <- INR_IPR; replace 0%R with (- 0%nat)%R; auto with real.
 rewrite Rabs_right; auto with real arith.
 apply Rle_powerRZ; auto with real arith.
 auto with zarith.
@@ -511,7 +510,7 @@ apply
   with
     (nat_of_P (vNum b) * / nat_of_P (vNum b) *
      (radix * powerRZ radix (Zpred (Fexp (Fnormalize radix b precision r)))))%R;
- [ ring | idtac ]; auto.
+ [ unfold IZR at 1 5; repeat rewrite <- INR_IPR; ring | idtac].
 rewrite Rinv_r; auto with real arith.
 rewrite <- powerRZ_Zs; auto with real zarith.
 rewrite <- Zsucc_pred; ring.
