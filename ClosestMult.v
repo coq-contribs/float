@@ -352,17 +352,17 @@ replace (powerRZ radix (- precision) * (powerRZ radix precision + (-1)%Z))%R
 apply Rle_trans with (1 + - powerRZ radix (- 1%nat))%R.
 simpl in |- *.
 replace (radix * 1)%R with (IZR radix); [ idtac | ring ].
-replace (/ 2)%R with (1 + - / 2)%R.
+replace (/ (1 + 1))%R with (1 + - / 2)%R.
 apply Rplus_le_compat_l; apply Ropp_le_contravar.
 apply Rle_Rinv; auto with real arith zarith.
-replace 2%R with (IZR (Zsucc 1)); auto with real arith zarith.
-cut (2%R <> 0%R :>R); [ intros | idtac ].
+replace 2%R with (1 + 1)%R; auto with real arith zarith.
+cut ((1 + 1)%R <> 0%R :>R); [ intros | idtac ].
 2: replace 2%R with (INR 2); auto with real arith zarith.
-apply Rmult_eq_reg_l with 2%R; auto.
+apply Rmult_eq_reg_l with (1 + 1)%R; auto.
 rewrite Rmult_plus_distr_l.
-rewrite (Rmult_comm 2 (- / 2)).
+simpl. rewrite (Rmult_comm (1 + 1) (- / (1 + 1))).
 rewrite Ropp_mult_distr_l_reverse.
-rewrite (Rmult_comm (/ 2) 2).
+rewrite (Rmult_comm (/ (1 + 1)) (1 + 1)).
 rewrite Rinv_r; auto with real; ring.
 apply Rplus_le_compat_l; apply Ropp_le_contravar.
 apply Rle_powerRZ; auto with real arith zarith.
