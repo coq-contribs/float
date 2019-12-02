@@ -68,7 +68,7 @@ unfold Fabs, FtoRradix, FtoR in |- *.
 rewrite <- Rmult_assoc.
 apply Rle_monotone_exp; auto with real arith.
 rewrite <- Rmult_IZR; apply Rle_IZR; simpl in |- *.
-rewrite <- (Zabs_eq radix); auto with zarith; rewrite <- Zabs_Zmult;
+rewrite <- (Z.abs_eq radix); auto with zarith; rewrite <- Zabs_Zmult;
  auto with float.
 case H; simpl in |- *; auto.
 unfold FtoRradix, FtoR in |- *; simpl in |- *; ring.

@@ -145,8 +145,8 @@ intros v p H' H'0 H'1.
 apply maxDivSimplInv; auto.
 2: apply maxDivUniqueInverse; auto.
 apply Zpower_nat_anti_monotone_lt with (n := radix); auto.
-apply Zle_lt_trans with (m := Zabs v); auto.
-rewrite <- (fun x => Zabs_eq (Zpower_nat radix x)); auto with zarith;
+apply Z.le_lt_trans with (m := Z.abs v); auto.
+rewrite <- (fun x => Z.abs_eq (Zpower_nat radix x)); auto with zarith;
  apply ZDividesLe; auto.
 apply digitMore; auto.
 Qed.
@@ -209,7 +209,7 @@ intros Z1 Z2; case Z1.
 case Z2; intros z1 Hz1; exists (- z1)%Z; rewrite Hz1; ring.
 intros Z1 Z2; case Z2.
 case Z1; intros z1 Hz1; exists (- z1)%Z.
-rewrite <- (Zopp_involutive v); rewrite Hz1; ring.
+rewrite <- (Z.opp_involutive v); rewrite Hz1; ring.
 Qed.
  
 Theorem LSB_opp : forall x : float, LSB x = LSB (Fopp x).
@@ -219,20 +219,20 @@ rewrite maxDiv_opp; auto.
 Qed.
  
 Theorem maxDiv_abs :
- forall (v : Z) (p : nat), maxDiv v p = maxDiv (Zabs v) p.
+ forall (v : Z) (p : nat), maxDiv v p = maxDiv (Z.abs v) p.
 intros v p; elim p; simpl in |- *; auto.
 intros n H; case (ZdividesP v (radix * Zpower_nat radix n));
- case (ZdividesP (Zabs v) (radix  * Zpower_nat radix n));
+ case (ZdividesP (Z.abs v) (radix  * Zpower_nat radix n));
  auto.
 intros Z1 Z2; case Z1.
-case Z2; intros z1 Hz1; exists (Zabs z1); rewrite Hz1.
-rewrite Zabs_Zmult; f_equal. apply Zabs_eq. auto with zarith.
+case Z2; intros z1 Hz1; exists (Z.abs z1); rewrite Hz1.
+rewrite Zabs_Zmult; f_equal. apply Z.abs_eq. auto with zarith.
 intros Z1 Z2; case Z2.
 case Z1; intros z1 Hz1.
 case (Zle_or_lt v 0); intros Z4.
-exists (- z1)%Z; rewrite <- (Zopp_involutive v);
+exists (- z1)%Z; rewrite <- (Z.opp_involutive v);
  rewrite <- (Zabs_eq_opp v); auto; rewrite Hz1; ring.
-exists z1; rewrite <- (Zabs_eq v); auto with zarith; rewrite Hz1; ring.
+exists z1; rewrite <- (Z.abs_eq v); auto with zarith; rewrite Hz1; ring.
 Qed.
 
 Theorem LSB_abs : forall x : float, LSB x = LSB (Fabs x).
@@ -241,13 +241,13 @@ rewrite Fdigit_abs; auto.
 rewrite maxDiv_abs; auto.
 Qed.
  
-Definition MSB (x : float) := Zpred (Z_of_nat (Fdigit radix x) + Fexp x).
+Definition MSB (x : float) := Z.pred (Z_of_nat (Fdigit radix x) + Fexp x).
  
 Theorem MSB_shift :
  forall (x : float) (n : nat), ~ is_Fzero x -> MSB x = MSB (Fshift radix n x).
 intros; unfold MSB, Fshift, Fdigit in |- *; simpl in |- *.
 rewrite digitAdd; auto with zarith.
-rewrite inj_plus; unfold Zpred in |- *; ring.
+rewrite inj_plus; unfold Z.pred in |- *; ring.
 Qed.
  
 Theorem MSB_comp :
@@ -292,7 +292,7 @@ Qed.
  
 Theorem Fexp_le_MSB : forall x : float, ~ is_Fzero x -> (Fexp x <= MSB x)%Z.
 intros x H'; unfold MSB in |- *.
-cut (Fdigit radix x <> 0%Z :>Z); unfold Zpred in |- *;
+cut (Fdigit radix x <> 0%Z :>Z); unfold Z.pred in |- *;
  auto with zarith.
 unfold Fdigit in |- *.
 red in |- *; intros H'0; absurd (digit radix (Fnum x) = 0); auto with zarith.
@@ -302,8 +302,8 @@ Qed.
 Theorem MSB_le_abs :
  forall x : float, ~ is_Fzero x -> (Float 1%nat (MSB x) <= Fabs x)%R.
 intros x H'; unfold MSB, FtoRradix, FtoR in |- *; simpl in |- *.
-replace (Zpred (Fdigit radix x + Fexp x)) with
- (Zpred (Fdigit radix x) + Fexp x)%Z; [ idtac | unfold Zpred in |- *; ring ].
+replace (Z.pred (Fdigit radix x + Fexp x)) with
+ (Z.pred (Fdigit radix x) + Fexp x)%Z; [ idtac | unfold Z.pred in |- *; ring ].
 rewrite powerRZ_add; auto with real zarith.
 rewrite Rmult_1_l.
 repeat rewrite (fun r : R => Rmult_comm r (powerRZ radix (Fexp x))).
@@ -318,7 +318,7 @@ apply not_eq_sym; apply lt_O_neq; apply digitNotZero; auto.
 Qed.
  
 Theorem abs_lt_MSB :
- forall x : float, (Fabs x < Float 1%nat (Zsucc (MSB x)))%R.
+ forall x : float, (Fabs x < Float 1%nat (Z.succ (MSB x)))%R.
 intros x.
 rewrite (MSB_abs x).
 unfold MSB, FtoRradix, FtoR in |- *.
@@ -331,7 +331,7 @@ rewrite <- Zpower_nat_Z_powerRZ; auto with arith.
 apply Rlt_IZR.
 unfold Fdigit in |- *; auto with arith.
 unfold Fabs in |- *; simpl in |- *.
-pattern (Zabs (Fnum x)) at 1 in |- *; rewrite <- (Zabs_eq (Zabs (Fnum x)));
+pattern (Z.abs (Fnum x)) at 1 in |- *; rewrite <- (Z.abs_eq (Z.abs (Fnum x)));
  auto with zarith.
 Qed.
  
@@ -349,7 +349,7 @@ Theorem MSB_monotoneAux :
 intros x y H' H'0; unfold MSB in |- *.
 rewrite <- H'0.
 cut (Fdigit radix x <= Fdigit radix y)%Z;
- [ unfold Zpred in |- *; auto with zarith | idtac ].
+ [ unfold Z.pred in |- *; auto with zarith | idtac ].
 unfold Fdigit in |- *; apply inj_le.
 apply digit_monotone; auto.
 apply le_IZR.
@@ -365,7 +365,7 @@ Theorem MSB_monotone :
 intros x y H' H'0 H'1; rewrite (MSB_abs x); rewrite (MSB_abs y).
 case (Zle_or_lt (Fexp (Fabs x)) (Fexp (Fabs y))); simpl in |- *; intros Zle1.
 rewrite
- MSB_shift with (x := Fabs y) (n := Zabs_nat (Fexp (Fabs y) - Fexp (Fabs x))).
+ MSB_shift with (x := Fabs y) (n := Z.abs_nat (Fexp (Fabs y) - Fexp (Fabs x))).
 apply MSB_monotoneAux; auto.
 unfold FtoRradix in |- *; repeat rewrite Fabs_correct; auto with real arith.
 rewrite FshiftCorrect; auto with real arith.
@@ -376,7 +376,7 @@ unfold Fshift in |- *; simpl in |- *.
 rewrite inj_abs; [ ring | auto with zarith ].
 apply Fabs_Fzero; auto.
 rewrite
- MSB_shift with (x := Fabs x) (n := Zabs_nat (Fexp (Fabs x) - Fexp (Fabs y))).
+ MSB_shift with (x := Fabs x) (n := Z.abs_nat (Fexp (Fabs x) - Fexp (Fabs y))).
 apply MSB_monotoneAux; auto.
 unfold FtoRradix in |- *; repeat rewrite Fabs_correct; auto with real arith.
 rewrite FshiftCorrect; auto with real arith.
@@ -393,22 +393,22 @@ Theorem MSB_le_multAux :
  ~ is_Fzero x -> ~ is_Fzero y -> (MSB x + MSB y <= MSB (Fmult x y))%Z.
 intros x y H' H'0; unfold MSB, Fmult, Fdigit in |- *; simpl in |- *.
 replace
- (Zpred (digit radix (Fnum x) + Fexp x) +
-  Zpred (digit radix (Fnum y) + Fexp y))%Z with
- (Zpred
-    (digit radix (Fnum x) + Zpred (digit radix (Fnum y)) + (Fexp x + Fexp y)));
- [ idtac | unfold Zpred in |- *; ring ].
+ (Z.pred (digit radix (Fnum x) + Fexp x) +
+  Z.pred (digit radix (Fnum y) + Fexp y))%Z with
+ (Z.pred
+    (digit radix (Fnum x) + Z.pred (digit radix (Fnum y)) + (Fexp x + Fexp y)));
+ [ idtac | unfold Z.pred in |- *; ring ].
 cut
- (digit radix (Fnum x) + Zpred (digit radix (Fnum y)) <=
+ (digit radix (Fnum x) + Z.pred (digit radix (Fnum y)) <=
   digit radix (Fnum x * Fnum y))%Z;
- [ unfold Zpred in |- *; auto with zarith | idtac ].
+ [ unfold Z.pred in |- *; auto with zarith | idtac ].
 rewrite <- inj_pred; auto with float zarith; try rewrite <- inj_plus.
 apply inj_le.
 rewrite <- digitAdd; auto with zarith.
 apply digit_monotone; auto with zarith.
 repeat rewrite Zabs_Zmult.
 apply Zle_Zmult_comp_l; auto with zarith.
-rewrite (fun x => Zabs_eq (Zpower_nat radix x)); auto with zarith.
+rewrite (fun x => Z.abs_eq (Zpower_nat radix x)); auto with zarith.
 apply not_eq_sym; apply lt_O_neq; apply digitNotZero; auto.
 Qed.
  
@@ -426,25 +426,25 @@ Qed.
  
 Theorem mult_le_MSBAux :
  forall x y : float,
- ~ is_Fzero x -> ~ is_Fzero y -> (MSB (Fmult x y) <= Zsucc (MSB x + MSB y))%Z.
+ ~ is_Fzero x -> ~ is_Fzero y -> (MSB (Fmult x y) <= Z.succ (MSB x + MSB y))%Z.
 intros x y H' H'0; unfold MSB, Fmult, Fdigit in |- *; simpl in |- *.
 replace
- (Zsucc
-    (Zpred (digit radix (Fnum x) + Fexp x) +
-     Zpred (digit radix (Fnum y) + Fexp y))) with
- (Zpred (digit radix (Fnum x) + digit radix (Fnum y) + (Fexp x + Fexp y)));
- [ idtac | unfold Zpred, Zsucc in |- *; ring ].
+ (Z.succ
+    (Z.pred (digit radix (Fnum x) + Fexp x) +
+     Z.pred (digit radix (Fnum y) + Fexp y))) with
+ (Z.pred (digit radix (Fnum x) + digit radix (Fnum y) + (Fexp x + Fexp y)));
+ [ idtac | unfold Z.pred, Z.succ in |- *; ring ].
 cut
  (digit radix (Fnum x * Fnum y) <=
   digit radix (Fnum x) + digit radix (Fnum y))%Z;
- [ unfold Zpred in |- *; auto with zarith | idtac ].
+ [ unfold Z.pred in |- *; auto with zarith | idtac ].
 rewrite <- inj_plus.
 apply inj_le; auto.
 rewrite <- digitAdd; auto with arith.
 apply digit_monotone; auto with arith.
 repeat rewrite Zabs_Zmult.
 apply Zle_Zmult_comp_l; auto with zarith.
-rewrite (fun x => Zabs_eq (Zpower_nat radix x)); auto with zarith.
+rewrite (fun x => Z.abs_eq (Zpower_nat radix x)); auto with zarith.
 Qed.
  
 Theorem mult_le_MSB :
@@ -455,7 +455,7 @@ Theorem mult_le_MSB :
   radix * Fmult (Float 1%nat (MSB x)) (Float 1%nat (MSB y)))%R.
 intros x y H' H'0; rewrite <- oneZplus.
 replace (radix * Float 1%nat (MSB x + MSB y))%R with
- (FtoRradix (Float 1%nat (Zsucc (MSB x + MSB y)))).
+ (FtoRradix (Float 1%nat (Z.succ (MSB x + MSB y)))).
 apply (oneExp_le radix); auto.
 apply mult_le_MSBAux; auto.
 unfold FtoRradix, FtoR in |- *; simpl in |- *.
@@ -486,7 +486,7 @@ replace 0%R with (INR 0); [ idtac | simpl in |- *; auto ];
  rewrite <- INR_IZR_INZ; apply INR_lt_nm.
 apply absolu_lt_nz; auto.
 replace (radix * Float 1%nat (MSB (Fabs x)))%R with
- (FtoRradix (Float 1%nat (Zsucc (MSB (Fabs x))))).
+ (FtoRradix (Float 1%nat (Z.succ (MSB (Fabs x))))).
 rewrite <- MSB_abs; apply abs_lt_MSB; auto.
 unfold FtoRradix, FtoR in |- *; simpl in |- *.
 rewrite powerRZ_Zs; auto with real zarith; ring.
@@ -498,24 +498,24 @@ Theorem LSB_rep :
  (LSB x <= LSB y)%Z -> exists z : Z, y = Float z (Fexp x) :>R.
 intros x y H' H'0.
 case (Zle_or_lt (Fexp x) (Fexp y)); intros Zl1.
-exists (Fnum y * Zpower_nat radix (Zabs_nat (Fexp y - Fexp x)))%Z.
+exists (Fnum y * Zpower_nat radix (Z.abs_nat (Fexp y - Fexp x)))%Z.
 pattern (Fexp x) at 2 in |- *;
- replace (Fexp x) with (Fexp y - Zabs_nat (Fexp y - Fexp x))%Z.
+ replace (Fexp x) with (Fexp y - Z.abs_nat (Fexp y - Fexp x))%Z.
 unfold FtoRradix in |- *;
  rewrite <-
-  (FshiftCorrect radix) with (n := Zabs_nat (Fexp y - Fexp x)) (x := y); 
+  (FshiftCorrect radix) with (n := Z.abs_nat (Fexp y - Fexp x)) (x := y); 
  auto.
 rewrite inj_abs; try ring; auto with zarith.
-exists (Zquotient (Fnum y) (Zpower_nat radix (Zabs_nat (Fexp x - Fexp y)))).
+exists (Zquotient (Fnum y) (Zpower_nat radix (Z.abs_nat (Fexp x - Fexp y)))).
 unfold FtoRradix in |- *;
  rewrite <-
   (FshiftCorrect radix)
                         with
-                        (n := Zabs_nat (Fexp x - Fexp y))
+                        (n := Z.abs_nat (Fexp x - Fexp y))
                        (x := 
                          Float
                            (Zquotient (Fnum y)
-                              (Zpower_nat radix (Zabs_nat (Fexp x - Fexp y))))
+                              (Zpower_nat radix (Z.abs_nat (Fexp x - Fexp y))))
                            (Fexp x)); auto.
 unfold Fshift in |- *; simpl in |- *.
 cut (0 <= Fexp x - Fexp y)%Z;
@@ -524,8 +524,8 @@ cut (0 <= Fexp x - Fexp y)%Z;
 unfold FtoR in |- *; simpl in |- *; auto.
 replace (Fexp x - (Fexp x - Fexp y))%Z with (Fexp y); [ idtac | ring ].
 replace
- (Zquotient (Fnum y) (Zpower_nat radix (Zabs_nat (Fexp x - Fexp y))) *
-  Zpower_nat radix (Zabs_nat (Fexp x - Fexp y)))%Z with (
+ (Zquotient (Fnum y) (Zpower_nat radix (Z.abs_nat (Fexp x - Fexp y))) *
+  Zpower_nat radix (Z.abs_nat (Fexp x - Fexp y)))%Z with (
  Fnum y); auto.
 apply ZdividesZquotient; auto with zarith.
 apply
@@ -536,7 +536,7 @@ apply ZdividesLessPow; auto.
 apply ZleLe.
 rewrite inj_abs; auto with zarith.
 apply Zplus_le_reg_l with (p := Fexp y).
-apply Zle_trans with (LSB x).
+apply Z.le_trans with (LSB x).
 replace (Fexp y + (Fexp x - Fexp y))%Z with (Fexp x); [ idtac | ring ].
 apply Fexp_le_LSB.
 rewrite Zplus_comm; auto.
@@ -545,7 +545,7 @@ Qed.
 Theorem LSB_rep_min :
  forall p : float, exists z : Z, p = Float z (LSB p) :>R.
 intros p;
- exists (Zquotient (Fnum p) (Zpower_nat radix (Zabs_nat (LSB p - Fexp p)))).
+ exists (Zquotient (Fnum p) (Zpower_nat radix (Z.abs_nat (LSB p - Fexp p)))).
 unfold FtoRradix, FtoR, LSB in |- *; simpl in |- *.
 rewrite powerRZ_add; auto with real zarith.
 rewrite <- Rmult_assoc.

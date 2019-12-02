@@ -32,8 +32,8 @@ Qed.
  
 Theorem floatDec : forall x y : float, {x = y} + {x <> y}.
 intros x y; case x; case y; intros Fnum2 Fexp2 Fnum1 Fexp1.
-case (Z_eq_dec Fnum1 Fnum2); intros H1.
-case (Z_eq_dec Fexp1 Fexp2); intros H2.
+case (Z.eq_dec Fnum1 Fnum2); intros H1.
+case (Z.eq_dec Fexp1 Fexp2); intros H2.
 left; apply floatEq; auto.
 right; red in |- *; intros H'; Contradict H2; inversion H'; auto.
 right; red in |- *; intros H'; Contradict H1; inversion H'; auto.
@@ -219,7 +219,7 @@ Qed.
 Theorem FshiftCorrectInv :
  forall x y : float,
  x = y :>R ->
- (Fexp x <= Fexp y)%Z -> Fshift (Zabs_nat (Fexp y - Fexp x)) y = x.
+ (Fexp x <= Fexp y)%Z -> Fshift (Z.abs_nat (Fexp y - Fexp x)) y = x.
 intros x y H' H'0; try apply sameExpEq; auto.
 apply trans_eq with (y := FtoR y); auto.
 apply FshiftCorrect.
@@ -238,11 +238,11 @@ Theorem FshiftCorrectSym :
  x = y :>R -> exists n : nat, (exists m : nat, Fshift n x = Fshift m y).
 intros x y H'.
 case (Z_le_gt_dec (Fexp x) (Fexp y)); intros H'1.
-exists 0; exists (Zabs_nat (Fexp y - Fexp x)).
+exists 0; exists (Z.abs_nat (Fexp y - Fexp x)).
 rewrite FshiftO.
 apply sym_equal.
 apply FshiftCorrectInv; auto.
-exists (Zabs_nat (Fexp x - Fexp y)); exists 0.
+exists (Z.abs_nat (Fexp x - Fexp y)); exists 0.
 rewrite FshiftO.
 apply FshiftCorrectInv; auto with zarith.
 Qed.
@@ -263,22 +263,22 @@ Theorem ReqGivesEqwithSameExp :
  forall p q : float,
  exists r : float,
    (exists s : float, p = r :>R /\ q = s :>R /\ Fexp r = Fexp s).
-intros p q; exists (Fshift (Zabs_nat (Fexp p - Zmin (Fexp p) (Fexp q))) p);
- exists (Fshift (Zabs_nat (Fexp q - Zmin (Fexp p) (Fexp q))) q); 
+intros p q; exists (Fshift (Z.abs_nat (Fexp p - Z.min (Fexp p) (Fexp q))) p);
+ exists (Fshift (Z.abs_nat (Fexp q - Z.min (Fexp p) (Fexp q))) q); 
  repeat split; auto with real.
 rewrite FshiftCorrect; auto.
 rewrite FshiftCorrect; auto.
 simpl in |- *.
-replace (Z_of_nat (Zabs_nat (Fexp p - Zmin (Fexp p) (Fexp q)))) with
- (Fexp p - Zmin (Fexp p) (Fexp q))%Z.
-replace (Z_of_nat (Zabs_nat (Fexp q - Zmin (Fexp p) (Fexp q)))) with
- (Fexp q - Zmin (Fexp p) (Fexp q))%Z.
+replace (Z_of_nat (Z.abs_nat (Fexp p - Z.min (Fexp p) (Fexp q)))) with
+ (Fexp p - Z.min (Fexp p) (Fexp q))%Z.
+replace (Z_of_nat (Z.abs_nat (Fexp q - Z.min (Fexp p) (Fexp q)))) with
+ (Fexp q - Z.min (Fexp p) (Fexp q))%Z.
 case (Zmin_or (Fexp p) (Fexp q)); intros H'; rewrite H'; auto with zarith.
 rewrite inj_abs; auto.
-apply Zplus_le_reg_l with (p := Zmin (Fexp p) (Fexp q)); auto with zarith.
-generalize (Zle_min_r (Fexp p) (Fexp q)); auto with zarith.
+apply Zplus_le_reg_l with (p := Z.min (Fexp p) (Fexp q)); auto with zarith.
+generalize (Z.le_min_r (Fexp p) (Fexp q)); auto with zarith.
 rewrite inj_abs; auto.
-apply Zplus_le_reg_l with (p := Zmin (Fexp p) (Fexp q)); auto with zarith.
+apply Zplus_le_reg_l with (p := Z.min (Fexp p) (Fexp q)); auto with zarith.
 Qed.
  
 Theorem FdigitEq :
@@ -291,8 +291,8 @@ cut (~ is_Fzero y); [ intros NZy | idtac ].
 case (Zle_or_lt (Fexp x) (Fexp y)); intros Eq1.
 case (Zle_lt_or_eq _ _ Eq1); clear Eq1; intros Eq1.
 absurd
- (Fdigit (Fshift (Zabs_nat (Fexp y - Fexp x)) y) =
-  Fdigit y + Zabs_nat (Fexp y - Fexp x)).
+ (Fdigit (Fshift (Z.abs_nat (Fexp y - Fexp x)) y) =
+  Fdigit y + Z.abs_nat (Fexp y - Fexp x)).
 rewrite FshiftCorrectInv; auto.
 rewrite <- H'1.
 red in |- *; intros H'2.
@@ -302,8 +302,8 @@ apply Zlt_le_weak; auto.
 apply FshiftFdigit; auto.
 apply sameExpEq; auto.
 absurd
- (Fdigit (Fshift (Zabs_nat (Fexp x - Fexp y)) x) =
-  Fdigit x + Zabs_nat (Fexp x - Fexp y)).
+ (Fdigit (Fshift (Z.abs_nat (Fexp x - Fexp y)) x) =
+  Fdigit x + Z.abs_nat (Fexp x - Fexp y)).
 rewrite FshiftCorrectInv; auto.
 rewrite <- H'1.
 red in |- *; intros H'2.

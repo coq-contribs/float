@@ -16,7 +16,7 @@ Fixpoint mZlist_aux (p : Z) (n : nat) {struct n} :
  list Z :=
   match n with
   | O => p :: nil
-  | S n1 => p :: mZlist_aux (Zsucc p) n1
+  | S n1 => p :: mZlist_aux (Z.succ p) n1
   end.
  
 Theorem mZlist_aux_correct :
@@ -74,8 +74,8 @@ apply Zlt_not_le; auto.
 apply Zlt_O_minus_lt; auto.
 replace (p - q)%Z with (- (q - p))%Z; auto with zarith.
 rewrite H'1; simpl in |- *; auto with zarith.
-unfold Zlt in |- *; simpl in |- *; auto.
-apply Zle_trans with (m := r); auto.
+unfold Z.lt in |- *; simpl in |- *; auto.
+apply Z.le_trans with (m := r); auto.
 Qed.
  
 Theorem mZlist_correct_rev1 :

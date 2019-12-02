@@ -26,25 +26,25 @@ Definition Even (z : Z) : Prop := exists z1 : _, z = (2 * z1)%Z.
  
 Definition Odd (z : Z) : Prop := exists z1 : _, z = (2 * z1 + 1)%Z.
  
-Theorem OddSEven : forall n : Z, Odd n -> Even (Zsucc n).
-intros n H'; case H'; intros m H'1; exists (Zsucc m).
-rewrite H'1; unfold Zsucc in |- *; ring.
+Theorem OddSEven : forall n : Z, Odd n -> Even (Z.succ n).
+intros n H'; case H'; intros m H'1; exists (Z.succ m).
+rewrite H'1; unfold Z.succ in |- *; ring.
 Qed.
  
-Theorem EvenSOdd : forall n : Z, Even n -> Odd (Zsucc n).
+Theorem EvenSOdd : forall n : Z, Even n -> Odd (Z.succ n).
 intros n H'; case H'; intros m H'1; exists m.
-rewrite H'1; unfold Zsucc in |- *; ring.
+rewrite H'1; unfold Z.succ in |- *; ring.
 Qed.
 Hint Resolve OddSEven EvenSOdd: zarith.
  
-Theorem OddSEvenInv : forall n : Z, Odd (Zsucc n) -> Even n.
+Theorem OddSEvenInv : forall n : Z, Odd (Z.succ n) -> Even n.
 intros n H'; case H'; intros m H'1; exists m.
-apply Zsucc_inj; rewrite H'1; (unfold Zsucc in |- *; ring).
+apply Z.succ_inj; rewrite H'1; (unfold Z.succ in |- *; ring).
 Qed.
  
-Theorem EvenSOddInv : forall n : Z, Even (Zsucc n) -> Odd n.
-intros n H'; case H'; intros m H'1; exists (Zpred m).
-apply Zsucc_inj; rewrite H'1; (unfold Zsucc, Zpred in |- *; ring).
+Theorem EvenSOddInv : forall n : Z, Even (Z.succ n) -> Odd n.
+intros n H'; case H'; intros m H'1; exists (Z.pred m).
+apply Z.succ_inj; rewrite H'1; (unfold Z.succ, Z.pred in |- *; ring).
 Qed.
  
 Theorem EvenO : Even 0.
@@ -58,8 +58,8 @@ Qed.
 Hint Resolve Odd1: zarith.
  
 Theorem OddOpp : forall z : Z, Odd z -> Odd (- z).
-intros z H; case H; intros z1 H1; exists (- Zsucc z1)%Z; rewrite H1.
-unfold Zsucc in |- *; ring.
+intros z H; case H; intros z1 H1; exists (- Z.succ z1)%Z; rewrite H1.
+unfold Z.succ in |- *; ring.
 Qed.
  
 Theorem EvenOpp : forall z : Z, Even z -> Even (- z).
@@ -219,9 +219,9 @@ rewrite (Zsucc_pred (Zpower_nat radix precision)); auto with zarith.
 intros H'; split; intros H'0; auto with zarith.
 replace (pred precision) with (S (pred (pred precision))); auto with zarith.
 Contradict H'0; apply OddNEven.
-replace (Zpred (Zpower_nat radix precision)) with
+replace (Z.pred (Zpower_nat radix precision)) with
  (Zpower_nat radix precision + - (1))%Z;
- [ idtac | unfold Zpred in |- *; simpl in |- *; auto ].
+ [ idtac | unfold Z.pred in |- *; simpl in |- *; auto ].
 replace precision with (S (pred precision));
  [ auto with zarith | inversion precisionGreaterThanOne; auto ].
 generalize (Z_eq_bool_correct (Fnum p) (- nNormMin radix precision));
@@ -375,13 +375,13 @@ Theorem FEvenD :
 intros p H H0; case H0.
 intros z Hz; exists (Float z (Fexp p)); split; auto.
 repeat split; simpl in |- *; auto with float.
-apply Zle_lt_trans with (Zabs (Fnum p)); auto with float zarith.
+apply Z.le_lt_trans with (Z.abs (Fnum p)); auto with float zarith.
 rewrite Hz; rewrite Zabs_Zmult;
- replace (Zabs 2 * Zabs z)%Z with (Zabs z + Zabs z)%Z; 
+ replace (Z.abs 2 * Z.abs z)%Z with (Z.abs z + Z.abs z)%Z; 
  auto with zarith arith.
-pattern (Zabs z) at 1 in |- *; replace (Zabs z) with (0 + Zabs z)%Z;
+pattern (Z.abs z) at 1 in |- *; replace (Z.abs z) with (0 + Z.abs z)%Z;
  auto with zarith.
-rewrite (Zabs_eq 2); auto with zarith.
+rewrite (Z.abs_eq 2); auto with zarith.
 unfold FtoRradix, FtoR in |- *; simpl in |- *.
 rewrite Hz; rewrite Rmult_IZR; simpl in |- *; ring.
 Qed.

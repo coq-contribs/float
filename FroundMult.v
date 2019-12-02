@@ -76,8 +76,8 @@ cut
 cut
  (Zquotient (Fnum p * Fnum q) (Zpower_nat radix precision) *
   powerRZ radix precision <= m)%R; [ intros H'9 | idtac ].
-rewrite Zabs_eq; auto with zarith.
-apply Zle_lt_trans with x; auto.
+rewrite Z.abs_eq; auto with zarith.
+apply Z.le_lt_trans with x; auto.
 replace x with
  (Fnum p * Fnum q +
   -
@@ -90,7 +90,7 @@ rewrite Rmult_IZR.
 rewrite Zpower_nat_Z_powerRZ; auto with zarith.
 pattern (Fnum p * Fnum q)%Z at 1 in |- *; rewrite H'5; ring.
 rewrite pGivesBound.
-rewrite <- (Zabs_eq (Zpower_nat radix precision)); auto with zarith.
+rewrite <- (Z.abs_eq (Zpower_nat radix precision)); auto with zarith.
 apply Zlt_Zabs_inv2; auto.
 apply Rmult_le_reg_l with (r := powerRZ radix (Fexp p + Fexp q));
  auto with real zarith.
@@ -103,13 +103,13 @@ case
     (m := Zquotient (Fnum p * Fnum q) (Zpower_nat radix precision));
  auto with zarith.
 apply Zmult_le_reg_r with (p := Zpower_nat radix precision); auto with zarith.
-apply Zlt_gt; auto with zarith.
+apply Z.lt_gt; auto with zarith.
 pattern (Zpower_nat radix precision) at 2 in |- *;
- rewrite <- (fun x => Zabs_eq (Zpower_nat radix x)).
+ rewrite <- (fun x => Z.abs_eq (Zpower_nat radix x)).
 rewrite <- Zabs_Zmult.
-apply Zle_trans with (1 := H'6); auto with zarith.
+apply Z.le_trans with (1 := H'6); auto with zarith.
 rewrite Zabs_Zmult.
-apply Zle_trans with (Zpower_nat radix precision * Zabs (Fnum q))%Z.
+apply Z.le_trans with (Zpower_nat radix precision * Z.abs (Fnum q))%Z.
 apply Zle_Zmult_comp_r; auto with zarith.
 apply Zlt_le_weak; rewrite <- pGivesBound; case Fp; auto with float.
 apply Zle_Zmult_comp_l; auto with zarith.
@@ -127,7 +127,7 @@ repeat rewrite (fun x => Rmult_comm x (powerRZ radix (Fexp p + Fexp q))).
 apply Rmult_le_compat_l; auto with real zarith.
 rewrite <- Zpower_nat_Z_powerRZ; auto with zarith.
 pattern (Fnum p * Fnum q)%Z at 2 in |- *;
- rewrite <- (Zabs_eq (Fnum p * Fnum q)); auto.
+ rewrite <- (Z.abs_eq (Fnum p * Fnum q)); auto.
 rewrite <- Rmult_IZR; apply Rle_IZR; apply Zle_Zabs_inv2; auto.
 simpl in |- *; auto.
 apply Zmin_n_n; auto.
@@ -161,9 +161,9 @@ cut (0 <= r)%Z;
      Zpower_nat radix precision)%Z;
     [ idtac | pattern (Fnum p * Fnum q)%Z at 1 in |- *; rewrite H'3; ring ];
     auto ].
-2: apply Zle_Zminus_ZERO; rewrite Zabs_eq in H'4; auto with zarith;
-    rewrite Zabs_eq in H'4; auto with zarith.
-case (Z_eq_dec r 0); intros Z4.
+2: apply Zle_Zminus_ZERO; rewrite Z.abs_eq in H'4; auto with zarith;
+    rewrite Z.abs_eq in H'4; auto with zarith.
+case (Z.eq_dec r 0); intros Z4.
 exists (Fzero (Fexp p + Fexp q)); repeat (split; auto with float).
 replace (FtoRradix (Fzero (Fexp p + Fexp q))) with 0%R;
  [ idtac | unfold Fzero, FtoRradix, FtoR in |- *; simpl in |- *; ring ].
@@ -178,13 +178,13 @@ case
     (m := Zquotient (Fnum p * Fnum q) (Zpower_nat radix precision));
  auto with zarith.
 apply Zmult_le_reg_r with (p := Zpower_nat radix precision); auto with zarith.
-apply Zlt_gt; auto with zarith.
+apply Z.lt_gt; auto with zarith.
 pattern (Zpower_nat radix precision) at 2 in |- *;
- rewrite <- (fun x => Zabs_eq (Zpower_nat radix x)).
+ rewrite <- (fun x => Z.abs_eq (Zpower_nat radix x)).
 rewrite <- Zabs_Zmult.
-apply Zle_trans with (1 := H'4); auto with zarith.
+apply Z.le_trans with (1 := H'4); auto with zarith.
 rewrite Zabs_Zmult.
-apply Zle_trans with (Zpower_nat radix precision * Zabs (Fnum q))%Z.
+apply Z.le_trans with (Zpower_nat radix precision * Z.abs (Fnum q))%Z.
 apply Zle_Zmult_comp_r; auto with zarith.
 apply Zlt_le_weak; rewrite <- pGivesBound; case Fp; auto with float.
 apply Zle_Zmult_comp_l; auto with zarith.
@@ -229,7 +229,7 @@ cut (Fmult p q <= fmax)%R;
     auto with real zarith; (intros H1 H2; case H2; auto) ].
 cut
  (fmax <=
-  Zsucc (Zquotient (Fnum p * Fnum q) (Zpower_nat radix precision)) *
+  Z.succ (Zquotient (Fnum p * Fnum q) (Zpower_nat radix precision)) *
   powerRZ radix (precision + (Fexp p + Fexp q)))%R.
 rewrite E; repeat rewrite Zmin_n_n; repeat rewrite <- Zminus_diag_reverse;
  repeat rewrite Zpower_nat_O; repeat rewrite Zmult_1_r; 
@@ -239,16 +239,16 @@ repeat rewrite Zmin_n_n; repeat rewrite <- Zminus_diag_reverse;
  repeat rewrite Zpower_nat_O; repeat rewrite Zmult_1_r; 
  auto.
 intros H1 H2; rewrite Zabs_Zopp; apply Zlt_Zabs_intro.
-apply Zlt_le_trans with 0%Z; auto with zarith.
+apply Z.lt_le_trans with 0%Z; auto with zarith.
 cut (Fnum p * Fnum q <= m)%Z; auto with zarith.
 apply le_IZR;
  apply (Rle_monotony_contra_exp radix) with (z := (Fexp p + Fexp q)%Z);
  auto with zarith.
 cut
  (m <=
-  Zsucc (Zquotient (Fnum p * Fnum q) (Zpower_nat radix precision)) *
+  Z.succ (Zquotient (Fnum p * Fnum q) (Zpower_nat radix precision)) *
   Zpower_nat radix precision)%Z; [ intros H'9 | idtac ].
-apply Zle_lt_trans with (Zpower_nat radix precision - r)%Z;
+apply Z.le_lt_trans with (Zpower_nat radix precision - r)%Z;
  [ idtac | rewrite pGivesBound; auto with zarith ].
 replace r with
  (Fnum p * Fnum q -
@@ -259,19 +259,19 @@ replace
   (Fnum p * Fnum q -
    Zquotient (Fnum p * Fnum q) (Zpower_nat radix precision) *
    Zpower_nat radix precision))%Z with
- (Zsucc (Zquotient (Fnum p * Fnum q) (Zpower_nat radix precision)) *
+ (Z.succ (Zquotient (Fnum p * Fnum q) (Zpower_nat radix precision)) *
   Zpower_nat radix precision - Fnum p * Fnum q)%Z; 
  auto with zarith.
-unfold Zsucc in |- *; simpl in |- *; ring.
+unfold Z.succ in |- *; simpl in |- *; ring.
 pattern (Fnum p * Fnum q)%Z at 1 in |- *; rewrite H'3; ring.
 apply le_IZR;
  apply (Rle_monotony_contra_exp radix) with (z := (Fexp p + Fexp q)%Z);
  auto with zarith.
 replace
  (IZR
-    (Zsucc (Zquotient (Fnum p * Fnum q) (Zpower_nat radix precision)) *
+    (Z.succ (Zquotient (Fnum p * Fnum q) (Zpower_nat radix precision)) *
      Zpower_nat radix precision) * powerRZ radix (Fexp p + Fexp q))%R with
- (Zsucc (Zquotient (Fnum p * Fnum q) (Zpower_nat radix precision)) *
+ (Z.succ (Zquotient (Fnum p * Fnum q) (Zpower_nat radix precision)) *
   powerRZ radix (precision + (Fexp p + Fexp q)))%R; 
  [ auto | idtac ].
 rewrite powerRZ_add; auto with real zarith.
@@ -281,25 +281,25 @@ case
  (FboundedMbound _ radixMoreThanOne b precision)
   with
     (z := (precision + (Fexp p + Fexp q))%Z)
-    (m := Zsucc (Zquotient (Fnum p * Fnum q) (Zpower_nat radix precision)));
+    (m := Z.succ (Zquotient (Fnum p * Fnum q) (Zpower_nat radix precision)));
  auto with arith.
-rewrite Zabs_eq; auto with zarith.
+rewrite Z.abs_eq; auto with zarith.
 apply Zlt_le_succ.
 case (Zle_lt_or_eq _ _ multPos); intros Eq1.
-cut (0 < Zabs (Fnum p))%Z; [ intros Eq2 | idtac ].
-cut (0 < Zabs (Fnum q))%Z; [ intros Eq3 | idtac ].
+cut (0 < Z.abs (Fnum p))%Z; [ intros Eq2 | idtac ].
+cut (0 < Z.abs (Fnum q))%Z; [ intros Eq3 | idtac ].
 apply Zlt_mult_simpl_l with (c := Zpower_nat radix precision);
  auto with zarith.
 rewrite (fun x y z => Zmult_comm x (Zquotient y z)).
-apply Zle_lt_trans with (Fnum p * Fnum q)%Z.
-rewrite Zabs_eq in H'4; auto with zarith; rewrite Zabs_eq in H'4;
+apply Z.le_lt_trans with (Fnum p * Fnum q)%Z.
+rewrite Z.abs_eq in H'4; auto with zarith; rewrite Z.abs_eq in H'4;
  auto with zarith.
-rewrite <- (Zabs_eq (Fnum p * Fnum q)); auto with zarith; rewrite Zabs_Zmult.
-apply Zlt_trans with (Zabs (Fnum p) * Zpower_nat radix precision)%Z.
-cut (Zabs (Fnum q) < Zpower_nat radix precision)%Z;
+rewrite <- (Z.abs_eq (Fnum p * Fnum q)); auto with zarith; rewrite Zabs_Zmult.
+apply Z.lt_trans with (Z.abs (Fnum p) * Zpower_nat radix precision)%Z.
+cut (Z.abs (Fnum q) < Zpower_nat radix precision)%Z;
  [ intros Eq4; apply Zmult_gt_0_lt_compat_l
  | rewrite <- pGivesBound; case Fq ]; auto with zarith.
-cut (Zabs (Fnum p) < Zpower_nat radix precision)%Z;
+cut (Z.abs (Fnum p) < Zpower_nat radix precision)%Z;
  [ intros Eq4; apply Zmult_gt_0_lt_compat_r
  | rewrite <- pGivesBound; case Fp ]; auto with zarith.
 case (Zle_lt_or_eq _ _ (Zle_ZERO_Zabs (Fnum q))); auto.
@@ -310,7 +310,7 @@ intros Eq3; Contradict Eq1; replace (Fnum p) with 0%Z; auto with zarith.
 generalize Eq3; case (Fnum p); simpl in |- *; auto; intros; discriminate.
 rewrite <- Eq1; replace (Zquotient 0 (Zpower_nat radix precision)) with 0%Z;
  auto with zarith.
-apply Zle_trans with (1 := H'1); auto with zarith.
+apply Z.le_trans with (1 := H'1); auto with zarith.
 intros f1 (Hf1, Hf2); rewrite <- Hf2.
 case H'2; intros L1 (L2, L3); apply L3; auto.
 rewrite Hf2; unfold Fmult, FtoRradix, FtoR in |- *.
@@ -318,7 +318,7 @@ replace
  (Fnum p * powerRZ radix (Fexp p) * (Fnum q * powerRZ radix (Fexp q)))%R with
  (Fnum p * Fnum q * powerRZ radix (Fexp p + Fexp q))%R.
 replace
- (Zsucc (Zquotient (Fnum p * Fnum q) (Zpower_nat radix precision)) *
+ (Z.succ (Zquotient (Fnum p * Fnum q) (Zpower_nat radix precision)) *
   powerRZ radix (precision + (Fexp p + Fexp q)))%R with
  ((Zquotient (Fnum p * Fnum q) (Zpower_nat radix precision) *
    Zpower_nat radix precision + Zpower_nat radix precision)%Z *
@@ -327,9 +327,9 @@ apply Rle_monotone_exp; auto with real zarith.
 rewrite <- Rmult_IZR; apply Rle_IZR.
 pattern (Fnum p * Fnum q)%Z at 1 in |- *; rewrite H'3;
  cut (r < Zpower_nat radix precision)%Z; auto with zarith.
-rewrite Zabs_eq in H'5; auto with zarith; rewrite Zabs_eq in H'5;
+rewrite Z.abs_eq in H'5; auto with zarith; rewrite Z.abs_eq in H'5;
  auto with zarith.
-unfold Zsucc in |- *; repeat rewrite Rmult_IZR || rewrite plus_IZR;
+unfold Z.succ in |- *; repeat rewrite Rmult_IZR || rewrite plus_IZR;
  simpl in |- *.
 rewrite (powerRZ_add radix precision); auto with real zarith;
  rewrite <- (Zpower_nat_Z_powerRZ radix precision); auto with real zarith; 
@@ -383,7 +383,7 @@ unfold FtoRradix in |- *; apply eqExpMax; auto.
 apply RoundedModeBounded with (radix := radix) (P := P) (r := (p * q)%R);
  auto; auto.
 unfold pPred in |- *; apply maxFbounded; auto.
-apply Zle_trans with (1 := H'3); auto with zarith.
+apply Z.le_trans with (1 := H'3); auto with zarith.
 replace (FtoR radix (Float (pPred (vNum b)) (precision + (Fexp p + Fexp q))))
  with (radix * Float (pPred (vNum b)) (pred precision + (Fexp p + Fexp q)))%R.
 rewrite Fabs_correct; auto with zarith.
@@ -414,7 +414,7 @@ apply Rmult_le_compat_l; auto with real arith.
 rewrite <- Rmult_assoc.
 rewrite (fun x : R => Rmult_comm x radix).
 rewrite <- powerRZ_Zs; auto with real arith.
-replace (Zsucc (pred precision)) with (Z_of_nat precision).
+replace (Z.succ (pred precision)) with (Z_of_nat precision).
 rewrite Rmult_IZR; auto.
 apply Rmult_le_compat; auto with real arith.
 replace 0%R with (IZR 0); unfold pPred in |- *; try apply Rle_IZR;
@@ -431,8 +431,8 @@ repeat rewrite (Rmult_comm (pPred (vNum b))).
 rewrite <- Rmult_assoc.
 rewrite <- powerRZ_Zs; auto with real zarith.
 rewrite inj_pred; auto with arith zarith.
-replace (Zsucc (Zpred precision + (Fexp p + Fexp q))) with
- (precision + (Fexp p + Fexp q))%Z; auto; unfold Zsucc, Zpred in |- *; 
+replace (Z.succ (Z.pred precision + (Fexp p + Fexp q))) with
+ (precision + (Fexp p + Fexp q))%Z; auto; unfold Z.succ, Z.pred in |- *; 
  ring.
 Qed.
  
@@ -544,25 +544,25 @@ Qed.
  
 Theorem errorBoundedMultExp_aux :
  forall n1 n2 : Z,
- (Zabs n1 < Zpos (vNum b))%Z ->
- (Zabs n2 < Zpos (vNum b))%Z ->
+ (Z.abs n1 < Zpos (vNum b))%Z ->
+ (Z.abs n2 < Zpos (vNum b))%Z ->
  (exists ny : Z,
     (exists ey : Z,
        (n1 * n2)%R = (ny * powerRZ radix ey)%R :>R /\
-       (Zabs ny < Zpos (vNum b))%Z)) ->
+       (Z.abs ny < Zpos (vNum b))%Z)) ->
  exists nx : Z,
    (exists ex : Z,
       (n1 * n2)%R = (nx * powerRZ radix ex)%R :>R /\
-      (Zabs nx < Zpos (vNum b))%Z /\
+      (Z.abs nx < Zpos (vNum b))%Z /\
       (0 <= ex)%Z /\ (ex <= precision)%Z).
 intros n1 n2 H H0 H1.
 case H1; intros ny (ey, (H2, H3)).
 case (Zle_or_lt 0 ey); intros Zl1.
 case (Zle_or_lt ey precision); intros Zl2.
 exists ny; exists ey; repeat (split; auto).
-exists (ny * Zpower_nat radix (Zabs_nat (ey - precision)))%Z;
+exists (ny * Zpower_nat radix (Z.abs_nat (ey - precision)))%Z;
  exists (Z_of_nat precision); repeat (split; auto with zarith).
-replace (IZR (ny * Zpower_nat radix (Zabs_nat (ey - precision)))) with
+replace (IZR (ny * Zpower_nat radix (Z.abs_nat (ey - precision)))) with
  (ny * powerRZ radix (ey - precision))%R.
 rewrite Rmult_assoc; rewrite <- powerRZ_add; auto with zarith real.
 replace (ey - precision + precision)%Z with ey; [ auto | ring ].
@@ -574,7 +574,7 @@ apply lt_IZR; apply Rmult_lt_reg_l with (r := powerRZ radix precision);
 repeat rewrite (fun x y => Rmult_comm (powerRZ x y)).
 rewrite Rmult_IZR.
 rewrite Rmult_assoc.
-rewrite (Zabs_eq (Zpower_nat radix (Zabs_nat (ey - precision))));
+rewrite (Z.abs_eq (Zpower_nat radix (Z.abs_nat (ey - precision))));
  auto with zarith.
 rewrite Zpower_nat_powerRZ_absolu; auto with real zarith.
 rewrite <- powerRZ_add; auto with real zarith.
@@ -586,11 +586,11 @@ replace (powerRZ radix precision) with (IZR (Zpos (vNum b)));
 rewrite <- (fun x y => Rabs_pos_eq (powerRZ x y)); auto with real zarith.
 rewrite <- Faux.Rabsolu_Zabs; rewrite <- Rabs_mult; rewrite <- H2.
 rewrite Rabs_mult; repeat rewrite Faux.Rabsolu_Zabs; auto with real zarith.
-case (Zle_lt_or_eq 0 (Zabs n2)); auto with zarith; intros Z1.
-apply Rlt_trans with (Zpos (vNum b) * Zabs n2)%R;
+case (Zle_lt_or_eq 0 (Z.abs n2)); auto with zarith; intros Z1.
+apply Rlt_trans with (Zpos (vNum b) * Z.abs n2)%R;
  auto with real zarith.
 rewrite <- Z1; auto with real zarith.
-replace (Zabs n1 * 0%Z)%R with (0 * Zpos (vNum b))%R;
+replace (Z.abs n1 * 0%Z)%R with (0 * Zpos (vNum b))%R;
  [ auto with real zarith | simpl; ring ].
 exists (n1 * n2)%Z; exists 0%Z; repeat (split; auto with zarith).
 rewrite Rmult_IZR; rewrite powerRZ_O; ring.

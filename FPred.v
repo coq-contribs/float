@@ -20,22 +20,22 @@ Hypothesis pGivesBound : Zpos (vNum b) = Zpower_nat radix precision.
  
 Definition FPred (x : float) :=
   match Z_eq_bool (Fnum x) (- pPred (vNum b)) with
-  | true => Float (- nNormMin radix precision) (Zsucc (Fexp x))
+  | true => Float (- nNormMin radix precision) (Z.succ (Fexp x))
   | false =>
       match Z_eq_bool (Fnum x) (nNormMin radix precision) with
       | true =>
           match Z_eq_bool (Fexp x) (- dExp b) with
-          | true => Float (Zpred (Fnum x)) (Fexp x)
-          | false => Float (pPred (vNum b)) (Zpred (Fexp x))
+          | true => Float (Z.pred (Fnum x)) (Fexp x)
+          | false => Float (pPred (vNum b)) (Z.pred (Fexp x))
           end
-      | false => Float (Zpred (Fnum x)) (Fexp x)
+      | false => Float (Z.pred (Fnum x)) (Fexp x)
       end
   end.
  
 Theorem FPredSimpl1 :
  forall x : float,
  Fnum x = (- pPred (vNum b))%Z ->
- FPred x = Float (- nNormMin radix precision) (Zsucc (Fexp x)).
+ FPred x = Float (- nNormMin radix precision) (Z.succ (Fexp x)).
 intros x H'; unfold FPred in |- *.
 generalize (Z_eq_bool_correct (Fnum x) (- pPred (vNum b)));
  case (Z_eq_bool (Fnum x) (- pPred (vNum b))); auto.
@@ -45,7 +45,7 @@ Qed.
 Theorem FPredSimpl2 :
  forall x : float,
  Fnum x = nNormMin radix precision ->
- Fexp x <> (- dExp b)%Z -> FPred x = Float (pPred (vNum b)) (Zpred (Fexp x)).
+ Fexp x <> (- dExp b)%Z -> FPred x = Float (pPred (vNum b)) (Z.pred (Fexp x)).
 intros x H' H'0; unfold FPred in |- *.
 generalize (Z_eq_bool_correct (Fnum x) (- pPred (vNum b)));
  case (Z_eq_bool (Fnum x) (- pPred (vNum b))); auto.
@@ -66,13 +66,13 @@ Qed.
  
 Theorem FPredSimpl3 :
  FPred (Float (nNormMin radix precision) (- dExp b)) =
- Float (Zpred (nNormMin radix precision)) (- dExp b).
+ Float (Z.pred (nNormMin radix precision)) (- dExp b).
 unfold FPred in |- *; simpl in |- *.
 generalize (Z_eq_bool_correct (nNormMin radix precision) (- pPred (vNum b)));
  case (Z_eq_bool (nNormMin radix precision) (- pPred (vNum b))); 
  auto.
 intros H'0; absurd (0 < pPred (vNum b))%Z; auto with zarith arith.
-rewrite <- (Zopp_involutive (pPred (vNum b))); rewrite <- H'0.
+rewrite <- (Z.opp_involutive (pPred (vNum b))); rewrite <- H'0.
 apply Zle_not_lt; replace 0%Z with (- (0))%Z;
  [ apply Zle_Zopp | simpl in |- *; auto ].
 apply Zlt_le_weak; apply nNormPos; auto with float zarith.
@@ -93,7 +93,7 @@ Theorem FPredSimpl4 :
  forall x : float,
  Fnum x <> (- pPred (vNum b))%Z ->
  Fnum x <> nNormMin radix precision ->
- FPred x = Float (Zpred (Fnum x)) (Fexp x).
+ FPred x = Float (Z.pred (Fnum x)) (Fexp x).
 intros x H' H'0; unfold FPred in |- *.
 generalize (Z_eq_bool_correct (Fnum x) (- pPred (vNum b)));
  case (Z_eq_bool (Fnum x) (- pPred (vNum b))); auto.
@@ -121,17 +121,17 @@ replace x with (Float (Fnum x) (Fexp x)).
 rewrite H'2; rewrite H'3; rewrite FPredSimpl3; unfold Fopp in |- *;
  simpl in |- *; rewrite FSuccSimpl3; simpl in |- *; 
  auto.
-rewrite <- Zopp_Zpred_Zs; rewrite Zopp_involutive; auto.
+rewrite <- Zopp_Zpred_Zs; rewrite Z.opp_involutive; auto.
 case x; simpl in |- *; auto.
 rewrite FPredSimpl2; auto; rewrite FSuccSimpl2; unfold Fopp in |- *;
- simpl in |- *; try rewrite Zopp_involutive; 
+ simpl in |- *; try rewrite Z.opp_involutive; 
  auto.
 rewrite H'2; auto.
 rewrite FPredSimpl4; auto; rewrite FSuccSimpl4; auto.
 unfold Fopp in |- *; simpl in |- *; rewrite <- Zopp_Zpred_Zs;
- rewrite Zopp_involutive; auto.
+ rewrite Z.opp_involutive; auto.
 unfold Fopp in |- *; simpl in |- *; Contradict H'1; rewrite <- H'1;
- rewrite Zopp_involutive; auto.
+ rewrite Z.opp_involutive; auto.
 unfold Fopp in |- *; simpl in |- *; Contradict H'2; auto with zarith.
 Qed.
  
@@ -145,7 +145,7 @@ rewrite <- Fopp_Fminus_dist.
 rewrite Fopp_Fminus.
 unfold FtoRradix in |- *; rewrite FSuccDiff1; auto.
 replace (Fnum (Fopp x)) with (- Fnum x)%Z.
-Contradict H'; rewrite <- (Zopp_involutive (Fnum x)); rewrite H';
+Contradict H'; rewrite <- (Z.opp_involutive (Fnum x)); rewrite H';
  auto with zarith.
 case x; simpl in |- *; auto.
 Qed.
@@ -166,7 +166,7 @@ Theorem FPredDiff3 :
  forall x : float,
  Fnum x = nNormMin radix precision ->
  Fexp x <> (- dExp b)%Z ->
- Fminus radix x (FPred x) = Float 1%nat (Zpred (Fexp x)) :>R.
+ Fminus radix x (FPred x) = Float 1%nat (Z.pred (Fexp x)) :>R.
 intros x H' H'0; rewrite (FPredFopFSucc x).
 pattern x at 1 in |- *; rewrite <- (Fopp_Fopp x).
 rewrite <- Fopp_Fminus_dist.
@@ -273,7 +273,7 @@ generalize (Z_eq_bool_correct (nNormMin radix precision) (- pPred (vNum b)));
  case (Z_eq_bool (nNormMin radix precision) (- pPred (vNum b)));
  simpl in |- *.
 intros H'; Contradict H'; apply sym_not_equal; apply Zlt_not_eq; auto.
-apply Zlt_le_trans with (- 0%nat)%Z.
+apply Z.lt_le_trans with (- 0%nat)%Z.
 apply Zlt_Zopp; unfold pPred in |- *; apply Zlt_succ_pred; simpl in |- *;
  apply vNumbMoreThanOne with (3 := pGivesBound); auto.
 simpl in |- *; apply Zlt_le_weak; apply nNormPos; auto.
@@ -281,12 +281,12 @@ generalize
  (Z_eq_bool_correct (nNormMin radix precision) (nNormMin radix precision));
  case (Z_eq_bool (nNormMin radix precision) (nNormMin radix precision));
  simpl in |- *.
-generalize (Z_eq_bool_correct (Zsucc (Fexp x)) (- dExp b));
- case (Z_eq_bool (Zsucc (Fexp x)) (- dExp b)); simpl in |- *.
+generalize (Z_eq_bool_correct (Z.succ (Fexp x)) (- dExp b));
+ case (Z_eq_bool (Z.succ (Fexp x)) (- dExp b)); simpl in |- *.
 intros H' H'0 H'1 H'2; absurd (- dExp b <= Fexp x)%Z; auto with float.
 rewrite <- H'; auto with float zarith.
-replace (Zpred (Zsucc (Fexp x))) with (Fexp x);
- [ idtac | unfold Zsucc, Zpred in |- *; ring ]; auto.
+replace (Z.pred (Z.succ (Fexp x))) with (Fexp x);
+ [ idtac | unfold Z.succ, Z.pred in |- *; ring ]; auto.
 intros H' H'0 H'1 H'2; rewrite <- H'2; auto.
 apply floatEq; auto.
 intros H'; case H'; auto.
@@ -295,55 +295,55 @@ generalize (Z_eq_bool_correct (Fnum x) (- nNormMin radix precision));
  simpl in |- *.
 generalize (Z_eq_bool_correct (Fexp x) (- dExp b));
  case (Z_eq_bool (Fexp x) (- dExp b)); simpl in |- *.
-generalize (Z_eq_bool_correct (Zsucc (Fnum x)) (- pPred (vNum b)));
- case (Z_eq_bool (Zsucc (Fnum x)) (- pPred (vNum b))); 
+generalize (Z_eq_bool_correct (Z.succ (Fnum x)) (- pPred (vNum b)));
+ case (Z_eq_bool (Z.succ (Fnum x)) (- pPred (vNum b))); 
  simpl in |- *.
-intros H0 H1 H2; absurd (Zsucc (Fnum x) <= Fnum x)%Z; auto with zarith.
+intros H0 H1 H2; absurd (Z.succ (Fnum x) <= Fnum x)%Z; auto with zarith.
 rewrite H0; rewrite H2; (apply Zle_Zopp; auto with float arith).
 unfold pPred in |- *; apply Zle_Zpred; apply ZltNormMinVnum; auto with zarith.
-generalize (Z_eq_bool_correct (Zsucc (Fnum x)) (nNormMin radix precision));
- case (Z_eq_bool (Zsucc (Fnum x)) (nNormMin radix precision)); 
+generalize (Z_eq_bool_correct (Z.succ (Fnum x)) (nNormMin radix precision));
+ case (Z_eq_bool (Z.succ (Fnum x)) (nNormMin radix precision)); 
  simpl in |- *.
 intros H' H'0 H'1 H'2; Contradict H'2.
 rewrite <- H'; auto with zarith.
-replace (Zpred (Zsucc (Fnum x))) with (Fnum x);
- [ idtac | unfold Zsucc, Zpred in |- *; ring ]; auto.
+replace (Z.pred (Z.succ (Fnum x))) with (Fnum x);
+ [ idtac | unfold Z.succ, Z.pred in |- *; ring ]; auto.
 intros H' H'0 H'1 H'2 H'3; apply floatEq; auto.
 generalize (Z_eq_bool_correct (- pPred (vNum b)) (- pPred (vNum b)));
  case (Z_eq_bool (- pPred (vNum b)) (- pPred (vNum b))); 
  auto.
 intros H' H'0 H'1 H'2; rewrite <- H'1.
-replace (Zsucc (Zpred (Fexp x))) with (Fexp x);
- [ idtac | unfold Zsucc, Zpred in |- *; ring ]; auto.
+replace (Z.succ (Z.pred (Fexp x))) with (Fexp x);
+ [ idtac | unfold Z.succ, Z.pred in |- *; ring ]; auto.
 apply floatEq; auto.
 intros H'; case H'; auto.
-generalize (Z_eq_bool_correct (Zsucc (Fnum x)) (- pPred (vNum b)));
- case (Z_eq_bool (Zsucc (Fnum x)) (- pPred (vNum b))); 
+generalize (Z_eq_bool_correct (Z.succ (Fnum x)) (- pPred (vNum b)));
+ case (Z_eq_bool (Z.succ (Fnum x)) (- pPred (vNum b))); 
  simpl in |- *.
 intros H'; absurd (- pPred (vNum b) <= Fnum x)%Z; auto with float.
 rewrite <- H'; auto with zarith.
 apply Zle_Zabs_inv1; auto with float.
 unfold pPred in |- *; apply Zle_Zpred; auto with float.
-generalize (Z_eq_bool_correct (Zsucc (Fnum x)) (nNormMin radix precision));
- case (Z_eq_bool (Zsucc (Fnum x)) (nNormMin radix precision)); 
+generalize (Z_eq_bool_correct (Z.succ (Fnum x)) (nNormMin radix precision));
+ case (Z_eq_bool (Z.succ (Fnum x)) (nNormMin radix precision)); 
  simpl in |- *.
 generalize (Z_eq_bool_correct (Fexp x) (- dExp b));
  case (Z_eq_bool (Fexp x) (- dExp b)); simpl in |- *.
 intros H' H'0 H'1 H'2 H'3.
-replace (Zpred (Zsucc (Fnum x))) with (Fnum x);
- [ idtac | unfold Zsucc, Zpred in |- *; ring ]; auto.
+replace (Z.pred (Z.succ (Fnum x))) with (Fnum x);
+ [ idtac | unfold Z.succ, Z.pred in |- *; ring ]; auto.
 apply floatEq; auto.
 intros H' H'0 H'1 H'2 H'3; case H.
-intros H'4; absurd (nNormMin radix precision <= Zabs (Fnum x))%Z.
-replace (Fnum x) with (Zpred (Zsucc (Fnum x)));
- [ idtac | unfold Zsucc, Zpred in |- *; ring ]; auto.
+intros H'4; absurd (nNormMin radix precision <= Z.abs (Fnum x))%Z.
+replace (Fnum x) with (Z.pred (Z.succ (Fnum x)));
+ [ idtac | unfold Z.succ, Z.pred in |- *; ring ]; auto.
 rewrite H'0.
-apply Zlt_not_le; rewrite Zabs_eq; auto with zarith.
+apply Zlt_not_le; rewrite Z.abs_eq; auto with zarith.
 apply Zle_Zpred; apply nNormPos; auto with float zarith.
 apply pNormal_absolu_min with (b := b); auto.
 intros H'4; Contradict H'; apply FsubnormalFexp with (1 := H'4).
 intros H' H'0 H'1 H'2; apply floatEq; simpl in |- *; auto.
-unfold Zpred, Zsucc in |- *; ring.
+unfold Z.pred, Z.succ in |- *; ring.
 Qed.
  
 Theorem FSucPred :
@@ -357,8 +357,8 @@ generalize (Z_eq_bool_correct (- nNormMin radix precision) (pPred (vNum b)));
  case (Z_eq_bool (- nNormMin radix precision) (pPred (vNum b)));
  simpl in |- *.
 intros H'; Contradict H'; apply Zlt_not_eq; auto.
-rewrite <- (Zopp_involutive (pPred (vNum b))); apply Zlt_Zopp.
-apply Zlt_le_trans with (- 0%nat)%Z.
+rewrite <- (Z.opp_involutive (pPred (vNum b))); apply Zlt_Zopp.
+apply Z.lt_le_trans with (- 0%nat)%Z.
 apply Zlt_Zopp; unfold pPred in |- *; apply Zlt_succ_pred; simpl in |- *.
 apply (vNumbMoreThanOne radix) with (precision := precision); auto.
 simpl in |- *; apply Zlt_le_weak; apply nNormPos; auto with zarith arith.
@@ -366,20 +366,20 @@ generalize
  (Z_eq_bool_correct (- nNormMin radix precision) (- nNormMin radix precision));
  case (Z_eq_bool (- nNormMin radix precision) (- nNormMin radix precision));
  simpl in |- *.
-generalize (Z_eq_bool_correct (Zsucc (Fexp x)) (- dExp b));
- case (Z_eq_bool (Zsucc (Fexp x)) (- dExp b)); simpl in |- *.
+generalize (Z_eq_bool_correct (Z.succ (Fexp x)) (- dExp b));
+ case (Z_eq_bool (Z.succ (Fexp x)) (- dExp b)); simpl in |- *.
 intros H' H'0 H'1 H'2; absurd (- dExp b <= Fexp x)%Z; auto with float.
 rewrite <- H'; auto with zarith.
 intros H' H'0 H'1 H'2; rewrite <- H'2; apply floatEq; simpl in |- *; auto;
- unfold Zsucc, Zpred in |- *; ring.
+ unfold Z.succ, Z.pred in |- *; ring.
 intros H'; case H'; auto.
 generalize (Z_eq_bool_correct (Fnum x) (nNormMin radix precision));
  case (Z_eq_bool (Fnum x) (nNormMin radix precision)); 
  simpl in |- *.
 generalize (Z_eq_bool_correct (Fexp x) (- dExp b));
  case (Z_eq_bool (Fexp x) (- dExp b)); simpl in |- *.
-generalize (Z_eq_bool_correct (Zpred (Fnum x)) (pPred (vNum b)));
- case (Z_eq_bool (Zpred (Fnum x)) (pPred (vNum b))); 
+generalize (Z_eq_bool_correct (Z.pred (Fnum x)) (pPred (vNum b)));
+ case (Z_eq_bool (Z.pred (Fnum x)) (pPred (vNum b))); 
  simpl in |- *.
 intros H' H'0 H'1 H'2; absurd (nNormMin radix precision <= pPred (vNum b))%Z;
  auto with float.
@@ -387,46 +387,46 @@ rewrite <- H'; rewrite H'1; auto with zarith.
 rewrite <- H'1; auto with float.
 apply Zle_Zabs_inv2; auto with float zarith.
 unfold pPred in |- *; apply Zle_Zpred; auto with float.
-generalize (Z_eq_bool_correct (Zpred (Fnum x)) (- nNormMin radix precision));
- case (Z_eq_bool (Zpred (Fnum x)) (- nNormMin radix precision));
+generalize (Z_eq_bool_correct (Z.pred (Fnum x)) (- nNormMin radix precision));
+ case (Z_eq_bool (Z.pred (Fnum x)) (- nNormMin radix precision));
  simpl in |- *.
 intros H' H'0 H'1 H'2 H'3;
- absurd (Zpred (nNormMin radix precision) = (- nNormMin radix precision)%Z);
+ absurd (Z.pred (nNormMin radix precision) = (- nNormMin radix precision)%Z);
  auto with zarith.
 intros H' H'0 H'1 H'2 H'3; apply floatEq; simpl in |- *; auto;
- unfold Zpred, Zsucc in |- *; ring.
+ unfold Z.pred, Z.succ in |- *; ring.
 generalize (Z_eq_bool_correct (pPred (vNum b)) (pPred (vNum b)));
  case (Z_eq_bool (pPred (vNum b)) (pPred (vNum b))); 
  auto.
 intros H' H'0 H'1 H'2; rewrite <- H'1; apply floatEq; simpl in |- *; auto;
- unfold Zpred, Zsucc in |- *; ring.
+ unfold Z.pred, Z.succ in |- *; ring.
 intros H'; case H'; auto.
-generalize (Z_eq_bool_correct (Zpred (Fnum x)) (pPred (vNum b)));
- case (Z_eq_bool (Zpred (Fnum x)) (pPred (vNum b))); 
+generalize (Z_eq_bool_correct (Z.pred (Fnum x)) (pPred (vNum b)));
+ case (Z_eq_bool (Z.pred (Fnum x)) (pPred (vNum b))); 
  simpl in |- *.
 intros H'; absurd (Fnum x <= pPred (vNum b))%Z; auto with float.
 rewrite <- H'.
 apply Zlt_not_le; apply Zlt_pred; auto.
 apply Zle_Zabs_inv2; unfold pPred in |- *; apply Zle_Zpred; auto with float.
-generalize (Z_eq_bool_correct (Zpred (Fnum x)) (- nNormMin radix precision));
- case (Z_eq_bool (Zpred (Fnum x)) (- nNormMin radix precision));
+generalize (Z_eq_bool_correct (Z.pred (Fnum x)) (- nNormMin radix precision));
+ case (Z_eq_bool (Z.pred (Fnum x)) (- nNormMin radix precision));
  simpl in |- *.
 generalize (Z_eq_bool_correct (Fexp x) (- dExp b));
  case (Z_eq_bool (Fexp x) (- dExp b)); simpl in |- *.
 intros H' H'0 H'1 H'2 H'3; apply floatEq; simpl in |- *; auto;
- unfold Zsucc, Zpred in |- *; ring.
+ unfold Z.succ, Z.pred in |- *; ring.
 intros H' H'0 H'1 H'2 H'3; case H; intros C0.
-absurd (nNormMin radix precision <= Zabs (Fnum x))%Z; auto with float.
-replace (Fnum x) with (Zsucc (Zpred (Fnum x)));
- [ idtac | unfold Zsucc, Zpred in |- *; ring ].
+absurd (nNormMin radix precision <= Z.abs (Fnum x))%Z; auto with float.
+replace (Fnum x) with (Z.succ (Z.pred (Fnum x)));
+ [ idtac | unfold Z.succ, Z.pred in |- *; ring ].
 rewrite H'0.
 rewrite <- Zopp_Zpred_Zs; rewrite Zabs_Zopp.
-rewrite Zabs_eq; auto with zarith.
+rewrite Z.abs_eq; auto with zarith.
 apply Zle_Zpred; simpl in |- *; apply nNormPos; auto with float zarith.
 apply pNormal_absolu_min with (b := b); auto.
 Contradict H'; apply FsubnormalFexp with (1 := C0).
 intros H' H'0 H'1 H'2; apply floatEq; simpl in |- *; auto.
-unfold Zpred, Zsucc in |- *; ring.
+unfold Z.pred, Z.succ in |- *; ring.
 Qed.
  
 Theorem FNPredSuc :

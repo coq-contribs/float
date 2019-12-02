@@ -353,9 +353,9 @@ Theorem ScalableRoundedModeP :
 intros P f s t HP Ff H1 H2.
 cut (ProjectorP b radix P);
  [ unfold ProjectorP in |- *; intros HP2 | apply RoundedProjector; auto ].
-cut (FtoR radix (Float (Fnum f) (Zsucc (Fexp f))) = (radix * FtoR radix f)%R);
+cut (FtoR radix (Float (Fnum f) (Z.succ (Fexp f))) = (radix * FtoR radix f)%R);
  [ intros V | idtac].
-2: unfold FtoR, Zsucc in |- *; simpl in |- *; ring_simplify.
+2: unfold FtoR, Z.succ in |- *; simpl in |- *; ring_simplify.
 2: rewrite powerRZ_add; [ simpl in |- *; ring | auto with zarith real ].
 unfold FtoRradix in |- *; apply HP2; auto.
 replace (FtoR radix f) with (FtoR radix s / radix)%R; auto.

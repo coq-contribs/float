@@ -41,19 +41,19 @@ rewrite Zmult_plus_distr_l.
 rewrite Zplus_assoc.
 repeat rewrite (fun x y z : Z => Zplus_comm x (y * z)).
 apply Zplus_lt_compat_l.
-apply Zlt_le_trans with (Zpower_nat radix precision); auto with zarith.
-apply Zle_lt_trans with (Zpred (Zpower_nat radix precision));
+apply Z.lt_le_trans with (Zpower_nat radix precision); auto with zarith.
+apply Z.le_lt_trans with (Z.pred (Zpower_nat radix precision));
  auto with zarith.
 apply Zle_Zabs_inv2; auto with float zarith.
 apply Zle_Zpred; auto with float zarith.
 rewrite <- pGivesBound; auto with float.
-apply Zle_trans with ((Fexp q - Fexp p) * Zpower_nat radix precision)%Z;
+apply Z.le_trans with ((Fexp q - Fexp p) * Zpower_nat radix precision)%Z;
  auto with zarith.
 pattern (Zpower_nat radix precision) at 1 in |- *;
  replace (Zpower_nat radix precision) with
-  (Zsucc 0 * Zpower_nat radix precision)%Z; auto.
+  (Z.succ 0 * Zpower_nat radix precision)%Z; auto.
 apply Zle_Zmult_comp_r; auto with zarith.
-unfold Zsucc in |- *; ring.
+unfold Z.succ in |- *; ring.
 cut (0 <= Fnum q)%Z; auto with zarith.
 apply (LeR0Fnum radix); auto.
 apply Rle_trans with (FtoRradix p); auto; apply Rlt_le; auto.
@@ -202,7 +202,7 @@ Theorem radixRangeBoundExp :
  Fcanonic radix b p ->
  Fcanonic radix b q ->
  (0 <= p)%R ->
- (p < q)%R -> (q < radix * p)%R -> Fexp p = Fexp q \/ Zsucc (Fexp p) = Fexp q.
+ (p < q)%R -> (q < radix * p)%R -> Fexp p = Fexp q \/ Z.succ (Fexp p) = Fexp q.
 intros p q H' H'0 H'1 H'2 H'3.
 case (FcanonicLtPos _ radixMoreThanOne b precision) with (p := p) (q := q);
  auto with arith.
@@ -211,12 +211,12 @@ intros H'4; right.
 Casec H'; intros H'.
 case
  (FcanonicLtPos _ radixMoreThanOne b precision)
-  with (p := q) (q := Float (Fnum p) (Zsucc (Fexp p))); 
+  with (p := q) (q := Float (Fnum p) (Z.succ (Fexp p))); 
  auto with arith.
 left.
 case H'; intros H1 H2; red in H1.
 repeat split; simpl in |- *; auto with float.
-apply Zle_trans with (Fexp p); auto with float zarith.
+apply Z.le_trans with (Fexp p); auto with float zarith.
 apply Rle_trans with (FtoRradix p); auto; apply Rlt_le; auto.
 unfold FtoR in |- *; simpl in |- *.
 rewrite powerRZ_Zs; auto with real zarith; auto.
@@ -228,13 +228,13 @@ simpl in |- *; auto.
 intros H'5; elim H'5; intros H'6 H'7; auto.
 case
  (FcanonicLtPos _ radixMoreThanOne b precision)
-  with (p := q) (q := Float (nNormMin radix precision) (Zsucc (Fexp p)));
+  with (p := q) (q := Float (nNormMin radix precision) (Z.succ (Fexp p)));
  auto with arith.
 left; repeat split; simpl in |- *.
-rewrite Zabs_eq; auto with zarith.
+rewrite Z.abs_eq; auto with zarith.
 apply ZltNormMinVnum; auto with zarith.
 unfold nNormMin in |- *; auto with zarith.
-apply Zle_trans with (Fexp p); auto with float zarith.
+apply Z.le_trans with (Fexp p); auto with float zarith.
 case H'; auto with float.
 rewrite <- (PosNormMin radix b precision); auto with zarith.
 apply Rle_trans with (1 := H'1); auto with real.

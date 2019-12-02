@@ -52,7 +52,7 @@ Theorem ZquotientProp :
  ex
    (fun r : Z =>
     m = (Zquotient m n * n + r)%Z /\
-    (Zabs (Zquotient m n * n) <= Zabs m)%Z /\ (Zabs r < Zabs n)%Z).
+    (Z.abs (Zquotient m n * n) <= Z.abs m)%Z /\ (Z.abs r < Z.abs n)%Z).
 intros m n; unfold Zquotient in |- *; case n; simpl in |- *.
 intros H; case H; auto.
 intros n' Hn'; case m; simpl in |- *; auto.
@@ -65,10 +65,10 @@ rewrite H1.
 rewrite inj_plus; rewrite inj_mult.
 rewrite <- (inject_nat_convert (Zpos n') n'); auto.
 repeat rewrite inj_oZ1; auto.
-rewrite inj_oZ1; rewrite Zabs_eq; auto with zarith.
+rewrite inj_oZ1; rewrite Z.abs_eq; auto with zarith.
 rewrite <- (inject_nat_convert (Zpos m') m'); auto with zarith.
 rewrite <- (inject_nat_convert (Zpos n') n'); auto with zarith.
-rewrite inj_oZ1; rewrite Zabs_eq; auto with zarith.
+rewrite inj_oZ1; rewrite Z.abs_eq; auto with zarith.
 rewrite <- (inject_nat_convert (Zpos n') n'); auto with zarith.
 intros m'; generalize (Pdiv_correct m' n'); case (Pdiv m' n'); simpl in |- *;
  auto.
@@ -81,11 +81,11 @@ rewrite <- (inject_nat_convert (Zpos n') n'); auto.
 repeat rewrite inj_oZ1; auto with zarith.
 ring.
 rewrite <- Zopp_mult_distr_l; rewrite Zabs_Zopp.
-rewrite inj_oZ1; rewrite Zabs_eq; auto with zarith.
+rewrite inj_oZ1; rewrite Z.abs_eq; auto with zarith.
 rewrite <- (inject_nat_convert (Zpos m') m'); auto with zarith.
 rewrite <- (inject_nat_convert (Zpos n') n'); auto with zarith.
 rewrite Zabs_Zopp.
-rewrite inj_oZ1; rewrite Zabs_eq; auto with zarith.
+rewrite inj_oZ1; rewrite Z.abs_eq; auto with zarith.
 rewrite <- (inject_nat_convert (Zpos n') n'); auto with zarith.
 intros n' Hn'; case m; simpl in |- *; auto.
 exists 0%Z; repeat split; simpl in |- *; auto with zarith.
@@ -101,10 +101,10 @@ repeat rewrite inj_oZ1; auto with zarith.
 ring.
 replace (Zneg n') with (- Zpos n')%Z; [ idtac | simpl in |- *; auto ].
 rewrite Zmult_opp_opp.
-rewrite inj_oZ1; rewrite Zabs_eq; auto with zarith.
+rewrite inj_oZ1; rewrite Z.abs_eq; auto with zarith.
 rewrite <- (inject_nat_convert (Zpos n') n'); auto with zarith.
 rewrite <- (inject_nat_convert (Zpos m') m'); auto with zarith.
-rewrite inj_oZ1; rewrite Zabs_eq; auto with zarith.
+rewrite inj_oZ1; rewrite Z.abs_eq; auto with zarith.
 rewrite <- (inject_nat_convert (Zpos n') n'); auto with zarith.
 intros m'; generalize (Pdiv_correct m' n'); case (Pdiv m' n'); simpl in |- *;
  auto.
@@ -119,17 +119,17 @@ repeat rewrite inj_oZ1; auto with zarith.
 ring.
 replace (Zneg n') with (- Zpos n')%Z; [ idtac | simpl in |- *; auto ].
 rewrite <- Zopp_mult_distr_r; rewrite Zabs_Zopp.
-rewrite inj_oZ1; rewrite Zabs_eq; auto with zarith.
+rewrite inj_oZ1; rewrite Z.abs_eq; auto with zarith.
 rewrite <- (inject_nat_convert (Zpos m') m'); auto with zarith.
 rewrite <- (inject_nat_convert (Zpos n') n'); auto with zarith.
 rewrite Zabs_Zopp.
-rewrite inj_oZ1; rewrite Zabs_eq; auto with zarith.
+rewrite inj_oZ1; rewrite Z.abs_eq; auto with zarith.
 rewrite <- (inject_nat_convert (Zpos n') n'); auto with zarith.
 Qed.
  
 Theorem ZquotientPos :
  forall z1 z2 : Z, (0 <= z1)%Z -> (0 <= z2)%Z -> (0 <= Zquotient z1 z2)%Z.
-intros z1 z2 H H0; case (Z_eq_dec z2 0); intros Z1.
+intros z1 z2 H H0; case (Z.eq_dec z2 0); intros Z1.
 rewrite Z1; red in |- *; case z1; simpl in |- *; auto; intros; red in |- *;
  intros; discriminate.
 case (ZquotientProp z1 z2); auto; intros r (H1, (H2, H3)).
@@ -137,9 +137,9 @@ case (Zle_or_lt 0 (Zquotient z1 z2)); auto; intros Z2.
 Contradict H3; apply Zle_not_lt.
 replace r with (z1 - Zquotient z1 z2 * z2)%Z;
  [ idtac | pattern z1 at 1 in |- *; rewrite H1; ring ].
-repeat rewrite Zabs_eq; auto.
+repeat rewrite Z.abs_eq; auto.
 pattern z2 at 1 in |- *; replace z2 with (0 + 1 * z2)%Z; [ idtac | ring ].
-unfold Zminus in |- *; apply Zle_trans with (z1 + 1 * z2)%Z; auto with zarith.
+unfold Zminus in |- *; apply Z.le_trans with (z1 + 1 * z2)%Z; auto with zarith.
 apply Zplus_le_compat_l.
 rewrite Zopp_mult_distr_l.
 apply Zle_Zmult_comp_r; auto with zarith.
@@ -158,10 +158,10 @@ case (ZquotientProp n m); auto; intros z2 (Hz2, (Hz3, Hz4)).
 cut (z2 = 0%Z);
  [ intros H1; pattern n at 1 in |- *; rewrite Hz2; rewrite H1; ring | idtac ].
 cut (z2 = ((z1 - Zquotient n m) * m)%Z); [ intros H2 | idtac ].
-case (Z_eq_dec (z1 - Zquotient n m) 0); intros H3.
+case (Z.eq_dec (z1 - Zquotient n m) 0); intros H3.
 rewrite H2; rewrite H3; ring.
 Contradict Hz4.
-replace (Zabs m) with (1 * Zabs m)%Z; [ idtac | ring ].
+replace (Z.abs m) with (1 * Z.abs m)%Z; [ idtac | ring ].
 apply Zle_not_lt; rewrite H2.
 rewrite Zabs_Zmult; apply Zle_Zmult_comp_r; auto with zarith.
 generalize H3; case (z1 - Zquotient n m)%Z;
@@ -193,10 +193,10 @@ Theorem Zeq_mult_simpl :
  forall a b c : Z, c <> 0%Z -> (a * c)%Z = (b * c)%Z -> a = b.
 intros a b c H H0.
 case (Zle_or_lt c 0); intros Zl1.
-apply Zle_antisym; apply Zmult_le_reg_r with (p := (- c)%Z); try apply Zlt_gt;
+apply Zle_antisym; apply Zmult_le_reg_r with (p := (- c)%Z); try apply Z.lt_gt;
  auto with zarith; repeat rewrite <- Zopp_mult_distr_r; 
  rewrite H0; auto with zarith.
-apply Zle_antisym; apply Zmult_le_reg_r with (p := c); try apply Zlt_gt;
+apply Zle_antisym; apply Zmult_le_reg_r with (p := c); try apply Z.lt_gt;
  auto with zarith; rewrite H0; auto with zarith.
 Qed.
  
@@ -239,7 +239,7 @@ red in |- *; intros; discriminate.
 intros z (H1, (H2, H3)).
 pattern m at 2 in |- *; rewrite H1; replace z with 0%Z; try ring.
 generalize H3; case z; simpl in |- *; auto; intros p; case p;
- unfold Zlt in |- *; simpl in |- *; intros; discriminate.
+ unfold Z.lt in |- *; simpl in |- *; intros; discriminate.
 Qed.
  
 Theorem Zdivides1 : forall m : Z, Zdivides m 1.
@@ -247,21 +247,21 @@ intros m; exists m; auto with zarith.
 Qed.
  
 Theorem Zabs_eq_case :
- forall z1 z2 : Z, Zabs z1 = Zabs z2 -> z1 = z2 \/ z1 = (- z2)%Z.
+ forall z1 z2 : Z, Z.abs z1 = Z.abs z2 -> z1 = z2 \/ z1 = (- z2)%Z.
 intros z1 z2; case z1; case z2; simpl in |- *; auto;
  try (intros; discriminate); intros p1 p2 H1; injection H1;
  (intros H2; rewrite H2); auto.
 Qed.
  
-Theorem Zabs_tri : forall z1 z2 : Z, (Zabs (z1 + z2) <= Zabs z1 + Zabs z2)%Z.
+Theorem Zabs_tri : forall z1 z2 : Z, (Z.abs (z1 + z2) <= Z.abs z1 + Z.abs z2)%Z.
 intros z1 z2; case z1; case z2; try (simpl in |- *; auto with zarith; fail).
 intros p1 p2;
  apply
-  Zabs_intro with (P := fun x => (x <= Zabs (Zpos p2) + Zabs (Zneg p1))%Z);
+  Zabs_intro with (P := fun x => (x <= Z.abs (Zpos p2) + Z.abs (Zneg p1))%Z);
  try rewrite Zopp_plus_distr; auto with zarith.
 intros p1 p2;
  apply
-  Zabs_intro with (P := fun x => (x <= Zabs (Zpos p2) + Zabs (Zneg p1))%Z);
+  Zabs_intro with (P := fun x => (x <= Z.abs (Zpos p2) + Z.abs (Zneg p1))%Z);
  try rewrite Zopp_plus_distr; auto with zarith.
 Qed.
 Hint Resolve Zabs_tri: zarith.
@@ -270,56 +270,56 @@ Theorem ZquotientUnique :
  forall m n q r : Z,
  n <> 0%Z ->
  m = (q * n + r)%Z ->
- (Zabs (q * n) <= Zabs m)%Z -> (Zabs r < Zabs n)%Z -> q = Zquotient m n.
+ (Z.abs (q * n) <= Z.abs m)%Z -> (Z.abs r < Z.abs n)%Z -> q = Zquotient m n.
 intros m n q r H' H'0 H'1 H'2.
 case (ZquotientProp m n); auto; intros z (H0, (H1, H2)).
-case (Zle_or_lt (Zabs q) (Zabs (Zquotient m n))); intros Zl1; auto with arith.
+case (Zle_or_lt (Z.abs q) (Z.abs (Zquotient m n))); intros Zl1; auto with arith.
 case (Zle_lt_or_eq _ _ Zl1); clear Zl1; intros Zl1; auto with arith.
 Contradict H1; apply Zlt_not_le.
 pattern m at 1 in |- *; rewrite H'0.
-apply Zle_lt_trans with (Zabs (q * n) + Zabs r)%Z; auto with zarith.
-apply Zlt_le_trans with (Zabs (q * n) + Zabs n)%Z; auto with zarith.
+apply Z.le_lt_trans with (Z.abs (q * n) + Z.abs r)%Z; auto with zarith.
+apply Z.lt_le_trans with (Z.abs (q * n) + Z.abs n)%Z; auto with zarith.
 repeat rewrite Zabs_Zmult.
-replace (Zabs q * Zabs n + Zabs n)%Z with (Zsucc (Zabs q) * Zabs n)%Z;
- [ auto with zarith | unfold Zsucc in |- *; ring ].
+replace (Z.abs q * Z.abs n + Z.abs n)%Z with (Z.succ (Z.abs q) * Z.abs n)%Z;
+ [ auto with zarith | unfold Z.succ in |- *; ring ].
 case (Zabs_eq_case _ _ Zl1); auto.
 intros H;
  (cut (Zquotient m n = 0%Z);
    [ intros H3; rewrite H; repeat rewrite H3; simpl in |- *; auto | idtac ]).
-cut (Zabs (Zquotient m n) < 1)%Z.
+cut (Z.abs (Zquotient m n) < 1)%Z.
 case (Zquotient m n); simpl in |- *; auto; intros p; case p;
- unfold Zlt in |- *; simpl in |- *; intros; discriminate.
-apply Zlt_mult_simpl_l with (c := Zabs n); auto with zarith.
-case (Zle_lt_or_eq 0 (Zabs n)); auto with zarith.
+ unfold Z.lt in |- *; simpl in |- *; intros; discriminate.
+apply Zlt_mult_simpl_l with (c := Z.abs n); auto with zarith.
+case (Zle_lt_or_eq 0 (Z.abs n)); auto with zarith.
 intros H3; case H'; auto.
 generalize H3; case n; simpl in |- *; auto; intros; discriminate.
 rewrite <- Zabs_Zmult; rewrite (Zmult_comm n).
-replace (Zabs n * 1)%Z with (Zabs n); [ idtac | ring ].
-apply Zle_lt_trans with (1 := H1).
+replace (Z.abs n * 1)%Z with (Z.abs n); [ idtac | ring ].
+apply Z.le_lt_trans with (1 := H1).
 apply Zlt_mult_simpl_l with (c := (1 + 1)%Z); auto with zarith.
-replace ((1 + 1) * Zabs m)%Z with (Zabs (m + m)).
-replace ((1 + 1) * Zabs n)%Z with (Zabs n + Zabs n)%Z; [ idtac | ring ].
+replace ((1 + 1) * Z.abs m)%Z with (Z.abs (m + m)).
+replace ((1 + 1) * Z.abs n)%Z with (Z.abs n + Z.abs n)%Z; [ idtac | ring ].
 pattern m at 1 in |- *; rewrite H'0; rewrite H0; rewrite H.
 replace (- Zquotient m n * n + r + (Zquotient m n * n + z))%Z with (r + z)%Z;
  [ idtac | ring ].
-apply Zle_lt_trans with (Zabs r + Zabs z)%Z; auto with zarith.
-rewrite <- (Zabs_eq (1 + 1)); auto with zarith.
-rewrite <- Zabs_Zmult; apply f_equal with (f := Zabs); auto with zarith.
+apply Z.le_lt_trans with (Z.abs r + Z.abs z)%Z; auto with zarith.
+rewrite <- (Z.abs_eq (1 + 1)); auto with zarith.
+rewrite <- Zabs_Zmult; apply f_equal with (f := Z.abs); auto with zarith.
 Contradict H'1; apply Zlt_not_le.
 pattern m at 1 in |- *; rewrite H0.
-apply Zle_lt_trans with (Zabs (Zquotient m n * n) + Zabs z)%Z;
+apply Z.le_lt_trans with (Z.abs (Zquotient m n * n) + Z.abs z)%Z;
  auto with zarith.
-apply Zlt_le_trans with (Zabs (Zquotient m n * n) + Zabs n)%Z;
+apply Z.lt_le_trans with (Z.abs (Zquotient m n * n) + Z.abs n)%Z;
  auto with zarith.
 repeat rewrite Zabs_Zmult.
-replace (Zabs (Zquotient m n) * Zabs n + Zabs n)%Z with
- (Zsucc (Zabs (Zquotient m n)) * Zabs n)%Z;
- [ auto with zarith | unfold Zsucc in |- *; ring ].
+replace (Z.abs (Zquotient m n) * Z.abs n + Z.abs n)%Z with
+ (Z.succ (Z.abs (Zquotient m n)) * Z.abs n)%Z;
+ [ auto with zarith | unfold Z.succ in |- *; ring ].
 Qed.
  
 Theorem ZquotientZopp :
  forall m n : Z, Zquotient (- m) n = (- Zquotient m n)%Z.
-intros m n; case (Z_eq_dec n 0); intros Z1.
+intros m n; case (Z.eq_dec n 0); intros Z1.
 rewrite Z1; unfold Zquotient in |- *; case n; case m; simpl in |- *; auto.
 case (ZquotientProp m n); auto; intros r1 (H'2, (H'3, H'4)); auto with zarith.
 apply sym_equal;
@@ -332,27 +332,27 @@ Qed.
  
 Theorem ZquotientMonotone :
  forall n m q : Z,
- (Zabs n <= Zabs m)%Z -> (Zabs (Zquotient n q) <= Zabs (Zquotient m q))%Z.
+ (Z.abs n <= Z.abs m)%Z -> (Z.abs (Zquotient n q) <= Z.abs (Zquotient m q))%Z.
 intros n m q H; case (Zle_lt_or_eq _ _ H); intros Z0.
-case (Z_eq_dec q 0); intros Z1.
+case (Z.eq_dec q 0); intros Z1.
 rewrite Z1; unfold Zquotient in |- *; case n; case m; simpl in |- *;
  auto with zarith.
-case (Zle_or_lt (Zabs (Zquotient n q)) (Zabs (Zquotient m q))); auto;
+case (Zle_or_lt (Z.abs (Zquotient n q)) (Z.abs (Zquotient m q))); auto;
  intros H'1.
 case (ZquotientProp m q); auto; intros r1 (H'2, (H'3, H'4)); auto with zarith.
 case (ZquotientProp n q); auto; intros r2 (H'5, (H'6, H'7)); auto with zarith.
 Contradict H'6.
 apply Zlt_not_le.
-apply Zlt_le_trans with (1 := Z0).
+apply Z.lt_le_trans with (1 := Z0).
 rewrite H'2.
-apply Zle_trans with (Zabs (Zquotient m q * q) + Zabs r1)%Z; auto with zarith.
-apply Zle_trans with (Zabs (Zquotient m q * q) + Zabs q)%Z; auto with zarith.
+apply Z.le_trans with (Z.abs (Zquotient m q * q) + Z.abs r1)%Z; auto with zarith.
+apply Z.le_trans with (Z.abs (Zquotient m q * q) + Z.abs q)%Z; auto with zarith.
 repeat rewrite Zabs_Zmult.
-replace (Zabs (Zquotient m q) * Zabs q + Zabs q)%Z with
- (Zsucc (Zabs (Zquotient m q)) * Zabs q)%Z;
- [ idtac | unfold Zsucc in |- *; ring ].
-cut (0 < Zabs q)%Z; auto with zarith.
-case (Zle_lt_or_eq 0 (Zabs q)); auto with zarith.
+replace (Z.abs (Zquotient m q) * Z.abs q + Z.abs q)%Z with
+ (Z.succ (Z.abs (Zquotient m q)) * Z.abs q)%Z;
+ [ idtac | unfold Z.succ in |- *; ring ].
+cut (0 < Z.abs q)%Z; auto with zarith.
+case (Zle_lt_or_eq 0 (Z.abs q)); auto with zarith.
 intros H'6; case Z1; auto.
 generalize H'6; case q; simpl in |- *; auto; intros; discriminate.
 case (Zabs_eq_case _ _ Z0); intros Z1; rewrite Z1; auto with zarith.
@@ -363,39 +363,39 @@ Theorem NotDividesDigit :
  forall r v : Z,
  (1 < r)%Z -> v <> 0%Z -> ~ Zdivides v (Zpower_nat r (digit r v)).
 intros r v H H'; red in |- *; intros H'0; case H'0; intros q E.
-absurd (Zabs v < Zpower_nat r (digit r v))%Z; auto with zarith.
+absurd (Z.abs v < Zpower_nat r (digit r v))%Z; auto with zarith.
 apply Zle_not_lt.
-case (Z_eq_dec q 0); intros Z1.
+case (Z.eq_dec q 0); intros Z1.
 case H'; rewrite E; rewrite Z1; ring.
 pattern v at 2 in |- *; rewrite E.
 rewrite Zabs_Zmult.
 pattern (Zpower_nat r (digit r v)) at 1 in |- *;
  replace (Zpower_nat r (digit r v)) with (Zpower_nat r (digit r v) * 1)%Z;
  [ idtac | ring ].
-rewrite (fun x y => Zabs_eq (Zpower_nat x y)); auto with zarith.
+rewrite (fun x y => Z.abs_eq (Zpower_nat x y)); auto with zarith.
 apply Zle_Zmult_comp_l; auto with zarith.
 generalize Z1; case q; simpl in |- *; try (intros H1; case H1; auto; fail);
  intros p;
- (case p; unfold Zle in |- *; simpl in |- *; intros; red in |- *; intros;
+ (case p; unfold Z.le in |- *; simpl in |- *; intros; red in |- *; intros;
    discriminate).
 Qed.
  
 Theorem ZDividesLe :
- forall n m : Z, n <> 0%Z -> Zdivides n m -> (Zabs m <= Zabs n)%Z.
+ forall n m : Z, n <> 0%Z -> Zdivides n m -> (Z.abs m <= Z.abs n)%Z.
 intros n m H' H'0; case H'0; intros q E; rewrite E.
 rewrite Zabs_Zmult.
-pattern (Zabs m) at 1 in |- *; replace (Zabs m) with (Zabs m * 1)%Z;
+pattern (Z.abs m) at 1 in |- *; replace (Z.abs m) with (Z.abs m * 1)%Z;
  [ idtac | ring ].
 apply Zle_Zmult_comp_l; auto with zarith.
 generalize E H'; case q; simpl in |- *; auto;
  try (intros H1 H2; case H2; rewrite H1; ring; fail); 
- intros p; case p; unfold Zle in |- *; simpl in |- *; 
+ intros p; case p; unfold Z.le in |- *; simpl in |- *; 
  intros; red in |- *; discriminate.
 Qed.
  
 Theorem Zquotient_mult_comp :
  forall m n p : Z, p <> 0%Z -> Zquotient (m * p) (n * p) = Zquotient m n.
-intros m n p Z1; case (Z_eq_dec n 0); intros Z2.
+intros m n p Z1; case (Z.eq_dec n 0); intros Z2.
 rewrite Z2; unfold Zquotient in |- *; case (m * p)%Z; case m; simpl in |- *;
  auto.
 case (ZquotientProp m n); auto; intros r (H1, (H2, H3)).
@@ -406,8 +406,8 @@ rewrite Zmult_assoc.
 repeat rewrite (fun x => Zabs_Zmult x p); auto with zarith.
 repeat rewrite Zabs_Zmult; auto with zarith.
 apply Zmult_gt_0_lt_compat_r; auto with zarith.
-apply Zlt_gt; generalize Z1; case p; simpl in |- *;
- try (intros H4; case H4; auto; fail); unfold Zlt in |- *; 
+apply Z.lt_gt; generalize Z1; case p; simpl in |- *;
+ try (intros H4; case H4; auto; fail); unfold Z.lt in |- *; 
  simpl in |- *; auto; intros; red in |- *; intros; 
  discriminate.
 Qed.

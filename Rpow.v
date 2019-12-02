@@ -141,7 +141,7 @@ Theorem powerRZ_O : forall e : R, powerRZ e 0 = 1%R.
 simpl in |- *; auto.
 Qed.
  
-Theorem powerRZ_1 : forall e : R, powerRZ e (Zsucc 0) = e.
+Theorem powerRZ_1 : forall e : R, powerRZ e (Z.succ 0) = e.
 simpl in |- *; auto with real.
 Qed.
  
@@ -209,9 +209,9 @@ Qed.
  
 Theorem powerRZ_Zs :
  forall (e : R) (n : Z),
- e <> 0%R -> powerRZ e (Zsucc n) = (e * powerRZ e n)%R.
+ e <> 0%R -> powerRZ e (Z.succ n) = (e * powerRZ e n)%R.
 intros e n H'0.
-replace (Zsucc n) with (n + Zsucc 0)%Z.
+replace (Z.succ n) with (n + Z.succ 0)%Z.
 rewrite powerRZ_add; auto.
 rewrite powerRZ_1.
 rewrite Rmult_comm; auto.
@@ -247,7 +247,7 @@ Theorem Rlt_powerRZ :
  forall (e : R) (n m : Z),
  (1 < e)%R -> (n < m)%Z -> (powerRZ e n < powerRZ e m)%R.
 intros e n m; case n; case m; simpl in |- *;
- try (unfold Zlt in |- *; intros; discriminate); auto with real.
+ try (unfold Z.lt in |- *; intros; discriminate); auto with real.
 intros p p0 H' H'0; apply Rlt_pow; auto with real.
 apply nat_of_P_lt_Lt_compare_morphism; auto.
 intros p H' H'0; replace 1%R with (/ 1)%R; auto with real.
@@ -294,7 +294,7 @@ Qed.
  
 Theorem Zpower_nat_powerRZ_absolu :
  forall n m : Z,
- (0 <= m)%Z -> IZR (Zpower_nat n (Zabs_nat m)) = powerRZ (IZR n) m.
+ (0 <= m)%Z -> IZR (Zpower_nat n (Z.abs_nat m)) = powerRZ (IZR n) m.
 intros n m; case m; simpl in |- *; auto with zarith.
 intros p H'; elim (nat_of_P p); simpl in |- *; auto with zarith.
 intros n0 H'0; rewrite <- H'0; simpl in |- *; auto with zarith.

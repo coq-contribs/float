@@ -25,7 +25,7 @@ cut (0 <= Fminus radix x y)%R; [ intros Rle1 | idtac ].
 cut (Fminus radix x y <= y)%R; [ intros Rle2 | idtac ].
 case (Zle_or_lt (Fexp x) (Fexp y)); intros Zle1.
 repeat split.
-apply Zle_lt_trans with (Zabs (Fnum x)); auto with float.
+apply Z.le_lt_trans with (Z.abs (Fnum x)); auto with float.
 change (Fnum (Fabs (Fminus radix x y)) <= Fnum (Fabs x))%Z in |- *.
 apply Rle_Fexp_eq_Zle with (radix := radix); auto with arith.
 repeat rewrite Fabs_correct.
@@ -33,19 +33,19 @@ repeat rewrite Rabs_pos_eq; auto.
 apply Rle_trans with (2 := H'1); auto.
 apply Rle_trans with (2 := H'1); auto.
 apply Rle_trans with (2 := Rle2); auto.
-apply Zlt_trans with (2 := radixMoreThanOne); auto with zarith.
-apply Zlt_trans with (2 := radixMoreThanOne); auto with zarith.
+apply Z.lt_trans with (2 := radixMoreThanOne); auto with zarith.
+apply Z.lt_trans with (2 := radixMoreThanOne); auto with zarith.
 unfold Fminus in |- *; simpl in |- *; apply Zmin_le1; auto.
 unfold Fminus in |- *; simpl in |- *; rewrite Zmin_le1; auto with float.
 repeat split.
-apply Zle_lt_trans with (Zabs (Fnum y)); auto with float.
+apply Z.le_lt_trans with (Z.abs (Fnum y)); auto with float.
 change (Fnum (Fabs (Fminus radix x y)) <= Fnum (Fabs y))%Z in |- *.
 apply Rle_Fexp_eq_Zle with (radix := radix); auto with arith.
 repeat rewrite Fabs_correct.
 repeat rewrite Rabs_pos_eq; auto.
 apply Rle_trans with (2 := Rle2); auto.
-apply Zlt_trans with (2 := radixMoreThanOne); auto with zarith.
-apply Zlt_trans with (2 := radixMoreThanOne); auto with zarith.
+apply Z.lt_trans with (2 := radixMoreThanOne); auto with zarith.
+apply Z.lt_trans with (2 := radixMoreThanOne); auto with zarith.
 unfold Fminus in |- *; simpl in |- *; apply Zmin_le2; auto with zarith.
 unfold Fminus in |- *; simpl in |- *; rewrite Zmin_le2;
  auto with float zarith.
@@ -53,12 +53,12 @@ rewrite (Fminus_correct radix); auto with arith; fold FtoRradix in |- *.
 apply Rplus_le_reg_l with (r := FtoRradix y); auto.
 replace (y + (x - y))%R with (FtoRradix x); [ idtac | ring ].
 replace (y + y)%R with (2%nat * y)%R; [ auto | simpl in |- *; ring ].
-apply Zlt_trans with (2 := radixMoreThanOne); auto with zarith.
+apply Z.lt_trans with (2 := radixMoreThanOne); auto with zarith.
 rewrite (Fminus_correct radix); auto with arith; fold FtoRradix in |- *.
 apply Rplus_le_reg_l with (r := FtoRradix y); auto.
 replace (y + (x - y))%R with (FtoRradix x); [ idtac | ring ].
 replace (y + 0)%R with (FtoRradix y); [ auto | simpl in |- *; ring ].
-apply Zlt_trans with (2 := radixMoreThanOne); auto with zarith.
+apply Z.lt_trans with (2 := radixMoreThanOne); auto with zarith.
 Qed.
  
 Theorem Sterbenz :
@@ -88,7 +88,7 @@ intros x y H' H'0 H'1 H'2 H'3.
 cut (0 < radix)%Z; [ intros Z1 | idtac ].
 rewrite minusSameExp; auto.
 repeat split; simpl in |- *; auto with float.
-apply Zle_lt_trans with (Zabs (Fnum x)); auto with float zarith.
+apply Z.le_lt_trans with (Z.abs (Fnum x)); auto with float zarith.
 change (Fnum (Fabs (Float (Fnum x - Fnum y) (Fexp x))) <= Fnum (Fabs x))%Z
  in |- *.
 apply Rle_Fexp_eq_Zle with (radix := radix); auto with zarith.
@@ -101,7 +101,7 @@ unfold Rminus in |- *; auto with real.
 apply Rle_trans with (FtoRradix y); auto with real.
 replace 0%R with (x - x)%R; auto with real.
 unfold Rminus in |- *; auto with real.
-apply Zlt_trans with (2 := radixMoreThanOne); auto with zarith.
+apply Z.lt_trans with (2 := radixMoreThanOne); auto with zarith.
 Qed.
  
 Theorem BminusSameExp :

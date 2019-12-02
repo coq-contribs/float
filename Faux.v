@@ -215,7 +215,7 @@ apply Rle_trans with (- p)%R; auto with real.
 apply RmaxLess1; auto.
 Qed.
  
-Theorem Rabsolu_Zabs : forall z : Z, Rabs (IZR z) = IZR (Zabs z).
+Theorem Rabsolu_Zabs : forall z : Z, Rabs (IZR z) = IZR (Z.abs z).
 intros z; case z; simpl in |- *; auto with real.
 apply Rabs_right; auto with real.
 intros p0; apply Rabs_right; auto with real zarith.
@@ -255,20 +255,20 @@ generalize H'; case (nat_of_P p0); simpl in |- *; auto.
 unfold nat_of_P in |- *; simpl in |- *; auto with arith.
 Qed.
 Hint Resolve convert_not_O: zarith arith.
-Hint Resolve Zlt_le_weak Zle_not_gt Zgt_irrefl Zlt_irrefl Zle_not_lt
+Hint Resolve Zlt_le_weak Zle_not_gt Zgt_irrefl Z.lt_irrefl Zle_not_lt
   Zlt_not_le Zlt_asym inj_lt inj_le: zarith.
  
 Theorem inj_abs :
- forall x : Z, (0 <= x)%Z -> Z_of_nat (Zabs_nat x) = x.
+ forall x : Z, (0 <= x)%Z -> Z_of_nat (Z.abs_nat x) = x.
 intros x; elim x; auto.
-unfold Zabs_nat in |- *.
+unfold Z.abs_nat in |- *.
 intros p.
 pattern p at 1 3 in |- *;
  rewrite <- (pred_o_P_of_succ_nat_o_nat_of_P_eq_id p).
 generalize (convert_not_O p); case (nat_of_P p); simpl in |- *;
  auto with arith.
 intros H'; case H'; auto.
-intros n H' H'0; rewrite Ppred_succ; auto.
+intros n H' H'0; rewrite Pos.pred_succ; auto.
 intros p H'; Contradict H'; auto.
 Qed.
  
@@ -318,7 +318,7 @@ Qed.
  
 Theorem Zlt_Zopp : forall x y : Z, (x < y)%Z -> (- y < - x)%Z.
 intros x y; case x; case y; simpl in |- *; auto with zarith; intros p p0;
- unfold Zlt in |- *; simpl in |- *; unfold Pos.compare; rewrite <- ZC4;
+ unfold Z.lt in |- *; simpl in |- *; unfold Pos.compare; rewrite <- ZC4;
  auto.
 Qed.
 Hint Resolve Zlt_Zopp: zarith.
@@ -328,30 +328,30 @@ intros x y H'; case (Zle_lt_or_eq _ _ H'); auto with zarith.
 Qed.
 Hint Resolve Zle_Zopp: zarith.
  
-Theorem absolu_INR : forall n : nat, Zabs_nat (Z_of_nat n) = n.
+Theorem absolu_INR : forall n : nat, Z.abs_nat (Z_of_nat n) = n.
 intros n; case n; simpl in |- *; auto with arith.
 intros n0; rewrite nat_of_P_o_P_of_succ_nat_eq_succ; auto with arith.
 Qed.
  
-Theorem absolu_Zopp : forall p : Z, Zabs_nat (- p) = Zabs_nat p.
+Theorem absolu_Zopp : forall p : Z, Z.abs_nat (- p) = Z.abs_nat p.
 intros p; case p; simpl in |- *; auto.
 Qed.
  
-Theorem Zabs_absolu : forall z : Z, Zabs z = Z_of_nat (Zabs_nat z).
+Theorem Zabs_absolu : forall z : Z, Z.abs z = Z_of_nat (Z.abs_nat z).
 intros z; case z; simpl in |- *; auto; intros p; apply sym_equal;
  apply inject_nat_convert; auto.
 Qed.
  
 Theorem absolu_comp_mult :
- forall p q : Z, Zabs_nat (p * q) = Zabs_nat p * Zabs_nat q.
+ forall p q : Z, Z.abs_nat (p * q) = Z.abs_nat p * Z.abs_nat q.
 intros p q; case p; case q; simpl in |- *; auto; intros p0 p1;
  apply
   ((fun (x y : positive) (_ : positive -> positive) =>
     nat_of_P_mult_morphism x y) p1 p0 (fun x => x)).
 Qed.
  
-Theorem Zmin_sym : forall m n : Z, Zmin n m = Zmin m n.
-intros m n; unfold Zmin in |- *.
+Theorem Zmin_sym : forall m n : Z, Z.min n m = Z.min m n.
+intros m n; unfold Z.min in |- *.
 case n; case m; simpl in |- *; auto; unfold Pos.compare.
 intros p p0; rewrite (ZC4 p p0).
 generalize (Pcompare_Eq_eq p0 p).
@@ -371,37 +371,37 @@ Theorem Zpower_nat_1 : forall z : Z, Zpower_nat z 1 = z.
 intros z; unfold Zpower_nat in |- *; simpl in |- *; rewrite Zmult_1_r; auto.
 Qed.
  
-Theorem Zmin_le1 : forall z1 z2 : Z, (z1 <= z2)%Z -> Zmin z1 z2 = z1.
-intros z1 z2; unfold Zle, Zmin in |- *; case (z1 ?= z2)%Z; auto; intros H;
+Theorem Zmin_le1 : forall z1 z2 : Z, (z1 <= z2)%Z -> Z.min z1 z2 = z1.
+intros z1 z2; unfold Z.le, Z.min in |- *; case (z1 ?= z2)%Z; auto; intros H;
  Contradict H; auto.
 Qed.
  
-Theorem Zmin_le2 : forall z1 z2 : Z, (z2 <= z1)%Z -> Zmin z1 z2 = z2.
+Theorem Zmin_le2 : forall z1 z2 : Z, (z2 <= z1)%Z -> Z.min z1 z2 = z2.
 intros z1 z2 H; rewrite Zmin_sym; apply Zmin_le1; auto.
 Qed.
  
 Theorem Zmin_Zle :
  forall z1 z2 z3 : Z,
- (z1 <= z2)%Z -> (z1 <= z3)%Z -> (z1 <= Zmin z2 z3)%Z.
-intros z1 z2 z3 H' H'0; unfold Zmin in |- *.
+ (z1 <= z2)%Z -> (z1 <= z3)%Z -> (z1 <= Z.min z2 z3)%Z.
+intros z1 z2 z3 H' H'0; unfold Z.min in |- *.
 case (z2 ?= z3)%Z; auto.
 Qed.
  
 Theorem Zminus_n_predm :
- forall n m : Z, Zsucc (n - m) = (n - Zpred m)%Z.
+ forall n m : Z, Z.succ (n - m) = (n - Z.pred m)%Z.
 intros n m.
-unfold Zpred in |- *; unfold Zsucc in |- *; ring.
+unfold Z.pred in |- *; unfold Z.succ in |- *; ring.
 Qed.
  
-Theorem Zopp_Zpred_Zs : forall z : Z, (- Zpred z)%Z = Zsucc (- z).
-intros z; unfold Zpred, Zsucc in |- *; ring.
+Theorem Zopp_Zpred_Zs : forall z : Z, (- Z.pred z)%Z = Z.succ (- z).
+intros z; unfold Z.pred, Z.succ in |- *; ring.
 Qed.
  
 Theorem Zle_mult_gen :
  forall x y : Z, (0 <= x)%Z -> (0 <= y)%Z -> (0 <= x * y)%Z.
 intros x y H' H'0; case (Zle_lt_or_eq _ _ H').
 intros H'1; rewrite Zmult_comm; apply Zmult_gt_0_le_0_compat; auto;
- apply Zlt_gt; auto.
+ apply Z.lt_gt; auto.
 intros H'1; rewrite <- H'1; simpl in |- *; auto with zarith.
 Qed.
 Hint Resolve Zle_mult_gen: zarith.
@@ -417,7 +417,7 @@ Definition Zmax : forall x_ x_ : Z, Z :=
 Theorem ZmaxLe1 : forall z1 z2 : Z, (z1 <= Zmax z1 z2)%Z.
 intros z1 z2; unfold Zmax in |- *; CaseEq (z1 ?= z2)%Z; simpl in |- *;
  auto with zarith.
-unfold Zle in |- *; intros H; rewrite H; red in |- *; intros; discriminate.
+unfold Z.le in |- *; intros H; rewrite H; red in |- *; intros; discriminate.
 Qed.
  
 Theorem ZmaxSym : forall z1 z2 : Z, Zmax z1 z2 = Zmax z2 z1.
@@ -431,7 +431,7 @@ intros H'; rewrite H'; auto; intros; red in |- *; intros; discriminate.
 Qed.
  
 Theorem Zmax_le2 : forall z1 z2 : Z, (z1 <= z2)%Z -> Zmax z1 z2 = z2.
-intros z1 z2; unfold Zle, Zmax in |- *; case (z1 ?= z2)%Z; auto.
+intros z1 z2; unfold Z.le, Zmax in |- *; case (z1 ?= z2)%Z; auto.
 intros H'; case H'; auto.
 Qed.
  
@@ -445,19 +445,19 @@ Qed.
 Hint Resolve ZmaxLe1 ZmaxLe2: zarith.
  
 Theorem Zeq_Zs :
- forall p q : Z, (p <= q)%Z -> (q < Zsucc p)%Z -> p = q.
+ forall p q : Z, (p <= q)%Z -> (q < Z.succ p)%Z -> p = q.
 intros p q H' H'0; apply Zle_antisym; auto.
 apply Zlt_succ_le; auto.
 Qed.
  
-Theorem Zmin_Zmax : forall z1 z2 : Z, (Zmin z1 z2 <= Zmax z1 z2)%Z.
-intros z1 z2; case (Zle_or_lt z1 z2); unfold Zle, Zlt, Zmin, Zmax in |- *;
+Theorem Zmin_Zmax : forall z1 z2 : Z, (Z.min z1 z2 <= Zmax z1 z2)%Z.
+intros z1 z2; case (Zle_or_lt z1 z2); unfold Z.le, Z.lt, Z.min, Zmax in |- *;
  CaseEq (z1 ?= z2)%Z; auto; intros H1 H2; try rewrite H1; 
  try rewrite H2; red in |- *; intros; discriminate.
 Qed.
  
 Theorem Zabs_Zmult :
- forall z1 z2 : Z, Zabs (z1 * z2) = (Zabs z1 * Zabs z2)%Z.
+ forall z1 z2 : Z, Z.abs (z1 * z2) = (Z.abs z1 * Z.abs z2)%Z.
 intros z1 z2; case z1; case z2; simpl in |- *; auto with zarith.
 Qed.
  
@@ -465,7 +465,7 @@ Theorem Zle_Zmult_comp_r :
  forall x y z : Z, (0 <= z)%Z -> (x <= y)%Z -> (x * z <= y * z)%Z.
 intros x y z H' H'0; case (Zle_lt_or_eq _ _ H'); intros Zlt1.
 apply Zmult_gt_0_le_compat_r; auto.
-apply Zlt_gt; auto.
+apply Z.lt_gt; auto.
 rewrite <- Zlt1; repeat rewrite <- Zmult_0_r_reverse; auto with zarith.
 Qed.
  
@@ -630,10 +630,10 @@ intros z t; case z; case t; simpl in |- *; auto with real; unfold IZR; intros t1
 Qed.
  
 Theorem absolu_Zs :
- forall z : Z, (0 <= z)%Z -> Zabs_nat (Zsucc z) = S (Zabs_nat z).
+ forall z : Z, (0 <= z)%Z -> Z.abs_nat (Z.succ z) = S (Z.abs_nat z).
 intros z; case z.
 3: intros p H'; Contradict H'; auto with zarith.
-replace (Zsucc 0) with (Z_of_nat 1).
+replace (Z.succ 0) with (Z_of_nat 1).
 intros H'; rewrite absolu_INR; simpl in |- *; auto.
 simpl in |- *; auto.
 intros p H'; rewrite <- Zpos_succ_morphism; simpl in |- *; auto with zarith.
@@ -642,12 +642,12 @@ Qed.
 Hint Resolve Zlt_le_succ: zarith.
  
 Theorem Zlt_next :
- forall n m : Z, (n < m)%Z -> m = Zsucc n \/ (Zsucc n < m)%Z.
-intros n m H'; case (Zle_lt_or_eq (Zsucc n) m); auto with zarith.
+ forall n m : Z, (n < m)%Z -> m = Z.succ n \/ (Z.succ n < m)%Z.
+intros n m H'; case (Zle_lt_or_eq (Z.succ n) m); auto with zarith.
 Qed.
  
 Theorem Zle_next :
- forall n m : Z, (n <= m)%Z -> m = n \/ (Zsucc n <= m)%Z.
+ forall n m : Z, (n <= m)%Z -> m = n \/ (Z.succ n <= m)%Z.
 intros n m H'; case (Zle_lt_or_eq _ _ H'); auto with zarith.
 Qed.
  
@@ -660,16 +660,16 @@ intros p q H'; case (Zle_lt_or_eq _ _ H'); auto with zarith.
 Qed.
  
 Theorem absolu_Zs_neg :
- forall z : Z, (z < 0)%Z -> S (Zabs_nat (Zsucc z)) = Zabs_nat z.
+ forall z : Z, (z < 0)%Z -> S (Z.abs_nat (Z.succ z)) = Z.abs_nat z.
 intros z H'; apply inject_nat_eq.
 rewrite inj_S.
-repeat rewrite <- (absolu_Zopp (Zsucc z)).
+repeat rewrite <- (absolu_Zopp (Z.succ z)).
 repeat rewrite <- (absolu_Zopp z).
 repeat rewrite inj_abs; replace 0%Z with (- (0))%Z; auto with zarith.
 Qed.
  
 Theorem Zlt_absolu :
- forall (x : Z) (n : nat), Zabs_nat x < n -> (x < Z_of_nat n)%Z.
+ forall (x : Z) (n : nat), Z.abs_nat x < n -> (x < Z_of_nat n)%Z.
 intros x n; case x; simpl in |- *; auto with zarith.
 replace 0%Z with (Z_of_nat 0); auto with zarith.
 intros p; rewrite <- (inject_nat_convert (Zpos p) p); auto with zarith.
@@ -677,31 +677,31 @@ case n; simpl in |- *; intros; red in |- *; simpl in |- *; auto.
 Qed.
  
 Theorem inj_pred :
- forall n : nat, n <> 0 -> Z_of_nat (pred n) = Zpred (Z_of_nat n).
+ forall n : nat, n <> 0 -> Z_of_nat (pred n) = Z.pred (Z_of_nat n).
 intros n; case n; auto.
 intros H'; Contradict H'; auto.
 intros n0 H'; rewrite inj_S; rewrite <- Zpred_succ; auto.
 Qed.
  
-Theorem Zle_abs : forall p : Z, (p <= Z_of_nat (Zabs_nat p))%Z.
+Theorem Zle_abs : forall p : Z, (p <= Z_of_nat (Z.abs_nat p))%Z.
 intros p; case p; simpl in |- *; auto with zarith; intros q;
  rewrite inject_nat_convert with (p := Zpos q); 
  auto with zarith.
-unfold Zle in |- *; red in |- *; intros H'2; discriminate.
+unfold Z.le in |- *; red in |- *; intros H'2; discriminate.
 Qed.
 Hint Resolve Zle_abs: zarith.
  
 Theorem ZleAbs :
  forall (z : Z) (n : nat),
- (- Z_of_nat n <= z)%Z -> (z <= Z_of_nat n)%Z -> Zabs_nat z <= n.
-intros z n H' H'0; case (le_or_lt (Zabs_nat z) n); auto; intros lt.
+ (- Z_of_nat n <= z)%Z -> (z <= Z_of_nat n)%Z -> Z.abs_nat z <= n.
+intros z n H' H'0; case (le_or_lt (Z.abs_nat z) n); auto; intros lt.
 case (Zle_or_lt 0 z); intros Zle0.
 Contradict H'0.
 apply Zlt_not_le; auto.
 rewrite <- (inj_abs z); auto with zarith.
 Contradict H'.
 apply Zlt_not_le; auto.
-replace z with (- Z_of_nat (Zabs_nat z))%Z.
+replace z with (- Z_of_nat (Z.abs_nat z))%Z.
 apply Zlt_Zopp; auto with zarith.
 rewrite <- absolu_Zopp.
 rewrite inj_abs; auto with zarith.
@@ -725,7 +725,7 @@ red in |- *; intros H'; discriminate.
 Qed.
 Hint Resolve NconvertO: zarith.
  
-Theorem absolu_lt_nz : forall z : Z, z <> 0%Z -> 0 < Zabs_nat z.
+Theorem absolu_lt_nz : forall z : Z, z <> 0%Z -> 0 < Z.abs_nat z.
 intros z; case z; simpl in |- *; auto; try (intros H'; case H'; auto; fail);
  intros p; generalize (NconvertO p); auto with arith.
 Qed.
@@ -810,38 +810,38 @@ Theorem IZR_inv : forall z1 z2 : Z, IZR z1 = IZR z2 :>R -> z1 = z2.
 intros z1 z2 H; apply Zle_antisym; apply Zle_Rle; rewrite H; auto with real.
 Qed.
  
-Theorem Zabs_eq_opp : forall x, (x <= 0)%Z -> Zabs x = (- x)%Z.
+Theorem Zabs_eq_opp : forall x, (x <= 0)%Z -> Z.abs x = (- x)%Z.
 intros x; case x; simpl in |- *; auto.
 intros p H; Contradict H; auto with zarith.
 Qed.
  
-Theorem Zabs_Zs : forall z : Z, (Zabs (Zsucc z) <= Zsucc (Zabs z))%Z.
+Theorem Zabs_Zs : forall z : Z, (Z.abs (Z.succ z) <= Z.succ (Z.abs z))%Z.
 intros z; case z; auto.
 simpl in |- *; auto with zarith.
-repeat rewrite Zabs_eq; auto with zarith.
+repeat rewrite Z.abs_eq; auto with zarith.
 intros p; rewrite Zabs_eq_opp; auto with zarith.
-2: unfold Zsucc in |- *; replace 0%Z with (-1 + 1)%Z; auto with zarith.
+2: unfold Z.succ in |- *; replace 0%Z with (-1 + 1)%Z; auto with zarith.
 2: case p; simpl in |- *; intros; red in |- *; simpl in |- *; intros;
     red in |- *; intros; discriminate.
-replace (- Zsucc (Zneg p))%Z with (Zpos p - 1)%Z.
-replace (Zsucc (Zabs (Zneg p))) with (Zpos p + 1)%Z;
+replace (- Z.succ (Zneg p))%Z with (Zpos p - 1)%Z.
+replace (Z.succ (Z.abs (Zneg p))) with (Zpos p + 1)%Z;
  auto with zarith.
-unfold Zsucc in |- *; rewrite Zopp_plus_distr.
+unfold Z.succ in |- *; rewrite Zopp_plus_distr.
 auto with zarith.
 Qed.
 Hint Resolve Zabs_Zs: zarith.
  
-Theorem Zle_Zpred : forall x y : Z, (x < y)%Z -> (x <= Zpred y)%Z.
+Theorem Zle_Zpred : forall x y : Z, (x < y)%Z -> (x <= Z.pred y)%Z.
 intros x y H; apply Zlt_succ_le.
 rewrite <- Zsucc_pred; auto.
 Qed.
 Hint Resolve Zle_Zpred: zarith.
  
-Theorem Zabs_Zopp : forall z : Z, Zabs (- z) = Zabs z.
+Theorem Zabs_Zopp : forall z : Z, Z.abs (- z) = Z.abs z.
 intros z; case z; simpl in |- *; auto.
 Qed.
  
-Theorem Zle_Zabs : forall z : Z, (z <= Zabs z)%Z.
+Theorem Zle_Zabs : forall z : Z, (z <= Z.abs z)%Z.
 intros z; case z; simpl in |- *; red in |- *; simpl in |- *; auto;
  try (red in |- *; intros; discriminate; fail).
 intros p; elim p; simpl in |- *; auto;
@@ -851,8 +851,8 @@ Hint Resolve Zle_Zabs: zarith.
  
 Theorem Zlt_mult_simpl_l :
  forall a b c : Z, (0 < c)%Z -> (c * a < c * b)%Z -> (a < b)%Z.
-intros a b0 c H H0; apply Zgt_lt.
-apply Zmult_gt_reg_r with (p := c); try apply Zlt_gt; auto with zarith.
+intros a b0 c H H0; apply Z.gt_lt.
+apply Zmult_gt_reg_r with (p := c); try apply Z.lt_gt; auto with zarith.
 repeat rewrite (fun x => Zmult_comm x c); auto with zarith.
 Qed.
 (* An equality function on Z that return a bool *)
@@ -920,7 +920,7 @@ Qed.
  
 Theorem Zlt_mult_ZERO :
  forall x y : Z, (0 < x)%Z -> (0 < y)%Z -> (0 < x * y)%Z.
-intros x y; case x; case y; unfold Zlt in |- *; simpl in |- *; auto.
+intros x y; case x; case y; unfold Z.lt in |- *; simpl in |- *; auto.
 Qed.
 Hint Resolve Zlt_mult_ZERO: zarith.
  
@@ -936,65 +936,65 @@ Qed.
 Hint Resolve Zle_Zminus_ZERO Zlt_Zminus_ZERO: zarith.
  
 Theorem Zle_Zpred_Zpred :
- forall z1 z2 : Z, (z1 <= z2)%Z -> (Zpred z1 <= Zpred z2)%Z.
+ forall z1 z2 : Z, (z1 <= z2)%Z -> (Z.pred z1 <= Z.pred z2)%Z.
 intros z1 z2 H; apply Zsucc_le_reg.
 repeat rewrite <- Zsucc_pred; auto.
 Qed.
 Hint Resolve Zle_Zpred_Zpred: zarith.
  
-Theorem Zle_ZERO_Zabs : forall z : Z, (0 <= Zabs z)%Z.
+Theorem Zle_ZERO_Zabs : forall z : Z, (0 <= Z.abs z)%Z.
 intros z; case z; simpl in |- *; auto with zarith.
 Qed.
 Hint Resolve Zle_ZERO_Zabs: zarith.
  
 Theorem Zlt_Zabs_inv1 :
- forall z1 z2 : Z, (Zabs z1 < z2)%Z -> (- z2 < z1)%Z.
+ forall z1 z2 : Z, (Z.abs z1 < z2)%Z -> (- z2 < z1)%Z.
 intros z1 z2 H; case (Zle_or_lt 0 z1); intros H1.
-apply Zlt_le_trans with (- (0))%Z; auto with zarith.
-apply Zlt_Zopp; apply Zle_lt_trans with (2 := H); auto with zarith.
-rewrite <- (Zopp_involutive z1); rewrite <- (Zabs_eq_opp z1);
+apply Z.lt_le_trans with (- (0))%Z; auto with zarith.
+apply Zlt_Zopp; apply Z.le_lt_trans with (2 := H); auto with zarith.
+rewrite <- (Z.opp_involutive z1); rewrite <- (Zabs_eq_opp z1);
  auto with zarith.
 Qed.
  
 Theorem Zlt_Zabs_inv2 :
- forall z1 z2 : Z, (Zabs z1 < Zabs z2)%Z -> (z1 < Zabs z2)%Z.
+ forall z1 z2 : Z, (Z.abs z1 < Z.abs z2)%Z -> (z1 < Z.abs z2)%Z.
 intros z1 z2; case z1; case z2; simpl in |- *; auto with zarith.
 Qed.
  
 Theorem Zle_Zabs_inv1 :
- forall z1 z2 : Z, (Zabs z1 <= z2)%Z -> (- z2 <= z1)%Z.
+ forall z1 z2 : Z, (Z.abs z1 <= z2)%Z -> (- z2 <= z1)%Z.
 intros z1 z2 H; case (Zle_or_lt 0 z1); intros H1.
-apply Zle_trans with (- (0))%Z; auto with zarith.
-apply Zle_Zopp; apply Zle_trans with (2 := H); auto with zarith.
-rewrite <- (Zopp_involutive z1); rewrite <- (Zabs_eq_opp z1);
+apply Z.le_trans with (- (0))%Z; auto with zarith.
+apply Zle_Zopp; apply Z.le_trans with (2 := H); auto with zarith.
+rewrite <- (Z.opp_involutive z1); rewrite <- (Zabs_eq_opp z1);
  auto with zarith.
 Qed.
  
 Theorem Zle_Zabs_inv2 :
- forall z1 z2 : Z, (Zabs z1 <= z2)%Z -> (z1 <= z2)%Z.
+ forall z1 z2 : Z, (Z.abs z1 <= z2)%Z -> (z1 <= z2)%Z.
 intros z1 z2 H; case (Zle_or_lt 0 z1); intros H1.
-rewrite <- (Zabs_eq z1); auto.
-apply Zle_trans with (Zabs z1); auto with zarith.
+rewrite <- (Z.abs_eq z1); auto.
+apply Z.le_trans with (Z.abs z1); auto with zarith.
 Qed.
  
 Theorem Zlt_Zabs_Zpred :
  forall z1 z2 : Z,
- (Zabs z1 < z2)%Z -> z1 <> Zpred z2 -> (Zabs (Zsucc z1) < z2)%Z.
+ (Z.abs z1 < z2)%Z -> z1 <> Z.pred z2 -> (Z.abs (Z.succ z1) < z2)%Z.
 intros z1 z2 H H0; case (Zle_or_lt 0 z1); intros H1.
-rewrite Zabs_eq; auto with zarith.
-rewrite Zabs_eq in H; auto with zarith.
-apply Zlt_trans with (2 := H).
+rewrite Z.abs_eq; auto with zarith.
+rewrite Z.abs_eq in H; auto with zarith.
+apply Z.lt_trans with (2 := H).
 repeat rewrite Zabs_eq_opp; auto with zarith.
 Qed.
  
 Theorem Zle_n_Zpred :
- forall z1 z2 : Z, (Zpred z1 <= Zpred z2)%Z -> (z1 <= z2)%Z.
+ forall z1 z2 : Z, (Z.pred z1 <= Z.pred z2)%Z -> (z1 <= z2)%Z.
 intros z1 z2 H; rewrite (Zsucc_pred z1); rewrite (Zsucc_pred z2);
  auto with zarith.
 Qed.
  
-Theorem Zpred_Zopp_Zs : forall z : Z, Zpred (- z) = (- Zsucc z)%Z.
-intros z; unfold Zpred, Zsucc in |- *; ring.
+Theorem Zpred_Zopp_Zs : forall z : Z, Z.pred (- z) = (- Z.succ z)%Z.
+intros z; unfold Z.pred, Z.succ in |- *; ring.
 Qed.
  
 Theorem Zlt_1_O : forall z : Z, (1 <= z)%Z -> (0 < z)%Z.
@@ -1012,30 +1012,30 @@ Qed.
 Hint Resolve Zlt_not_eq Zlt_not_eq_rev: zarith.
  
 Theorem Zle_Zpred_Zlt :
- forall z1 z2 : Z, (z1 <= z2)%Z -> (Zpred z1 < z2)%Z.
+ forall z1 z2 : Z, (z1 <= z2)%Z -> (Z.pred z1 < z2)%Z.
 intros z1 z2 H; apply Zsucc_lt_reg; rewrite <- Zsucc_pred; auto with zarith.
 Qed.
 Hint Resolve Zle_Zpred_Zlt: zarith.
  
 Theorem Zle_Zpred_inv :
- forall z1 z2 : Z, (z1 <= Zpred z2)%Z -> (z1 < z2)%Z.
+ forall z1 z2 : Z, (z1 <= Z.pred z2)%Z -> (z1 < z2)%Z.
 intros z1 z2 H; rewrite (Zsucc_pred z2); auto with zarith.
 Qed.
  
 Theorem Zabs_intro :
- forall (P : Z -> Prop) (z : Z), P (- z)%Z -> P z -> P (Zabs z).
+ forall (P : Z -> Prop) (z : Z), P (- z)%Z -> P z -> P (Z.abs z).
 intros P z; case z; simpl in |- *; auto.
 Qed.
  
 Theorem Zpred_Zle_Zabs_intro :
  forall z1 z2 : Z,
- (- Zpred z2 <= z1)%Z -> (z1 <= Zpred z2)%Z -> (Zabs z1 < z2)%Z.
+ (- Z.pred z2 <= z1)%Z -> (z1 <= Z.pred z2)%Z -> (Z.abs z1 < z2)%Z.
 intros z1 z2 H H0; apply Zle_Zpred_inv.
-apply Zabs_intro with (P := fun x => (x <= Zpred z2)%Z); auto with zarith.
+apply Zabs_intro with (P := fun x => (x <= Z.pred z2)%Z); auto with zarith.
 Qed.
  
 Theorem Zlt_ZERO_Zle_ONE : forall z : Z, (0 < z)%Z -> (1 <= z)%Z.
-intros z H; replace 1%Z with (Zsucc 0); auto with zarith; simpl in |- *; auto.
+intros z H; replace 1%Z with (Z.succ 0); auto with zarith; simpl in |- *; auto.
 Qed.
 Hint Resolve Zlt_ZERO_Zle_ONE: zarith.
  
@@ -1050,7 +1050,7 @@ Qed.
 Hint Resolve lt_S_le: arith.
  
 Theorem Zlt_Zabs_intro :
- forall z1 z2 : Z, (- z2 < z1)%Z -> (z1 < z2)%Z -> (Zabs z1 < z2)%Z.
+ forall z1 z2 : Z, (- z2 < z1)%Z -> (z1 < z2)%Z -> (Z.abs z1 < z2)%Z.
 intros z1 z2; case z1; case z2; simpl in |- *; auto with zarith.
 intros p p0 H H0; change (- Zneg p0 < - Zneg p)%Z in |- *;
  auto with zarith.

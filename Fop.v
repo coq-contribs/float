@@ -16,9 +16,9 @@ Hypothesis radixNotZero : (0 < radix)%Z.
  
 Definition Fplus (x y : float) :=
   Float
-    (Fnum x * Zpower_nat radix (Zabs_nat (Fexp x - Zmin (Fexp x) (Fexp y))) +
-     Fnum y * Zpower_nat radix (Zabs_nat (Fexp y - Zmin (Fexp x) (Fexp y))))
-    (Zmin (Fexp x) (Fexp y)).
+    (Fnum x * Zpower_nat radix (Z.abs_nat (Fexp x - Z.min (Fexp x) (Fexp y))) +
+     Fnum y * Zpower_nat radix (Z.abs_nat (Fexp y - Z.min (Fexp x) (Fexp y))))
+    (Z.min (Fexp x) (Fexp y)).
  
 Theorem Fplus_correct : forall x y : float, Fplus x y = (x + y)%R :>R.
 intros x y; unfold Fplus, Fshift, FtoRradix, FtoR in |- *; simpl in |- *.
@@ -43,7 +43,7 @@ Qed.
  
 Theorem Fopp_Fopp : forall p : float, Fopp (Fopp p) = p.
 intros p; case p; unfold Fopp in |- *; simpl in |- *; auto.
-intros; rewrite Zopp_involutive; auto.
+intros; rewrite Z.opp_involutive; auto.
 Qed.
  
 Theorem Fzero_opp : forall f : float, ~ is_Fzero f -> ~ is_Fzero (Fopp f).
@@ -58,7 +58,7 @@ rewrite <- (digit_abs radix (Fnum x)).
 case (Fnum x); simpl in |- *; auto.
 Qed.
  
-Definition Fabs (x : float) := Float (Zabs (Fnum x)) (Fexp x).
+Definition Fabs (x : float) := Float (Z.abs (Fnum x)) (Fexp x).
  
 Theorem Fabs_correct1 :
  forall x : float, (0 <= FtoR radix x)%R -> Fabs x = x :>R.
@@ -67,7 +67,7 @@ intros Fnum1 Fexp1 H'.
 repeat rewrite <- (Rmult_comm (powerRZ radix Fexp1)); apply Rmult_eq_compat_l;
  auto.
 cut (0 <= Fnum1)%Z.
-unfold Zabs, Zle in |- *.
+unfold Z.abs, Z.le in |- *.
 case Fnum1; simpl in |- *; auto.
 intros p H'0; case H'0; auto.
 apply Znot_gt_le; auto.
@@ -86,7 +86,7 @@ rewrite <- Ropp_mult_distr_l_reverse;
  repeat rewrite <- (Rmult_comm (powerRZ radix Fexp1));
  apply Rmult_eq_compat_l; auto.
 cut (Fnum1 <= 0)%Z.
-unfold Zabs, Zle in |- *.
+unfold Z.abs, Z.le in |- *.
 case Fnum1; unfold IZR; auto with real.
 intros p H'0; case H'0; auto.
 apply Znot_gt_le.
@@ -115,7 +115,7 @@ apply Rmult_le_compat_r; auto with real arith.
 rewrite Zabs_absolu.
 replace 1%R with (INR 1); auto with real.
 repeat rewrite <- INR_IZR_INZ; apply Rle_INR; auto.
-cut (Zabs_nat (Fnum p) <> 0); auto with zarith.
+cut (Z.abs_nat (Fnum p) <> 0); auto with zarith.
 Contradict H'.
 unfold FtoRradix, FtoR in |- *; simpl in |- *.
 replace (Fnum p) with 0%Z; try (simpl;ring).
@@ -165,7 +165,7 @@ intros x y; case x; case y; unfold Fminus, Fplus, Fopp in |- *; simpl in |- *.
 intros Fnum1 Fexp1 Fnum2 Fexp2 H'; rewrite <- H'.
 repeat rewrite Zmin_n_n.
 apply floatEq; simpl in |- *; auto.
-replace (Zabs_nat (Fexp2 - Fexp2)) with 0; auto with zarith arith.
+replace (Z.abs_nat (Fexp2 - Fexp2)) with 0; auto with zarith arith.
 replace (Zpower_nat radix 0) with (Z_of_nat 1); simpl in |- *;
  auto with zarith arith.
 replace (Fexp2 - Fexp2)%Z with 0%Z; simpl in |- *; auto with zarith arith.

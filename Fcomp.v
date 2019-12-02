@@ -14,15 +14,15 @@ Let radixMoreThanZERO := Zlt_1_O _ (Zlt_le_weak _ _ radixMoreThanOne).
 Hint Resolve radixMoreThanZERO: zarith.
  
 Definition Fdiff (x y : float) :=
-  (Fnum x * Zpower_nat radix (Zabs_nat (Fexp x - Zmin (Fexp x) (Fexp y))) -
-   Fnum y * Zpower_nat radix (Zabs_nat (Fexp y - Zmin (Fexp x) (Fexp y))))%Z.
+  (Fnum x * Zpower_nat radix (Z.abs_nat (Fexp x - Z.min (Fexp x) (Fexp y))) -
+   Fnum y * Zpower_nat radix (Z.abs_nat (Fexp y - Z.min (Fexp x) (Fexp y))))%Z.
 
 Let FtoRradix := FtoR radix.
 Local Coercion FtoRradix : float >-> R.
 
 Theorem Fdiff_correct :
  forall x y : float,
- (Fdiff x y * powerRZ radix (Zmin (Fexp x) (Fexp y)))%R = (x - y)%R.
+ (Fdiff x y * powerRZ radix (Z.min (Fexp x) (Fexp y)))%R = (x - y)%R.
 intros x y; unfold Fdiff in |- *.
 rewrite <- Z_R_minus.
 rewrite Rmult_comm; rewrite Rmult_minus_distr_l.
@@ -35,10 +35,10 @@ repeat rewrite inj_abs; auto with arith.
 repeat rewrite Zplus_minus; auto.
 rewrite (fun t : R => Rmult_comm t (Fnum x));
  rewrite (fun t : R => Rmult_comm t (Fnum y)); auto.
-apply Zplus_le_reg_l with (p := Zmin (Fexp x) (Fexp y)); auto with arith.
-rewrite Zplus_minus; rewrite Zplus_0_r; apply Zle_min_r; auto.
-apply Zplus_le_reg_l with (p := Zmin (Fexp x) (Fexp y)); auto with arith.
-rewrite Zplus_minus; rewrite Zplus_0_r; apply Zle_min_l; auto.
+apply Zplus_le_reg_l with (p := Z.min (Fexp x) (Fexp y)); auto with arith.
+rewrite Zplus_minus; rewrite Zplus_0_r; apply Z.le_min_r; auto.
+apply Zplus_le_reg_l with (p := Z.min (Fexp x) (Fexp y)); auto with arith.
+rewrite Zplus_minus; rewrite Zplus_0_r; apply Z.le_min_l; auto.
 Qed.
 (* Definition of  comparison functions*)
  
@@ -82,7 +82,7 @@ rewrite <- Fdiff_correct; intros H'1; case Rmult_integral with (1 := H'1).
 intros H'0; unfold Feq_bool, Fcompare in |- *.
 rewrite eq_IZR_R0 with (1 := H'0); auto.
 intros H'0; Contradict H'0.
-case (Zmin (Fexp x) (Fexp y)); simpl in |- *; auto with real zarith.
+case (Z.min (Fexp x) (Fexp y)); simpl in |- *; auto with real zarith.
 apply Rplus_eq_reg_l with (r := FtoR radix y); auto with real.
 Qed.
  
@@ -107,7 +107,7 @@ repeat rewrite (Rplus_comm (- y)).
 rewrite Rplus_opp_r.
 change (x - y < 0)%R in |- *.
 rewrite <- Fdiff_correct.
-replace 0%R with (powerRZ radix (Zmin (Fexp x) (Fexp y)) * 0)%R;
+replace 0%R with (powerRZ radix (Z.min (Fexp x) (Fexp y)) * 0)%R;
  auto with real arith.
 rewrite (Rmult_comm (Fdiff x y)).
 apply Rmult_lt_compat_l; auto with real zarith.
@@ -128,10 +128,10 @@ cut (Fdiff x y < 0)%R; auto with arith.
 intros H'1.
 cut (Fdiff x y < 0)%Z; auto with zarith.
 intros H'2; generalize (Zlt_compare _ _ H'2);
- unfold Flt_bool, Fcompare, Zcompare in |- *; case (Fdiff x y);
+ unfold Flt_bool, Fcompare, Z.compare in |- *; case (Fdiff x y);
  auto with arith; intros; contradiction.
 apply lt_IZR; auto with arith.
-apply (Rlt_monotony_contra_exp radix) with (z := Zmin (Fexp x) (Fexp y));
+apply (Rlt_monotony_contra_exp radix) with (z := Z.min (Fexp x) (Fexp y));
  auto with arith real; rewrite Rmult_0_l.
 rewrite Fdiff_correct; auto with real.
 Qed.
@@ -214,7 +214,7 @@ Lemma Fge_Zge :
  forall n1 n2 d : Z, (n1 >= n2)%Z -> Fge (Float n1 d) (Float n2 d).
 intros n1 n2 d H'; apply Fle_Fge; auto.
 apply Fle_Zle; auto.
-apply Zge_le; auto.
+apply Z.ge_le; auto.
 Qed.
  
 Lemma Flt_Fgt : forall x y : float, Flt x y -> Fgt y x.
@@ -225,7 +225,7 @@ Lemma Fgt_Zgt :
  forall n1 n2 d : Z, (n1 > n2)%Z -> Fgt (Float n1 d) (Float n2 d).
 intros n1 n2 d H'; apply Flt_Fgt; auto.
 apply Flt_Zlt; auto.
-apply Zgt_lt; auto.
+apply Z.gt_lt; auto.
 Qed.
 (* Arithmetic properties on F : Fle is reflexive, transitive, antisymmetric *)
  

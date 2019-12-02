@@ -30,7 +30,7 @@ intros n; unfold FtoRradix, FtoR, boundNat in |- *; simpl in |- *.
 rewrite Rmult_1_l.
 rewrite <- Zpower_nat_Z_powerRZ; auto with real zarith.
 rewrite INR_IZR_INZ; auto with real zarith.
-apply Rle_lt_trans with (Zabs n); [rewrite (Zabs_eq (Z_of_nat n))|idtac];auto with real zarith.
+apply Rle_lt_trans with (Z.abs n); [rewrite (Z.abs_eq (Z_of_nat n))|idtac];auto with real zarith.
 Qed.
  
 Theorem boundBoundNat : forall n : nat, Fbounded b (boundNat n).
@@ -38,11 +38,11 @@ intros n; repeat split; unfold boundNat in |- *; simpl in |- *;
  auto with zarith.
 apply vNumbMoreThanOne with (radix := radix) (precision := precision);
  auto with zarith.
-apply Zle_trans with 0%Z;[case (dExp b)|idtac]; auto with zarith.
+apply Z.le_trans with 0%Z;[case (dExp b)|idtac]; auto with zarith.
 Qed.
 (* A function that returns a bounded greater than a given r *)
  
-Definition boundR (r : R) := boundNat (Zabs_nat (up (Rabs r))).
+Definition boundR (r : R) := boundNat (Z.abs_nat (up (Rabs r))).
  
 Theorem boundRCorrect1 : forall r : R, (r < boundR r)%R.
 intros r; case (Rle_or_lt r 0); intros H'.
@@ -50,7 +50,7 @@ apply Rle_lt_trans with (1 := H').
 unfold boundR, boundNat, FtoRradix, FtoR in |- *; simpl in |- *;
  auto with real.
 rewrite Rmult_1_l; auto with real zarith.
-apply Rlt_trans with (2 := boundNatCorrect (Zabs_nat (up (Rabs r)))).
+apply Rlt_trans with (2 := boundNatCorrect (Z.abs_nat (up (Rabs r)))).
 replace (Rabs r) with r; auto with real.
 apply Rlt_le_trans with (r2 := IZR (up r)); auto with real zarith.
 case (archimed r); auto.
@@ -96,7 +96,7 @@ case (Zle_or_lt (Fexp (boundR r)) (Fexp q)); intros H'.
 intros H'0 H'1 H'2 H'3; case H'0.
 apply is_Fzero_rep2 with (radix := radix); auto.
 rewrite <-
- FshiftCorrect with (n := Zabs_nat (Fexp q - Fexp (boundR r))) (x := q);
+ FshiftCorrect with (n := Z.abs_nat (Fexp q - Fexp (boundR r))) (x := q);
  auto with arith.
 apply is_Fzero_rep1 with (radix := radix).
 unfold is_Fzero in |- *.
@@ -142,9 +142,9 @@ apply in_map with (f := fun p : Z * Z => Float (fst p) (snd p));
 apply mProd_correct; auto.
 apply mZlist_correct; auto.
 unfold boundR, boundNat in |- *; simpl in |- *; auto with zarith.
-apply Zle_trans with (- (0))%Z; auto with zarith.
+apply Z.le_trans with (- (0))%Z; auto with zarith.
 apply Zle_Zopp; unfold pPred in |- *; apply Zle_Zpred; simpl in |- *.
-apply Zlt_trans with 1%Z; auto with zarith.
+apply Z.lt_trans with 1%Z; auto with zarith.
 apply vNumbMoreThanOne with (3 := pGivesBound); auto.
 unfold boundR, boundNat in |- *; simpl in |- *; auto with zarith.
 unfold pPred in |- *; apply Zle_Zpred; simpl in |- *.
@@ -152,7 +152,7 @@ unfold boundR, boundNat in |- *; simpl in |- *; auto with zarith.
 apply vNumbMoreThanOne with (3 := pGivesBound); auto.
 apply mZlist_correct; auto.
 unfold boundR, boundNat in |- *; simpl in |- *; auto with zarith.
-apply Zle_trans with 0%Z; auto with zarith arith.
+apply Z.le_trans with 0%Z; auto with zarith arith.
 case (dExp b); auto with zarith.
 case (boundR r); simpl in |- *; auto with zarith.
 case (boundR r); simpl in |- *; auto with zarith.
@@ -177,7 +177,7 @@ unfold pPred in |- *; apply Zle_Zpred; simpl in |- *.
 red in |- *; simpl in |- *; auto.
 apply mZlist_correct; auto.
 unfold boundR, boundNat in |- *; simpl in |- *; auto with zarith.
-apply Zle_trans with 0%Z; auto with zarith.
+apply Z.le_trans with 0%Z; auto with zarith.
 case (dExp b); auto with zarith.
 case (boundR r); simpl in |- *; auto with zarith.
 case (boundR r); simpl in |- *; auto with zarith.
@@ -203,7 +203,7 @@ red in |- *; simpl in |- *; auto with zarith.
 apply mZlist_correct; auto.
 simpl in |- *; auto with zarith.
 unfold boundR, boundNat in |- *; simpl in |- *; auto with zarith.
-apply Zle_trans with 0%Z; auto with zarith.
+apply Z.le_trans with 0%Z; auto with zarith.
 case (dExp b); auto with zarith.
 simpl in |- *; auto with zarith.
 Qed.
@@ -212,7 +212,7 @@ Theorem mBPadic_Fbounded :
  forall (p : float) (r : R), In p (mBFloat r) -> Fbounded b p.
 intros p r H'; red in |- *; repeat (split; auto).
 apply Zpred_Zle_Zabs_intro.
-apply mZlist_correct_rev1 with (q := Zpred (Zpos (vNum b)));
+apply mZlist_correct_rev1 with (q := Z.pred (Zpos (vNum b)));
  auto with real.
 apply
  mProd_correct_rev1
@@ -226,7 +226,7 @@ apply
 intros a1 b1; case a1; case b1; simpl in |- *.
 intros z z0 z1 z2 H'0; inversion H'0; auto.
 generalize H'; case p; auto.
-apply mZlist_correct_rev2 with (p := (- Zpred (Zpos (vNum b)))%Z);
+apply mZlist_correct_rev2 with (p := (- Z.pred (Zpos (vNum b)))%Z);
  auto.
 apply
  mProd_correct_rev1
@@ -574,23 +574,23 @@ elim H0; intros H'3 H'6; apply H'6; clear H0; auto.
 rewrite <- H'0; auto with real.
 exists
  (Fnum
-    (Fshift radix (Zabs_nat (Fexp (Fnormalize radix b precision q) - Fexp p))
+    (Fshift radix (Z.abs_nat (Fexp (Fnormalize radix b precision q) - Fexp p))
        (Fnormalize radix b precision q))).
 pattern (Fexp p) at 2 in |- *;
  replace (Fexp p) with
   (Fexp
      (Fshift radix
-        (Zabs_nat (Fexp (Fnormalize radix b precision q) - Fexp p))
+        (Z.abs_nat (Fexp (Fnormalize radix b precision q) - Fexp p))
         (Fnormalize radix b precision q))).
 unfold FtoRradix in |- *;
  rewrite <-
   FshiftCorrect
                 with
                 (n := 
-                  Zabs_nat (Fexp (Fnormalize radix b precision q) - Fexp p))
+                  Z.abs_nat (Fexp (Fnormalize radix b precision q) - Fexp p))
                (x := Fnormalize radix b precision q).
 case
- (Fshift radix (Zabs_nat (Fexp (Fnormalize radix b precision q) - Fexp p))
+ (Fshift radix (Z.abs_nat (Fexp (Fnormalize radix b precision q) - Fexp p))
     (Fnormalize radix b precision q)); auto.
 auto with arith.
 simpl in |- *; rewrite inj_abs; auto with zarith.

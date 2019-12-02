@@ -30,14 +30,14 @@ intros p; rewrite <- (Zmult_1_l (Zpower_nat n p)); replace (S p) with (1 + p);
  [ rewrite Zpower_nat_is_exp | auto with zarith ].
 rewrite Zpower_nat_1; auto with zarith.
 apply Zmult_gt_0_lt_compat_r; auto with zarith.
-apply Zlt_gt; auto with zarith.
+apply Z.lt_gt; auto with zarith.
 Qed.
  
 Theorem Zpower_nat_monotone_lt :
  forall p q : nat, p < q -> (Zpower_nat n p < Zpower_nat n q)%Z.
 intros p q H'; elim H'; simpl in |- *; auto.
 apply Zpower_nat_monotone_S.
-intros m H H0; apply Zlt_trans with (1 := H0).
+intros m H H0; apply Z.lt_trans with (1 := H0).
 apply Zpower_nat_monotone_S.
 Qed.
 Hint Resolve Zpower_nat_monotone_lt: zarith.
@@ -96,8 +96,8 @@ Fixpoint digitAux (v r : Z) (q : positive) {struct q} : nat :=
 Definition digit (q : Z) :=
   match q with
   | Z0 => 0
-  | Zpos q' => digitAux (Zabs q) 1 (xO q')
-  | Zneg q' => digitAux (Zabs q) 1 (xO q')
+  | Zpos q' => digitAux (Z.abs q) 1 (xO q')
+  | Zneg q' => digitAux (Z.abs q) 1 (xO q')
   end.
 Hint Unfold digit.
  
@@ -115,7 +115,7 @@ Theorem Zcompare_correct :
  | Datatypes.Lt => (p < q)%Z
  | Datatypes.Eq => p = q
  end.
-intros p q; unfold Zlt in |- *; generalize (Zcompare_EGAL p q);
+intros p q; unfold Z.lt in |- *; generalize (Zcompare_EGAL p q);
  (CaseEq (p ?= q)%Z; simpl in |- *; auto).
 intros H H0; case (Zcompare_Gt_Lt_antisym p q); auto.
 Qed.
@@ -133,7 +133,7 @@ intros; rewrite H1; rewrite Zpower_nat_O; auto with zarith.
 intros r'; rewrite digitAux1; auto.
 intros H1; generalize (Rec (n * r)%Z); case (digitAux v (n * r) q').
 intros; rewrite Zpower_nat_O; auto with zarith.
-apply Zle_trans with (m := r); auto with zarith.
+apply Z.le_trans with (m := r); auto with zarith.
 intros r'; rewrite digitAux1; auto.
 intros q' Rec r; generalize (Zcompare_correct r v); case (r ?= v)%Z; auto.
 intros H1; generalize (Rec (n * r)%Z); case (digitAux v (n * r) q').
@@ -141,22 +141,22 @@ intros; rewrite H1; rewrite Zpower_nat_O; auto with zarith.
 intros r'; rewrite digitAux1; auto.
 intros H1; generalize (Rec (n * r)%Z); case (digitAux v (n * r) q').
 intros; rewrite Zpower_nat_O; auto with zarith.
-apply Zle_trans with (m := r); auto with zarith.
+apply Z.le_trans with (m := r); auto with zarith.
 intros r'; rewrite digitAux1; auto.
 Qed.
 (* digit is correct (first part) *)
  
 Theorem digitLess :
- forall q : Z, q <> 0%Z -> (Zpower_nat n (pred (digit q)) <= Zabs q)%Z.
+ forall q : Z, q <> 0%Z -> (Zpower_nat n (pred (digit q)) <= Z.abs q)%Z.
 intros q; case q.
 intros H; Contradict H; auto with zarith.
 intros p H; unfold digit in |- *;
- generalize (digitAuxLess (Zabs (Zpos p)) 1 (xO p));
- case (digitAux (Zabs (Zpos p)) 1 (xO p)); simpl in |- *; 
+ generalize (digitAuxLess (Z.abs (Zpos p)) 1 (xO p));
+ case (digitAux (Z.abs (Zpos p)) 1 (xO p)); simpl in |- *; 
  auto with zarith.
 intros p H; unfold digit in |- *;
- generalize (digitAuxLess (Zabs (Zneg p)) 1 (xO p));
- case (digitAux (Zabs (Zneg p)) 1 (xO p)); simpl in |- *; 
+ generalize (digitAuxLess (Z.abs (Zneg p)) 1 (xO p));
+ case (digitAux (Z.abs (Zneg p)) 1 (xO p)); simpl in |- *; 
  auto with zarith.
 Qed.
 Hint Resolve digitLess: zarith.
@@ -177,7 +177,7 @@ Theorem digitAuxMore :
 intros v r q; generalize r; elim q; clear r q; simpl in |- *.
 intros p Rec r Hr; generalize (Zcompare_correct r v); case (r ?= v)%Z; auto.
 intros H1 H2; rewrite <- H1.
-apply Zle_lt_trans with (Zpower_nat n 0 * r)%Z; auto with zarith arith.
+apply Z.le_lt_trans with (Zpower_nat n 0 * r)%Z; auto with zarith arith.
 rewrite Zpower_nat_O; rewrite Zmult_1_l; auto with zarith.
 intros H1 H2; rewrite digitAux1.
 apply Rec.
@@ -186,7 +186,7 @@ rewrite <- digitAux1; auto.
 rewrite Zpower_nat_O; rewrite Zmult_1_l; auto with zarith.
 intros p Rec r Hr; generalize (Zcompare_correct r v); case (r ?= v)%Z; auto.
 intros H1 H2; rewrite <- H1.
-apply Zle_lt_trans with (Zpower_nat n 0 * r)%Z; auto with zarith arith.
+apply Z.le_lt_trans with (Zpower_nat n 0 * r)%Z; auto with zarith arith.
 rewrite Zpower_nat_O; rewrite Zmult_1_l; auto with zarith.
 intros H1 H2; rewrite digitAux1.
 apply Rec.
@@ -200,16 +200,16 @@ Theorem pos_length_pow :
  forall p : positive, (Zpos p < Zpower_nat n (S (pos_length p)))%Z.
 intros p; elim p; simpl in |- *; auto.
 intros p0 H; rewrite Zpos_xI.
-apply Zlt_le_trans with (2 * (n * Zpower_nat n (pos_length p0)))%Z;
+apply Z.lt_le_trans with (2 * (n * Zpower_nat n (pos_length p0)))%Z;
 auto with zarith.
 intros p0 H; rewrite Zpos_xO.
-apply Zlt_le_trans with (2 * (n * Zpower_nat n (pos_length p0)))%Z;
+apply Z.lt_le_trans with (2 * (n * Zpower_nat n (pos_length p0)))%Z;
 auto with zarith.
 auto with zarith.
 Qed.
 (* digit is correct (second part) *)
  
-Theorem digitMore : forall q : Z, (Zabs q < Zpower_nat n (digit q))%Z.
+Theorem digitMore : forall q : Z, (Z.abs q < Zpower_nat n (digit q))%Z.
 intros q; case q.
 easy.
 intros q'; rewrite <- (Zmult_1_r (Zpower_nat n (digit (Zpos q')))).
@@ -227,19 +227,19 @@ Hint Resolve digitMore: zarith.
  
 Theorem digitInv :
  forall (q : Z) (r : nat),
- (Zpower_nat n (pred r) <= Zabs q)%Z ->
- (Zabs q < Zpower_nat n r)%Z -> digit q = r.
+ (Zpower_nat n (pred r) <= Z.abs q)%Z ->
+ (Z.abs q < Zpower_nat n r)%Z -> digit q = r.
 intros q r H' H'0; case (le_or_lt (digit q) r).
 intros H'1; case (le_lt_or_eq _ _ H'1); auto; intros H'2.
-absurd (Zabs q < Zpower_nat n (digit q))%Z; auto with zarith.
+absurd (Z.abs q < Zpower_nat n (digit q))%Z; auto with zarith.
 apply Zle_not_lt; auto with zarith.
-apply Zle_trans with (m := Zpower_nat n (pred r)); auto with zarith.
+apply Z.le_trans with (m := Zpower_nat n (pred r)); auto with zarith.
 apply Zpower_nat_monotone_le.
 generalize H'2; case r; auto with arith.
 intros H'1.
-absurd (Zpower_nat n (pred (digit q)) <= Zabs q)%Z; auto with zarith.
+absurd (Zpower_nat n (pred (digit q)) <= Z.abs q)%Z; auto with zarith.
 apply Zlt_not_le; auto with zarith.
-apply Zlt_le_trans with (m := Zpower_nat n r); auto.
+apply Z.lt_le_trans with (m := Zpower_nat n r); auto.
 apply Zpower_nat_monotone_le.
 generalize H'1; case (digit q); auto with arith.
 apply digitLess; auto with zarith.
@@ -257,14 +257,14 @@ Qed.
 (* digit is monotone *)
  
 Theorem digit_monotone :
- forall p q : Z, (Zabs p <= Zabs q)%Z -> digit p <= digit q.
+ forall p q : Z, (Z.abs p <= Z.abs q)%Z -> digit p <= digit q.
 intros p q H; case (le_or_lt (digit p) (digit q)); auto; intros H1;
  Contradict H.
 apply Zlt_not_le.
 cut (p <> 0%Z); [ intros H2 | idtac ].
-apply Zlt_le_trans with (2 := digitLess p H2).
+apply Z.lt_le_trans with (2 := digitLess p H2).
 cut (digit q <= pred (digit p)); [ intros H3 | idtac ].
-apply Zlt_le_trans with (2 := Zpower_nat_monotone_le _ _ H3);
+apply Z.lt_le_trans with (2 := Zpower_nat_monotone_le _ _ H3);
  auto with zarith.
 generalize H1; case (digit p); simpl in |- *; auto with arith.
 generalize H1; case p; simpl in |- *; intros tmp; intros; red in |- *; intros;
@@ -281,7 +281,7 @@ generalize H'; case q; simpl in |- *; auto with zarith; intros q'; case q';
  simpl in |- *; auto with zarith arith; intros; red in |- *; 
  simpl in |- *; red in |- *; intros; discriminate.
 Qed.
-Hint Resolve Zlt_gt: zarith.
+Hint Resolve Z.lt_gt: zarith.
  
 Theorem digitAdd :
  forall (q : Z) (r : nat),
@@ -290,40 +290,40 @@ intros q r H0.
 apply digitInv.
 replace (pred (digit q + r)) with (pred (digit q) + r).
 rewrite Zpower_nat_is_exp; rewrite Zabs_Zmult;
- rewrite (fun x => Zabs_eq (Zpower_nat n x)); auto with zarith arith.
+ rewrite (fun x => Z.abs_eq (Zpower_nat n x)); auto with zarith arith.
 generalize (digitNotZero _ H0); case (digit q); auto with arith.
 intros H'; Contradict H'; auto with arith.
 rewrite Zpower_nat_is_exp; rewrite Zabs_Zmult;
- rewrite (fun x => Zabs_eq (Zpower_nat n x)); auto with zarith arith.
+ rewrite (fun x => Z.abs_eq (Zpower_nat n x)); auto with zarith arith.
 Qed.
  
 Theorem digit_minus1 : forall p : nat, digit (Zpower_nat n p - 1) = p.
 intros p; case p; auto.
 intros n0; apply digitInv; auto.
-rewrite Zabs_eq.
+rewrite Z.abs_eq.
 cut (Zpower_nat n (pred (S n0)) < Zpower_nat n (S n0))%Z; auto with zarith.
 cut (0 < Zpower_nat n (S n0))%Z; auto with zarith.
-rewrite Zabs_eq; auto with zarith.
+rewrite Z.abs_eq; auto with zarith.
 Qed.
  
 Theorem digit_bound :
  forall (x y z : Z) (n : nat),
- (Zabs x <= Zabs y)%Z ->
- (Zabs y <= Zabs z)%Z -> digit x = n -> digit z = n -> digit y = n.
+ (Z.abs x <= Z.abs y)%Z ->
+ (Z.abs y <= Z.abs z)%Z -> digit x = n -> digit z = n -> digit y = n.
 intros x y z n0 H' H'0 H'1 H'2; apply le_antisym.
 rewrite <- H'2; auto with arith.
 rewrite <- H'1; auto with arith.
 Qed.
  
-Theorem digit_abs : forall p : Z, digit (Zabs p) = digit p.
+Theorem digit_abs : forall p : Z, digit (Z.abs p) = digit p.
 intros p; case p; simpl in |- *; auto.
 Qed.
 (* Strict comparison on the number of digits gives comparison on the numbers *)
  
 Theorem digit_anti_monotone_lt :
- (1 < n)%Z -> forall p q : Z, digit p < digit q -> (Zabs p < Zabs q)%Z.
+ (1 < n)%Z -> forall p q : Z, digit p < digit q -> (Z.abs p < Z.abs q)%Z.
 intros H' p q H'0.
-case (Zle_or_lt (Zabs q) (Zabs p)); auto; intros H'1.
+case (Zle_or_lt (Z.abs q) (Z.abs p)); auto; intros H'1.
 Contradict H'0.
 case (Zle_lt_or_eq _ _ H'1); intros H'2.
 apply le_not_lt; auto with arith.

@@ -146,7 +146,7 @@ generalize
 rewrite FnormalizeCorrect; auto with real arith.
 rewrite FnormalizeCorrect; auto with real arith.
 rewrite H'21; rewrite H'19; auto.
-apply Zle_trans with (Fexp r); auto.
+apply Z.le_trans with (Fexp r); auto.
 apply FcanonicLeastExp with radix b precision; auto with arith.
 rewrite FnormalizeCorrect; auto with real arith.
 apply FnormalizeCanonic; auto with arith.
@@ -204,7 +204,7 @@ elim H13; intros H12 H14; clear H13.
 cut
  (ex
     (fun m : Z =>
-     s = Float m (Fexp r - precision) :>R /\ (Zabs m <= pPred (vNum b))%Z)).
+     s = Float m (Fexp r - precision) :>R /\ (Z.abs m <= pPred (vNum b))%Z)).
 intros H13; elim H13; intros m H15; elim H15; intros H16 H17; clear H15 H13.
 exists r; exists (Float m (Fexp r - precision)).
 split; auto.
@@ -228,15 +228,15 @@ unfold FtoRradix in |- *; unfold FtoR in |- *; simpl in |- *.
 rewrite Zmin_le1; auto with zarith.
 replace
  (Fnum p * Fnum q *
-  Zpower_nat radix (Zabs_nat (Fexp p + Fexp q - (Fexp p + Fexp q))))%Z with
+  Zpower_nat radix (Z.abs_nat (Fexp p + Fexp q - (Fexp p + Fexp q))))%Z with
  (Fnum p * Fnum q)%Z.
 2: replace (Fexp p + Fexp q - (Fexp p + Fexp q))%Z with 0%Z;
     auto with zarith arith; simpl in |- *.
 2: auto with zarith.
 exists
  ((Fnum p * Fnum q +
-   - Fnum r * Zpower_nat radix (Zabs_nat (Fexp r - (Fexp p + Fexp q)))) *
-  Zpower_nat radix (Zabs_nat (Fexp p + Fexp q + (precision - Fexp r))))%Z;
+   - Fnum r * Zpower_nat radix (Z.abs_nat (Fexp r - (Fexp p + Fexp q)))) *
+  Zpower_nat radix (Z.abs_nat (Fexp p + Fexp q + (precision - Fexp r))))%Z;
  split.
 rewrite plus_IZR.
 repeat rewrite Rmult_IZR.
@@ -345,7 +345,7 @@ apply (ClosestCompatible b radix (p * q)%R (p * q)%R pq); auto.
 unfold Zminus in |- *; rewrite powerRZ_add; auto with real arith.
 rewrite Rmult_assoc; apply Rmult_le_compat_l.
 apply powerRZ_le; auto with real arith.
-unfold pPred, Zpred in |- *; rewrite pGivesBound.
+unfold pPred, Z.pred in |- *; rewrite pGivesBound.
 rewrite plus_IZR; rewrite Zpower_nat_Z_powerRZ.
 replace (powerRZ radix (- precision) * (powerRZ radix precision + (-1)%Z))%R
  with (1 + - powerRZ radix (- precision))%R.
